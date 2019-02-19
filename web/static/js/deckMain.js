@@ -1,8 +1,110 @@
 $(document).ready(function() {
 
+    var max = 100;
+
+    var map = $('#map');
+    var width = map.width();
+    var height = map.height();
+
+
+    // create scale objects
+    var xScale = d3.scaleLinear()
+        .domain([-max, max])
+        .range([0, width]);
+    var yScale = d3.scaleLinear()
+        .domain([-max, max])
+        .range([height, 0]);
+
+
+
+
+    const EPSILON = 1e-4;
+
+    function getPosition(u, v) {
+        const x = u * 0.1;
+        const y = v * 0.1;
+        const z = 0;
+
+        return [x, y, z];
+    }
+
+    function getNormal(u, v) {
+        const p0 = getPosition(u - EPSILON, v - EPSILON);
+        const p1 = getPosition(u + EPSILON, v + EPSILON);
+
+        const nx = (p1[1] - p0[1]) * (p1[2] - p0[2]);
+        const ny = (p1[2] - p0[2]) * (p1[0] - p0[0]);
+        const nz = (p1[0] - p0[0]) * (p1[1] - p0[1]);
+
+        return new luma.Vector3(nx, ny, nz).normalize();
+    }
+
+
+    console.log(data)
+
+    const points = [];
+
+    const mm = {
+        x_min: 9999999,
+        y_min: 9999999,
+        x_max: -9999999,
+        y_min: -9999999,
+    };
+
+    for (let i = 0; i < data.length; i++) {
+        u = data[i].tsneX;
+        v = data[i].tsneY;
+
+        mm.x_min = Math.min(mm.x_min, u)
+        mm.x_max = Math.max(mm.x_max, u)
+        mm.y_min = Math.min(mm.y_min, v)
+        mm.y_max = Math.max(mm.y_max, v)
+
+        const p = getPosition(u, v)
+        const n = getNormal(u, v)
+        points.push({
+            position: p,
+            normal: n,
+            color: [0, 0, 0]
+        })
+    }
+
+
+
+    new deck.DeckGL({
+        container: 'map', // uses id to set canvas
+        views: [new deck.OrbitView(map)],
+        viewState: {fov: 50, distance: 10, rotationX: 0, rotationOrbit: 45, zoom: 1},
+        layers: [
+          new deck.PointCloudLayer({
+              id: 'pointCloud',
+              coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
+              //coordinateOrigin: [mm.x_max - mm.x_min, mm.y_max - mm.y_min, 0],
+              opacity: 1,
+              data: points,
+              radiusPixels: 50,
+              lightSettings: {
+                  coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
+                  lightsPosition: [20, 100, 100, 50, 0, 0],
+                  lightsStrength: [1, 0, 2, 0],
+                  numberOfLights: 2,
+                  ambientRatio: 0.2
+              }
+          })
+        ]
+    })
+})
+
+
+
+/*
+$(document).ready(function() {
+
     ///////////////////////////////////////////
     // Create plot, draw points and add zoom //
     ///////////////////////////////////////////
+
+
 
     var n = 15; // number of points
     var max = 100; // maximum of x and y
@@ -151,7 +253,7 @@ $(document).ready(function() {
 
 
     function drawPoints() {
-        console.log('This should NOT print');
+        console.log('This should print');
         // Draws points based on data provided by python
         points = points_g.selectAll("circle").data(data);
         points = points.enter().append("circle")
@@ -955,3 +1057,5 @@ function msToTime(ms) {
         }
         return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
     }
+
+*/

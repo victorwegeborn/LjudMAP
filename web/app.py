@@ -5,8 +5,8 @@ from flask import Flask, render_template, request, flash, redirect, jsonify
 from werkzeug.utils import secure_filename
 import subprocess
 import sys
-sys.path.append("../python")
-sys.path.append("..")
+sys.path.append(os.path.abspath("../python"))
+sys.path.append(os.path.abspath(".."))
 import time
 import audio_processing
 from flask import send_file
@@ -31,7 +31,7 @@ def upload_file():
     return render_template('index.html')
 
 # When audio is submitted, checks so audio is valid, uploads it, and sends parameters
-# to audio_processing which in turn generates files needed for browser, then 
+# to audio_processing which in turn generates files needed for browser, then
 # redirects and loads browser.
 @app.route('/process_audio', methods=['GET', 'POST'])
 def process_audio() -> str:
@@ -55,13 +55,13 @@ def process_audio() -> str:
             else:
                 print("File extension not allowed")
                 return "<h3>File extension not allowed. Please use WAV or MP3.</h3>"
-    
+
     segment_size = float(request.form['radio1'])
     step_size = float(request.form['radio2'])
     config_file = request.form['radio3']
 
     audio_processing.main(session_key, config_file, segment_size, step_size)
-    
+
     return redirect("/"+session_key)
 
 # Triggered when searching by key, if key exists go to load_browser()
@@ -74,17 +74,17 @@ def retrain() -> str:
         filename = request.form['audioPath'].split("/")[-1]
         segment_size = float(request.form['segmentSize'])
         step_size = float(request.form['stepSize'])
-        
-        
+
+
         new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
-    
+
         subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
         subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
 
         audio_processing.retrain(valid_points, new_session_key, old_session_key, segment_size, step_size)
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
-        
+
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/goByKey', methods=['POST'])
@@ -107,18 +107,19 @@ def load_browser(session_key) -> str:
             reader = csv.reader(f, skipinitialspace=True)
             header = next(reader)
             data = [{k: v for k, v in zip(header, line)} for line in reader]
-                
+
         with open(data_dir + "metadata.csv", "r") as f:
             reader = csv.reader(f, skipinitialspace=True)
             header = next(reader)
             metadata = [{k: v for k, v in zip(header, line)} for line in reader][0]
-        return render_template('audioBrowser.html', 
-                                data=data, 
-                                audioDuration=metadata["audio_duration"], 
+        #return render_template('audioBrowser.html',
+        return render_template('deckAudioBrowser.html',
+                                data=data,
+                                audioDuration=metadata["audio_duration"],
                                 segmentSize=metadata["segment_size"],
                                 stepSize=metadata["step_size"],
                                 datapoints=len(data),
-                                session_key=session_key, 
+                                session_key=session_key,
                                 audioPath="../" + metadata["audio_path"])
     else:
         return "<h3>Something went wrong, the files for the this audio session does not exist</h3>"
@@ -126,4 +127,3 @@ def load_browser(session_key) -> str:
 if __name__ == '__main__':
     #app.run(debug=True)
     app.run(host='0.0.0.0', debug=True, port=3134)
-

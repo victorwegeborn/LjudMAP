@@ -37,8 +37,8 @@ def update_config(config_file, segment_size, step_size):
                 f.write("\n")
             else:
                 f.write(line)
-    
-def main(session_key, config_file, segment_size, step_size):    
+
+def main(session_key, config_file, segment_size, step_size):
     # Get audiofilename
     audio_dir = "static/uploads/" + session_key + "/"
     for file_name in os.listdir(audio_dir):
@@ -53,7 +53,7 @@ def main(session_key, config_file, segment_size, step_size):
         wav_audio = AudioSegment.from_mp3(audio_path)
         audio_path = audio_path[:-3:] + "wav" # set new audio_path
         wav_audio.export(audio_path, format="wav")
-    
+
     # Get metadata
     audio_duration = len(AudioSegment.from_wav(audio_path))
 
@@ -75,7 +75,7 @@ def main(session_key, config_file, segment_size, step_size):
     htk_reader = HTKFile()
     htk_reader.load(output_path)
     result = np.array(htk_reader.data)
-    
+
     print(result)
     # Run data through t-SNE
     tsne = TSNE(n_components=2, perplexity=25)#, random_state=None)
@@ -130,7 +130,7 @@ def main(session_key, config_file, segment_size, step_size):
 
     #return data, audio_duration
 
-def retrain(valid_points, session_key, old_session_key, segment_size, step_size):    
+def retrain(valid_points, session_key, old_session_key, segment_size, step_size):
     # Get audiofilename
     audio_dir = "static/uploads/" + session_key + "/"
     for file_name in os.listdir(audio_dir):
@@ -145,7 +145,7 @@ def retrain(valid_points, session_key, old_session_key, segment_size, step_size)
         wav_audio = AudioSegment.from_mp3(audio_path)
         audio_path = audio_path[:-3:] + "wav" # set new audio_path
         wav_audio.export(audio_path, format="wav")
-    
+
     # Get metadata
     audio_duration = len(AudioSegment.from_wav(audio_path))
 
@@ -163,7 +163,7 @@ def retrain(valid_points, session_key, old_session_key, segment_size, step_size)
     htk_reader.load(path_to_old_htk)
     result = np.array(htk_reader.data)
     new_result = []
-    
+
     valid_points_indexes = [i[0] for i in valid_points[1:]]
     start_times = [i[1] for i in valid_points[1:]]
     colors = [i[2] for i in valid_points[1:]]
@@ -172,7 +172,7 @@ def retrain(valid_points, session_key, old_session_key, segment_size, step_size)
             new_result.append(line)
 
     new_result = np.array(new_result)
-    
+
     # Run data through t-SNE
     tsne = TSNE(n_components=2, perplexity=25)#, random_state=None)
     Y1 = convert_range(tsne.fit_transform(new_result))
@@ -231,15 +231,15 @@ def retrain(valid_points, session_key, old_session_key, segment_size, step_size)
 def convert_range(Y):
     # print(Y.shape)
     # return Y
-    new_range = (80 - (-80))  
+    new_range = (80 - (-80))
     Y_x = Y[:,0]
-    
-    
-    old_range_x = (max(Y_x) - min(Y_x))  
+
+
+    old_range_x = (max(Y_x) - min(Y_x))
     new_Y_x = (((Y_x - min(Y_x)) * new_range) / old_range_x) + (-80)
 
     Y_y = Y[:,1]
-    old_range_y = (max(Y_y) - min(Y_y))  
+    old_range_y = (max(Y_y) - min(Y_y))
     new_Y_y = (((Y_y - min(Y_y)) * new_range) / old_range_y) + (-80)
-    
+
     return np.array((new_Y_x, new_Y_y)).T
