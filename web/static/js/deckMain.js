@@ -1,5 +1,11 @@
 $(document).ready(function() {
 
+    deck.log.enable()
+    deck.log.priority = 1
+
+    /* used to render different sets of data points */
+    var CURRENT_ALGORITHM = 'default';
+
     var max = 100;
 
     var map = $('#map');
@@ -20,79 +26,204 @@ $(document).ready(function() {
 
     const EPSILON = 1e-4;
 
-    function getPosition(u, v) {
-        const x = u * 0.1;
-        const y = v * 0.1;
-        const z = 0;
 
-        return [x, y, z];
+
+    var dataPoints = [];
+
+    function getPosition(alg, point) {
+        if (alg === 'tsne') { return [parseFloat(point.tsneX), parseFloat(point.tsneY), 0]; }
+        if (alg === 'som')  { return [parseFloat(point.somX),  parseFloat(point.somY), 0];  }
+        if (alg === 'pca')  { return [parseFloat(point.pcaX),  parseFloat(point.pcaY), 0];  }
+        if (alg === 'umap') { return [parseFloat(point.umapX), parseFloat(point.umapY), 0]; }
     }
 
-    function getNormal(u, v) {
-        const p0 = getPosition(u - EPSILON, v - EPSILON);
-        const p1 = getPosition(u + EPSILON, v + EPSILON);
-
-        const nx = (p1[1] - p0[1]) * (p1[2] - p0[2]);
-        const ny = (p1[2] - p0[2]) * (p1[0] - p0[0]);
-        const nz = (p1[0] - p0[0]) * (p1[1] - p0[1]);
-
-        return new luma.Vector3(nx, ny, nz).normalize();
-    }
-
-
-    console.log(data)
-
-    const points = [];
-
-    const mm = {
-        x_min: 9999999,
-        y_min: 9999999,
-        x_max: -9999999,
-        y_min: -9999999,
-    };
 
     for (let i = 0; i < data.length; i++) {
-        u = data[i].tsneX;
-        v = data[i].tsneY;
+        dataPoints.push({
+            position: [0,0,0], // default position
+            color: [0,0,0], // default color
+            id: data[i].id,
+            'tsne': getPosition('tsne', data[i]),
+            'umap': getPosition('umap', data[i]),
+            'som': getPosition('som', data[i]),
+            'pca': getPosition('pca', data[i])
+        });
+    };
 
-        mm.x_min = Math.min(mm.x_min, u)
-        mm.x_max = Math.max(mm.x_max, u)
-        mm.y_min = Math.min(mm.y_min, v)
-        mm.y_max = Math.max(mm.y_max, v)
+    function changeAlgorithm(algo) {
+        CURRENT_ALGORITHM = algo;
+        for (let i = 0; i < dataPoints.length; i++) {
+            dataPoints[i].position = dataPoints[i][CURRENT_ALGORITHM];
+        }
+    }
 
-        const p = getPosition(u, v)
-        const n = getNormal(u, v)
-        points.push({
-            position: p,
-            normal: n,
-            color: [0, 0, 0]
-        })
+    /* DECK GL RENDERER */
+    const deckgl = new deck.DeckGL({
+        container: 'map',
+        mapbox: false,
+        views: [
+            new deck.OrbitView({ controller: true })
+        ],
+        viewState: {
+            fov: 50,
+            distance: 20,
+            rotationX: 0,
+            rotationOrbit: 0,
+            zoom: 1
+        },
+        layers: [
+            new deck.PointCloudLayer({
+                data: dataPoints,
+                coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+                getPosition: d => d.position,
+                getColor: d => d.color,
+                radiusPixels: 50,
+                transitions: {
+                    getPosition: {
+                        duration: 1600,
+                        easing: d3.easeExpOut,
+                    }
+                },
+            })
+        ],
+        // initialization of canvas
+        onLoad: () => {
+            changeAlgorithm('tsne')
+            redrawCanvas(dataPoints)
+        }
+    })
+
+
+
+
+
+    /* Canvas layer creation */
+    function redrawCanvas(data) {
+        const pointCloudLayer = new deck.PointCloudLayer({
+            data: data,
+            coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+            getPosition: d => d.position,
+            getColor: d => d.color,
+            radiusPixels: 50,
+            updateTriggers: {
+                getPosition: CURRENT_ALGORITHM
+            },
+            transitions: {
+                getPosition: {
+                    duration: 1600,
+                    easing: d3.easeExpOut,
+                }
+            },
+            pickable: true,
+            onHover: ({object, x, y}) => {
+                console.log(object, x, y)
+            }
+        });
+        deckgl.setProps({
+            layers: [pointCloudLayer]
+        });
     }
 
 
 
-    new deck.DeckGL({
-        container: 'map', // uses id to set canvas
-        views: [new deck.OrbitView(map)],
-        viewState: {fov: 50, distance: 10, rotationX: 0, rotationOrbit: 45, zoom: 1},
-        layers: [
-          new deck.PointCloudLayer({
-              id: 'pointCloud',
-              coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
-              //coordinateOrigin: [mm.x_max - mm.x_min, mm.y_max - mm.y_min, 0],
-              opacity: 1,
-              data: points,
-              radiusPixels: 50,
-              lightSettings: {
-                  coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
-                  lightsPosition: [20, 100, 100, 50, 0, 0],
-                  lightsStrength: [1, 0, 2, 0],
-                  numberOfLights: 2,
-                  ambientRatio: 0.2
-              }
-          })
-        ]
+
+    // Change algorithm, and therefor coords
+    $("#buttonGroup2 button").on("click", function() {
+        changeAlgorithm(this.value)
+        redrawCanvas(dataPoints);
+    });
+
+
+
+    ///////////////
+    // Web audio //
+    ///////////////
+
+
+    var audioCtx = new AudioContext();
+    var audioBuffer;
+    var audioLoaded = false;
+    var currentSegmentStartTimes = [];
+    loadAudio(audioPath);
+
+
+    var launchInterval = segmentSize/2;
+    $("#launchSlider").val(launchInterval);
+    $("#launchSliderText").text("Launch interval: " + launchInterval);
+
+    var fade = segmentSize/2;
+    $("#fadeSlider").val(fade);
+    $("#fadeSliderText").text("Fade in/out: " + fade);
+
+    var gradient = 50;
+    $("#gradientSlider").val(gradient);
+    $("#gradientSliderText").text("Gradient: " + gradient);
+
+    $("#launchSlider").on("mousemove", function() {
+        launchInterval = this.value;
+        $("#launchSliderText").text("Launch interval: " + launchInterval);
     })
+
+    $("#fadeSlider").on("mousemove", function() {
+        fade = this.value;
+        $("#fadeSliderText").text("Fade in/out: " + fade);
+    })
+
+    $("#gradientSlider").on("mousemove", function() {
+        gradient = this.value;
+        $("#gradientSliderText").text("Gradient: " + gradient);
+    })
+
+    function loadAudio(fileName) {
+        audioList = [fileName];
+        bufferLoader = new BufferLoader(
+            audioCtx,
+            audioList,
+            finishedLoading
+        );
+        bufferLoader.load();
+
+        function finishedLoading(bufferList) {
+            audioBuffer = bufferList[0];
+            var audioLoaded = true;
+            $("#loading-sm").hide()
+            console.log("Audio loaded.");
+        }
+    }
+
+    // This function is called every 1000ms and samples and plays audio segments from
+    // currentSegmentStartTimes according to launch-intervals and fade
+    function playSegments(){
+        if(currentSegmentStartTimes.length > 0) {
+            var i;
+            var startTime
+            console.log(launchInterval);
+            for (i = 0; i < 100; i++) {
+                startTime = audioCtx.currentTime + (i*launchInterval)/1000;
+                var audioInterval = currentSegmentStartTimes[Math.floor(Math.random()*currentSegmentStartTimes.length)];
+                var source = audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+                var volume = audioCtx.createGain();
+                source.connect(volume);
+                volume.connect(audioCtx.destination);
+
+                volume.gain.value = 0.1;
+                volume.gain.exponentialRampToValueAtTime(1.0, startTime + fade/1000);
+                volume.gain.setValueAtTime(1.0, startTime + (segmentSize-fade)/1000);
+                volume.gain.exponentialRampToValueAtTime(0.1, startTime + segmentSize/1000);
+
+                if (i*launchInterval >= 1000) {
+                    break;
+                }
+                source.start(startTime, audioInterval/1000, segmentSize/1000);
+                console.log(audioInterval + " starting in: " + startTime);
+            }
+        }
+    }
+
+
+
+
 })
 
 
@@ -1032,6 +1163,7 @@ $(document).ready(function() {
 
 })
 
+*/
 
 // Outside document.ready as it is used in html code
 function msToTime(ms) {
@@ -1057,5 +1189,3 @@ function msToTime(ms) {
         }
         return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
     }
-
-*/
