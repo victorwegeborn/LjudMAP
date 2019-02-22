@@ -31,6 +31,7 @@ $(document).ready(function() {
     // Set dict for centroids
     centroids = {};
 
+
     // dimensions and margins
     var map = d3.select("#map")
     width = $("#map").width();
@@ -927,6 +928,8 @@ $(document).ready(function() {
     setInterval(playSegments, 1000);
     setInterval(updateTimeBar, 100);
 
+
+    
 
 })
 

@@ -3,52 +3,78 @@ $(document).ready(function() {
     deck.log.enable()
     deck.log.priority = 1
 
+
     /* used to render different sets of data points */
     var CURRENT_ALGORITHM = 'default';
+    var CURRENT_CATEGORY = 'black';
 
-    var max = 100;
 
     var map = $('#map');
     var width = map.width();
     var height = map.height();
 
+    var max = 100;
+
+
+    var labeled = false;
+
+    var XKEY = 88;
+
+    var SHIFTDOWN = false;
+    var CTRLDOWN = false;
+    var XDOWN = false;
+    var cDown = false;
+    var LOCALMOUSE = { x: 0, y: 0 };
 
     // create scale objects
     var xScale = d3.scaleLinear()
         .domain([-max, max])
-        .range([0, width]);
+        .range([-width/2, width/2]);
     var yScale = d3.scaleLinear()
         .domain([-max, max])
-        .range([height, 0]);
+        .range([height/2, -height/2]);
 
-
-
-
-    const EPSILON = 1e-4;
-
+    var new_xScale = xScale;
+    var new_yScale = yScale;
 
 
     var dataPoints = [];
 
     function getPosition(alg, point) {
-        if (alg === 'tsne') { return [parseFloat(point.tsneX), parseFloat(point.tsneY), 0]; }
-        if (alg === 'som')  { return [parseFloat(point.somX),  parseFloat(point.somY), 0];  }
-        if (alg === 'pca')  { return [parseFloat(point.pcaX),  parseFloat(point.pcaY), 0];  }
-        if (alg === 'umap') { return [parseFloat(point.umapX), parseFloat(point.umapY), 0]; }
+        if (alg === 'tsne') { return [xScale(parseFloat(point.tsneX)), yScale(parseFloat(point.tsneY)), 0]; }
+        if (alg === 'som')  { return [xScale(parseFloat(point.somX)),  yScale(parseFloat(point.somY)), 0];  }
+        if (alg === 'pca')  { return [xScale(parseFloat(point.pcaX)),  yScale(parseFloat(point.pcaY)), 0];  }
+        if (alg === 'umap') { return [xScale(parseFloat(point.umapX)), yScale(parseFloat(point.umapY)), 0]; }
+    }
+
+    function getColor(color) {
+        if (color === 'black') return [0,0,0];
+        else if (color === "blue") return [0,125,255];
+        else if (color === "green") return [0, 167, 84];
+        else if (color === "yellow") return [255, 191, 66];
+        else if (color === "red") return [228, 47, 70];
+        else if (color === "purple") return [134,0,123];
+        else if (color === "orange") return [255, 163, 56];
+        else if (color === "teal") return [0, 129, 128];
+        else if (color === "brown") return [171, 38, 44];
     }
 
 
+    /* Setup data for display in deck.gl */
     for (let i = 0; i < data.length; i++) {
         dataPoints.push({
             position: [0,0,0], // default position
-            color: [0,0,0], // default color
-            id: data[i].id,
+            category: CURRENT_CATEGORY,
+            id: 'p' + data[i].id,
+            start: data[i].start,
+            normal: [0,1,0],
             'tsne': getPosition('tsne', data[i]),
             'umap': getPosition('umap', data[i]),
             'som': getPosition('som', data[i]),
-            'pca': getPosition('pca', data[i])
+            'pca': getPosition('pca', data[i]),
         });
     };
+
 
     function changeAlgorithm(algo) {
         CURRENT_ALGORITHM = algo;
@@ -61,6 +87,7 @@ $(document).ready(function() {
     const deckgl = new deck.DeckGL({
         container: 'map',
         mapbox: false,
+        fp64: true,
         views: [
             new deck.OrbitView({ controller: true })
         ],
@@ -69,15 +96,17 @@ $(document).ready(function() {
             distance: 20,
             rotationX: 0,
             rotationOrbit: 0,
-            zoom: 1
+            zoom: 0.04,
+            offset: [0,0,0],
         },
         layers: [
             new deck.PointCloudLayer({
+                id: 'pointCloud',
                 data: dataPoints,
                 coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
                 getPosition: d => d.position,
-                getColor: d => d.color,
-                radiusPixels: 50,
+                getColor: d => getColor(d.category),
+                radiusPixels: 100,
                 transitions: {
                     getPosition: {
                         duration: 1600,
@@ -86,7 +115,8 @@ $(document).ready(function() {
                 },
             })
         ],
-        // initialization of canvas
+        pickingRadius: 30,
+        getCursor: () => 'crosshair',
         onLoad: () => {
             changeAlgorithm('tsne')
             redrawCanvas(dataPoints)
@@ -96,17 +126,23 @@ $(document).ready(function() {
 
 
 
+    var colorTrigger = 0;
 
     /* Canvas layer creation */
     function redrawCanvas(data) {
+        // reset color trigger
+        if (colorTrigger > Number.MAX_SAFE_INTEGER - 1) { colorTrigger = 0; }
         const pointCloudLayer = new deck.PointCloudLayer({
+            id: 'pointCloud',
             data: data,
             coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
             getPosition: d => d.position,
-            getColor: d => d.color,
-            radiusPixels: 50,
+            getColor: d => getColor(d.category),
+            getNormal: d => d.n,
+            radiusPixels: 100,
             updateTriggers: {
-                getPosition: CURRENT_ALGORITHM
+                instanceColors: colorTrigger,
+                getPosition: CURRENT_ALGORITHM,
             },
             transitions: {
                 getPosition: {
@@ -115,9 +151,8 @@ $(document).ready(function() {
                 }
             },
             pickable: true,
-            onHover: ({object, x, y}) => {
-                console.log(object, x, y)
-            }
+            onHover: info => { LOCALMOUSE.x = info.x, LOCALMOUSE.y = info.y; }
+            //onHover: info => hoverInteraction(info)
         });
         deckgl.setProps({
             layers: [pointCloudLayer]
@@ -126,11 +161,147 @@ $(document).ready(function() {
 
 
 
+    function categorize() {
+        pointsInRadius = deckgl.pickMultipleObjects({
+            x: LOCALMOUSE.x, y: LOCALMOUSE.y,
+            radius: 20,
+            depth: 30,
+        });
+        if (pointsInRadius.length > 0) {
+            for (let i = 0; i < pointsInRadius.length; i++) {
+                pointsInRadius[i].object.category = CURRENT_CATEGORY;
+            }
+            colorTrigger++;
+            redrawCanvas(dataPoints)
+        }
+    }
+
+    function updateAudioList() {
+        pointsInRadius = deckgl.pickMultipleObjects({
+            x: LOCALMOUSE.x, y: LOCALMOUSE.y,
+            radius: 20,
+            depth: 30,
+        });
+        if (pointsInRadius.length > 0) {
+            startList = [];
+            for (let i = 0; i < pointsInRadius.length; i++) {
+                startList.push(pointsInRadius[i].object.start);
+            }
+            currentSegmentStartTimes = startList;
+        }
+    }
+
+
+    // Change category buttons
+    $("#buttonGroup1 button").on("click", function() {
+        if (CURRENT_CATEGORY !== this.value) {
+            CURRENT_CATEGORY = this.value;
+            console.log('new category', CURRENT_CATEGORY)
+        }
+    });
+
 
     // Change algorithm, and therefor coords
     $("#buttonGroup2 button").on("click", function() {
-        changeAlgorithm(this.value)
-        redrawCanvas(dataPoints);
+        if (CURRENT_ALGORITHM !== this.value) {
+            changeAlgorithm(this.value)
+            redrawCanvas(dataPoints);
+            console.log('new algorithm', CURRENT_ALGORITHM)
+        }
+    });
+
+
+    //////////////////
+    // Mouse events //
+    //////////////////
+
+    map.on("mousemove", function(ev) {
+        if (SHIFTDOWN) {
+            categorize();
+        }
+        else if (CTRLDOWN) {
+            updateAudioList();
+        }
+        else if (SHIFTDOWN + XDOWN) {
+            console.log('shift + xdown')
+        }
+    })
+
+    ////////////////
+    // Key events //
+    ////////////////
+
+    $(document).keydown(function(ev) {
+        if (ev.shiftKey) {
+            SHIFTDOWN = true;
+        }
+        else if (ev.ctrlKey) {
+            CTRLDOWN = true;
+        }
+        else if (ev.keyCode == XKEY) {
+            XDOWN = true;
+        }
+    });
+
+    $(document).keyup(function(ev) {
+        if (SHIFTDOWN) {
+            SHIFTDOWN = false;
+        }
+        else if (CTRLDOWN) {
+            CTRLDOWN = false;
+            currentSegmentStartTimes = [];
+        }
+        else if (cDown) {
+            cDown = false;
+            floatingCircleRadius = prevFloatingCircleRadius;
+            //drawFloatingCircle(ev);
+
+        } else {
+            if (ev.keyCode == 48) {
+                CURRENT_CATEGORY = "black";
+            } else if (ev.keyCode == 49) {
+                CURRENT_CATEGORY = "blue";
+            } else if (ev.keyCode == 50) {
+                CURRENT_CATEGORY = "green";
+            } else if (ev.keyCode == 51) {
+                CURRENT_CATEGORY = "yellow";
+            } else if (ev.keyCode == 52) {
+                CURRENT_CATEGORY = "red";
+            } else if (ev.keyCode == 53) {
+                CURRENT_CATEGORY = "purple";
+            } else if (ev.keyCode == 54) {
+                CURRENT_CATEGORY = "orange";
+            } else if (ev.keyCode == 55) {
+                CURRENT_CATEGORY = "teal";
+            } else if (ev.keyCode == 56) {
+                CURRENT_CATEGORY = "brown";
+            }
+            else if (ev.keyCode == 81) {
+                floatingCircleRadius = 50;
+                prevFloatingCircleRadius = 50;
+                // var circle = map.selectAll("circle");
+                // circle.style('stroke-width', floatingCircleRadius);
+            }
+            else if (ev.keyCode == 87) {
+                floatingCircleRadius = 100;
+                prevFloatingCircleRadius = 100;
+                // var circle = map.selectAll("circle");
+                // circle.style('stroke-width', floatingCircleRadius);
+            }
+            else if (ev.keyCode == 69) {
+                floatingCircleRadius = 150;
+                prevFloatingCircleRadius = 150;
+                // var circle = map.selectAll("circle");
+                // circle.style('stroke-width', floatingCircleRadius);
+            } else if (ev.keyCode == 82) {
+                floatingCircleRadius = 300;
+                prevFloatingCircleRadius = 300;
+                // var circle = map.selectAll("circle");
+                // circle.style('stroke-width', floatingCircleRadius);
+            }
+            console.log('new category', CURRENT_CATEGORY)
+            //drawFloatingCircle(ev);
+        }
     });
 
 
@@ -191,6 +362,19 @@ $(document).ready(function() {
         }
     }
 
+
+
+    /*
+
+    circles = d3.selectAll(".dot")
+                .filter(function(d) {return Math.abs(new_xScale(d.umapX)-x) < floatingCircleRadius/2
+                                          & Math.abs(new_yScale(d.umapY)-y) < floatingCircleRadius/2})
+        circles.each(function(d, i){
+                currentSegmentStartTimes.push(d3.select(this).attr("start"));
+            })
+        */
+
+
     // This function is called every 1000ms and samples and plays audio segments from
     // currentSegmentStartTimes according to launch-intervals and fade
     function playSegments(){
@@ -222,8 +406,39 @@ $(document).ready(function() {
     }
 
 
+    setInterval(playSegments, 1000);
+    //setInterval(updateTimeBar, 100);
 
 
+    // SELECTION BOX
+    var selectionBox = $('#selectionBox')
+    var x1 = 0, x2 = 0, x3 = 0, x4 = 0;
+
+    function reCalc() { //This will restyle the div
+        var x3 = Math.min(x1,x2); //Smaller X
+        var x4 = Math.max(x1,x2); //Larger X
+        var y3 = Math.min(y1,y2); //Smaller Y
+        var y4 = Math.max(y1,y2); //Larger Y
+        div.style.left = x3 + 'px';
+        div.style.top = y3 + 'px';
+        div.style.width = x4 - x3 + 'px';
+        div.style.height = y4 - y3 + 'px';
+    }
+
+    startSelectionBox = function(e) {
+        div.hidden = 0; //Unhide the div
+        x1 = e.clientX; //Set the initial X
+        y1 = e.clientY; //Set the initial Y
+        reCalc();
+    };
+    moveSelectionBox = function(e) {
+        x2 = e.clientX; //Update the current position X
+        y2 = e.clientY; //Update the current position Y
+        reCalc();
+    };
+    releaseSelectionBox = function(e) {
+        div.hidden = 1; //Hide the div
+    };
 })
 
 
@@ -250,8 +465,8 @@ $(document).ready(function() {
     // Used to allow export
     var labeled = false;
 
-    var shiftDown = false;
-    var ctrlDown = false;
+    var SHIFTDOWN = false;
+    var CTRLDOWN = false;
     var cDown = false;
     var categoryColor = "black"; // Start color of floating circle
 
@@ -541,10 +756,10 @@ $(document).ready(function() {
 
     map.on("mousemove", function(ev) {
         var coords = d3.mouse(this);
-        if (shiftDown) {
+        if (SHIFTDOWN) {
             categorize(coords[0], coords[1]);
         }
-        else if (ctrlDown) {
+        else if (CTRLDOWN) {
             updateAudioList(coords[0], coords[1]);
         }
     })
@@ -573,10 +788,10 @@ $(document).ready(function() {
 
     $(document).keydown(function(ev) {
         if (ev.shiftKey) {
-            shiftDown = true;
+            SHIFTDOWN = true;
         }
         else if (ev.ctrlKey) {
-            ctrlDown = true;
+            CTRLDOWN = true;
         }
         else if (ev.keyCode == 67 && categoryColor != "black") {
             cDown = true;
@@ -630,11 +845,11 @@ $(document).ready(function() {
     });
 
     $(document).keyup(function(ev) {
-        if (shiftDown) {
-            shiftDown = false;
+        if (SHIFTDOWN) {
+            SHIFTDOWN = false;
         }
-        else if (ctrlDown) {
-            ctrlDown = false;
+        else if (CTRLDOWN) {
+            CTRLDOWN = false;
             currentSegmentStartTimes = [];
         }
         else if (cDown) {

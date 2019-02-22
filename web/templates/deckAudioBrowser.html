@@ -78,7 +78,8 @@
 		<div class="row top-buffer side-buffer" id="row1">
 			<div class="col-sm-1 buttonGroup1">
 	            <h6>Label (hold shift)</h6>
-	            <div id="buttonGroup1">
+                <div>
+	               <div id="buttonGroup1">
 	            	<button type="button" value="black" class="btn-block btn btn-dark top-buffer-sm btn-sm">None (#0)</button>
 
 					<div class="input-group top-buffer-xs">
@@ -136,6 +137,7 @@
 					    <button type="button" value="brown" class="btn-block btn btn-cat4 btn-sm">(#8)</button>
 					  </div>
 					</div>
+                    </div>
 					<hr>
 					<h6>Algorithm</h6>
 	                <div id="buttonGroup2">
@@ -197,9 +199,11 @@
 	            </div>
 			</div>
 			<div class="col-sm-10">
+				<div class="row h-50">
 				<!-- used by Per -->
 				<!-- <svg id="map"><text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text></svg> -->
-				<div style='border-style: solid; border-width: 2px;' id="map"></div>
+					<div style="border-style: solid; border-width: 2px;" id="map"></div>
+				</div>
 			</div>
 			<div class="col-sm-1">
 				<div id="metadata">
@@ -263,6 +267,7 @@
 			</div>
 		</div> -->
 	</div>
+    <div id="selectionBox" hidden></div>
 	<script type="text/javascript">
 		// Define variables passed from app.py, they are used in js-file
 		var audioDuration = '{{audioDuration}}';
