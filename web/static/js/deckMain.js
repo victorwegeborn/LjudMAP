@@ -3,28 +3,29 @@ $(document).ready(function() {
     deck.log.enable()
     deck.log.priority = 1
 
-
     /* used to render different sets of data points */
     var CURRENT_ALGORITHM = 'default';
     var CURRENT_CATEGORY = 'black';
 
+    /* local mouse position on plot (Updated with callbacks) */
+    var LOCALMOUSE = { x: 0, y: 0 };
+
+    /* Keys */
+    const XKEY = 88;
+    var SHIFTDOWN = false;
+    var CTRLDOWN = false;
+    var XDOWN = false;
+    var cDown = false;
 
     var map = $('#map');
     var width = map.width();
     var height = map.height();
 
-    var max = 100;
-
 
     var labeled = false;
 
-    var XKEY = 88;
 
-    var SHIFTDOWN = false;
-    var CTRLDOWN = false;
-    var XDOWN = false;
-    var cDown = false;
-    var LOCALMOUSE = { x: 0, y: 0 };
+    var max = 100;
 
     // create scale objects
     var xScale = d3.scaleLinear()
@@ -76,12 +77,6 @@ $(document).ready(function() {
     };
 
 
-    function changeAlgorithm(algo) {
-        CURRENT_ALGORITHM = algo;
-        for (let i = 0; i < dataPoints.length; i++) {
-            dataPoints[i].position = dataPoints[i][CURRENT_ALGORITHM];
-        }
-    }
 
     /* DECK GL RENDERER */
     const deckgl = new deck.DeckGL({
@@ -120,6 +115,7 @@ $(document).ready(function() {
         onLoad: () => {
             changeAlgorithm('tsne')
             redrawCanvas(dataPoints)
+            initializeSequenceMap(dataPoints)
         }
     })
 
@@ -141,7 +137,7 @@ $(document).ready(function() {
             getNormal: d => d.n,
             radiusPixels: 100,
             updateTriggers: {
-                instanceColors: colorTrigger,
+                getColor: colorTrigger,
                 getPosition: CURRENT_ALGORITHM,
             },
             transitions: {
@@ -160,6 +156,12 @@ $(document).ready(function() {
     }
 
 
+    function changeAlgorithm(algo) {
+        CURRENT_ALGORITHM = algo;
+        for (let i = 0; i < dataPoints.length; i++) {
+            dataPoints[i].position = dataPoints[i][CURRENT_ALGORITHM];
+        }
+    }
 
     function categorize() {
         pointsInRadius = deckgl.pickMultipleObjects({
@@ -168,11 +170,14 @@ $(document).ready(function() {
             depth: 30,
         });
         if (pointsInRadius.length > 0) {
+            ids = [];
             for (let i = 0; i < pointsInRadius.length; i++) {
                 pointsInRadius[i].object.category = CURRENT_CATEGORY;
+                ids.push(pointsInRadius[i].object.id)
             }
             colorTrigger++;
             redrawCanvas(dataPoints)
+            colorSequenceRect(ids, CURRENT_CATEGORY)
         }
     }
 
@@ -192,6 +197,77 @@ $(document).ready(function() {
     }
 
 
+    //////////////////
+    // Sequence Map //
+    //////////////////
+
+    var seqMax = 100;
+
+
+    var seqDims = {
+        width: $('#sequenceMap').width(),
+        height: $('#sequenceMap').height(),
+    };
+
+
+    var xScaleSequence = d3.scaleLinear()
+        .domain([0, 100])
+        .range([0, seqDims.width+2])
+
+    var seqContainer = d3.select("#sequenceMap")
+        .append("svg")
+        .attr("width", seqDims.width)
+        .attr("height", seqDims.height)
+        .append("g")
+
+
+    var rects = seqContainer.selectAll("div").data(data)
+
+    function initializeSequenceMap (data) {
+        rects = rects.enter().append("rect")
+            .classed("rectBar", true)
+            .attr("x", d => { return xScaleSequence(d.start/audioDuration*100) })
+            .attr("y", 0)
+            .attr('id', d => { return 'p' + d.id })
+            .attr("width", (xScaleSequence(stepSize/audioDuration)*100))
+            .attr("height", "100%")
+            .attr("fill", d => { return d.category; })
+            .style('fill-opacity', 0.5)
+            .on("mouseenter", function(d){
+                var coords = d3.mouse(this)
+                $("#timeBarDuration").show()
+                $("#timeBarDuration").css({
+                    'position': 'absolute',
+                    'z-index': '1000',
+                    'background-color': "black",
+                    'color': "white",
+                    'pointer-events': 'none',
+                    'left': coords[0]
+                    //'left': d.start / audioDuration * 100 + '%'
+                });
+                $("#timeBarDuration").text(msToTime(d.start));
+            })
+            .on("mouseleave", function(d){
+                $("#timeBarDuration").hide()
+            })
+
+        //seqContainer.style("pointer-events", "all")
+        //seqContainer.call(zoom)
+        //seqContainer.on("dblclick.zoom", null)
+    }
+
+    function colorSequenceRect(ids, color) {
+        rectsBars = d3.selectAll(".rectBar")
+            .filter(d => { return ids.includes('p' + d.id) })
+        rectsBars.style('fill', color)
+    }
+
+    //drawSequenceMap(dataPoints)
+
+    ///////////////////
+    // Button events //
+    ///////////////////
+
     // Change category buttons
     $("#buttonGroup1 button").on("click", function() {
         if (CURRENT_CATEGORY !== this.value) {
@@ -199,6 +275,7 @@ $(document).ready(function() {
             console.log('new category', CURRENT_CATEGORY)
         }
     });
+
 
 
     // Change algorithm, and therefor coords
@@ -227,6 +304,9 @@ $(document).ready(function() {
         }
     })
 
+
+
+
     ////////////////
     // Key events //
     ////////////////
@@ -254,7 +334,6 @@ $(document).ready(function() {
         else if (cDown) {
             cDown = false;
             floatingCircleRadius = prevFloatingCircleRadius;
-            //drawFloatingCircle(ev);
 
         } else {
             if (ev.keyCode == 48) {
@@ -300,7 +379,6 @@ $(document).ready(function() {
                 // circle.style('stroke-width', floatingCircleRadius);
             }
             console.log('new category', CURRENT_CATEGORY)
-            //drawFloatingCircle(ev);
         }
     });
 

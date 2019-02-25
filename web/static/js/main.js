@@ -186,7 +186,6 @@ $(document).ready(function() {
 
     function drawRects() {
         // Draws rects based on data provided by python
-
         rects = rects_g.selectAll("rect").data(data);
         rects = rects.enter().append("rect")
             .classed("rectBar", true) // class = .plot
@@ -929,7 +928,6 @@ $(document).ready(function() {
     setInterval(updateTimeBar, 100);
 
 
-    
 
 })
 

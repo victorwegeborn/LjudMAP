@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
     <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/style.css') }}>
     <script src="//code.jquery.com/jquery.min.js"></script>
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
@@ -147,6 +147,7 @@
 		                <button type="button" value="umap" class="btn btn-block btn-dark top-buffer-sm btn-sm">UMAP</button>
 		            </div>
 	                <hr>
+					<!--
 	                <h6>Cursor</h6>
 	                <div id="buttonGroup3">
 						<button type="button" value="50" class="btn btn-block btn-dark top-buffer-sm btn-sm">Small (#Q)</button>
@@ -156,6 +157,7 @@
 		            </div>
 		            <hr>
 					<hr>
+					-->
 	                <h6>Retrain colored points</h6>
 		            <div id="buttonGroup5">
 	                	<button type="button" value="mfcc1" class="btn btn-block btn-dark top-buffer-sm btn-sm">Run</button>
@@ -198,11 +200,14 @@
 			        </button> -->
 	            </div>
 			</div>
-			<div class="col-sm-10">
-				<div class="row h-50">
-				<!-- used by Per -->
-				<!-- <svg id="map"><text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text></svg> -->
-					<div style="border-style: solid; border-width: 2px;" id="map"></div>
+			<div style="height: 100%" class="col-sm-10">
+				<div class="row" style="height: 90%; border-style: solid; border-width: 2px;" id="map"></div>
+				<br>
+				<div class="row" style="height: 55px; border-style: solid; border-width: 2px;" id="sequenceMap">
+					<svg id="sequenceMap" hidden>
+						<rect id="timeBar"></rect>
+						<span id="timeBarDuration" class="unSelectableText"></span>
+					</svg>
 				</div>
 			</div>
 			<div class="col-sm-1">
@@ -247,15 +252,12 @@
 	            </div>
 			</div>
 		</div>
-		<div class="row side-buffer top-buffer-sm" id="row2">
-			<svg id="sequenceMap">
-				<rect id="timeBar"></rect>
-				<span id="timeBarDuration" class="unSelectableText"></span>
-			</svg>
-		</div>
+
+		<!--
 		<div class="row side-buffer top-buffer-sm" id="row3">
 			<svg id="graphMap"></svg>
 		</div>
+	-->
 		<audio id="audioBar"controls controlsList="nodownload" style="display:none">
 	  		<source src="{{audioPath}}">
 		</audio>
