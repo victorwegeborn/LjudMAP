@@ -80,73 +80,40 @@
 	            <h6>Label (hold shift)</h6>
                 <div>
 	               <div id="buttonGroup1">
-	            	<button type="button" value="black" class="btn-block btn btn-dark top-buffer-sm btn-sm">None (#0)</button>
 
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="blueLabel" class="form-control" value="label1">
-					  <div class="input-group-prepend">
-					    <button type="button" value="blue" class="btn-block btn btn-primary btn-sm">(#1)</button>
-					  </div>
-					</div>
+					<div class="btn-group-vertical btn-block">
 
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="greenLabel" class="form-control" value="label2">
-					  <div class="input-group-prepend">
-					    <button type="button" value="green" class="btn-block btn btn-success btn-sm">(#2)</button>
-					  </div>
-					</div>
+						<button type="button" value="black" class="btn-block btn btn-dark btn-sm">None</button>
 
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="yellowLabel" class="form-control" value="label3">
-					  <div class="input-group-prepend">
-					    <button type="button" value="yellow" class="btn-block btn btn-warning btn-sm">(#3)</button>
-					  </div>
-					</div>
+						<div class="btn-group btn-group-sm">
+							<button type="button" value="blue" class="btn btn-primary btn-sm"><text style="font-size: 11px;">1</text></button>
+							<button type="button" value="green" class="btn btn-success btn-sm"><text style="font-size: 11px;">2</text></button>
+							<button type="button" value="yellow" class="btn btn-warning btn-sm"><text style="font-size: 11px;">3</text></button>
+						</div>
 
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="redLabel" class="form-control" value="label4">
-					  <div class="input-group-prepend">
-					    <button type="button" value="red" class="btn-block btn btn-danger btn-sm">(#4)</button>
-					  </div>
-					</div>
+						<div class="btn-group btn-group-sm">
+							<button type="button" value="red" class="btn btn-danger btn-sm"><text style="font-size: 11px;">4</text></button>
+							<button type="button" value="purple" class="btn btn-cat1 btn-sm"><text style="font-size: 11px;">5</text></button>
+							<button type="button" value="orange" class="btn btn-cat2 btn-sm"><text style="font-size: 11px;">6</text></button>
+						</div>
 
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="purpleLabel" class="form-control" value="label5">
-					  <div class="input-group-prepend">
-					    <button type="button" value="purple" class="btn-block btn btn-cat1 btn-sm">(#5)</button>
-					  </div>
+						<div class="btn-group btn-group-sm">
+							<button type="button" value="teal" class="btn btn-cat3 btn-sm"><text style="font-size: 11px;">7</text></button>
+							<button type="button" value="brown" class="btn btn-cat4 btn-sm"><text style="font-size: 11px;">8</text></button>
+						</div>
 					</div>
-
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="orangeLabel" class="form-control" value="label6">
-					  <div class="input-group-prepend">
-					    <button type="button" value="orange" class="btn-block btn btn-cat2 btn-sm">(#6)</button>
-					  </div>
+                </div>
+				<hr>
+				<h6>Algorithm</h6>
+	            <div id="buttonGroup2">
+					<div class="btn-group-vertical btn-block">
+						<button type="button" value="tsne" class="btn btn-block btn-dark btn-sm">t-SNE</button>
+		                <button type="button" value="pca" class="btn btn-block btn-dark btn-sm">PCA</button>
+		                <button type="button" value="som" class="btn btn-block btn-dark btn-sm">SOM</button>
+		                <button type="button" value="umap" class="btn btn-block btn-dark btn-sm">UMAP</button>
 					</div>
-
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="tealLabel" class="form-control" value="label7">
-					  <div class="input-group-prepend">
-					    <button type="button" value="teal" class="btn-block btn btn-cat3 btn-sm">(#7)</button>
-					  </div>
-					</div>
-
-					<div class="input-group top-buffer-xs">
-	                	<input type="text" id="brownLabel" class="form-control" value="label8">
-					  <div class="input-group-prepend">
-					    <button type="button" value="brown" class="btn-block btn btn-cat4 btn-sm">(#8)</button>
-					  </div>
-					</div>
-                    </div>
-					<hr>
-					<h6>Algorithm</h6>
-	                <div id="buttonGroup2">
-						<button type="button" value="tsne" class="btn btn-block btn-dark top-buffer-sm btn-sm">t-SNE</button>
-		                <button type="button" value="pca" class="btn btn-block btn-dark top-buffer-sm btn-sm">PCA</button>
-		                <button type="button" value="som" class="btn btn-block btn-dark top-buffer-sm btn-sm">SOM</button>
-		                <button type="button" value="umap" class="btn btn-block btn-dark top-buffer-sm btn-sm">UMAP</button>
-		            </div>
-	                <hr>
+		        </div>
+	            <hr>
 					<!--
 	                <h6>Cursor</h6>
 	                <div id="buttonGroup3">
@@ -158,21 +125,22 @@
 		            <hr>
 					<hr>
 					-->
-	                <h6>Retrain colored points</h6>
-		            <div id="buttonGroup5">
-	                	<button type="button" value="mfcc1" class="btn btn-block btn-dark top-buffer-sm btn-sm">Run</button>
+	                <h6>Retrain</h6>
+		            <div <div class="btn-group-vertical btn-block" id="buttonGroup5">
+	                	<button type="button" value="labeled" class="btn btn-dark btn-sm">labeled</button>
+						<button type="button" value="inverse" class="btn btn-dark btn-sm">Inverse</button>
 		            </div>
 					<hr>
 	                <h6>Export</h6>
 	                <div id="buttonGroup4">
-	                	<button type="button" value="csv" class="btn btn-block btn-dark top-buffer-sm btn-sm">CSV</button>
+	                	<button type="button" value="csv" class="btn btn-block btn-dark btn-sm">CSV</button>
 		            </div>
 		            <hr>
 	                <h6>Sequential playback</h6>
-	                <div id="buttonGroup6">
-	                	<button type="button" value ="play" class="btn btn-block btn-dark top-buffer-sm btn-sm">Play</button>
-	                	<button type="button" value ="pause" class="btn btn-block btn-dark top-buffer-sm btn-sm">Pause</button>
-	                	<button type="button" value ="stop" class="btn btn-block btn-dark top-buffer-sm btn-sm">Stop</button>
+	                <div class="btn-group-vertical btn-block" id="buttonGroup6">
+	                	<button type="button" value ="play" class="btn btn-dark btn-sm">Play</button>
+	                	<button type="button" value ="pause" class="btn btn-dark btn-sm">Pause</button>
+	                	<button type="button" value ="stop" class="btn btn-dark btn-sm">Stop</button>
 		            </div>
 		            <hr>
 		            <h6>Median filter value</h6>
@@ -200,8 +168,10 @@
 			        </button> -->
 	            </div>
 			</div>
-			<div style="height: 100%" class="col-sm-10">
-				<div class="row" style="height: 90%; border-style: solid; border-width: 2px;" id="map"></div>
+			<div id="wrapper" style="height: 100%;" class="col-sm-10">
+				<div class="row" style="height: 90%; border-style: solid; border-width: 2px; margin-bottom: 0px;" id="map">
+					<text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text>
+				</div>
 				<br>
 				<div class="row" style="height: 55px; border-style: solid; border-width: 2px;" id="sequenceMap">
 					<svg id="sequenceMap" hidden>

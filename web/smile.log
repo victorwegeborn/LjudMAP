@@ -1,17 +1,17 @@
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in SMILExtract : config file is: ../opensmile-2.3.0/config/MFCC.conf
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in cComponentManager : successfully registered 96 component types.
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in instance 'lldcsvsink' : No filename given, disabling this sink component.
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in instance 'lldarffsink' : No filename given, disabling this sink component.
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in cComponentManager : successfully finished createInstances
                                  (16 component instances were finalised, 1 data memories were finalised)
-[ 22.02.2019 - 12:11:11 ]
+[ 27.02.2019 - 14:15:37 ]
     (MSG) [2] in cComponentManager : starting single thread processing loop
-[ 22.02.2019 - 12:11:14 ]
-    (MSG) [2] in cComponentManager : Processing finished! System ran for 418 ticks.
+[ 27.02.2019 - 14:15:40 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 215 ticks.

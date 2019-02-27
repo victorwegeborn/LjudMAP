@@ -173,6 +173,7 @@ def retrain(valid_points, session_key, old_session_key, segment_size, step_size)
 
     new_result = np.array(new_result)
 
+
     # Run data through t-SNE
     tsne = TSNE(n_components=2, perplexity=25)#, random_state=None)
     Y1 = convert_range(tsne.fit_transform(new_result))

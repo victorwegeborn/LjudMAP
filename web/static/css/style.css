@@ -16,12 +16,22 @@ html, body {
     width: 100%;
     height: 100%;
     background-color: #e5e5e5;
+    margin: auto;
+    margin-bottom: 0px;
 }
 
+#wrapper {
+    align-content: center;
+}
 
+.customBar {
+    padding-top: 0px;
+    margin-top: 0px;
+}
 
 #sequenceMap {
     width: 100%;
+    margin: auto;
 }
 
 #graphMap {

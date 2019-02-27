@@ -459,7 +459,6 @@ $(document).ready(function() {
         else {
             $("#audioBar").trigger(this.value);
         }
-
     });
 
     $("#graphMap").on("click", function() {
