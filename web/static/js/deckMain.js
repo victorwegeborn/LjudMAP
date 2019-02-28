@@ -30,6 +30,7 @@ $(document).ready(function() {
     };
 
     let CURRENT_VIEW_STATE = INITIAL_VIEW_STATE;
+    let VIEW_HAS_CHANGED = false;
 
     /* Keys */
     const XKEY = 88;
@@ -106,6 +107,7 @@ $(document).ready(function() {
         viewState: INITIAL_VIEW_STATE,
         onViewStateChange: ({viewState}) => {
             console.log(viewState)
+            VIEW_HAS_CHANGED = true;
             CURRENT_VIEW_STATE = viewState;
             deckgl.setProps({viewState: CURRENT_VIEW_STATE});
         },
@@ -145,6 +147,9 @@ $(document).ready(function() {
              2 = z axis flatten
     */
     function focusCamera(axis) {
+        if (!VIEW_HAS_CHANGED) return;
+
+
         // XY plane
         var rotX = 0;
         var rotOrb = 0;
@@ -165,6 +170,7 @@ $(document).ready(function() {
         currentViewState = Object.assign({}, CURRENT_VIEW_STATE, {
             translationX: 0,
             translationY: 0,
+            lookAt: [0,0,0,1], // why the fourth component? Paning stops working without...
             distance: 20,
             rotationX: rotX,
             rotationOrbit: rotOrb,
@@ -174,7 +180,8 @@ $(document).ready(function() {
                                                                  'translationY',
                                                                  'distance',
                                                                  'rotationX',
-                                                                 'rotationOrbit'])
+                                                                 'rotationOrbit',
+                                                                 'lookAt'])
         });
         console.log(currentViewState)
         deckgl.setProps({viewState: currentViewState})
@@ -219,9 +226,6 @@ $(document).ready(function() {
             layers: [pointCloudLayer]
         });
     }
-
-
-
 
 
 
