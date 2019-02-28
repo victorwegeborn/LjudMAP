@@ -3,13 +3,33 @@ $(document).ready(function() {
     deck.log.enable()
     deck.log.priority = 1
 
+    console.log(data)
+
     /* used to render different sets of data points */
     var CURRENT_ALGORITHM = 'default';
     var CURRENT_CATEGORY = 'black';
     var HIGHLIGHT = 'HIGHLIGHT';
 
+    var FLATTEN = [1, 1, 1];
+
     /* local mouse position on plot (Updated with callbacks) */
     var LOCALMOUSE = { x: 0, y: 0 };
+
+    var POINT_RADIUS = 100;
+
+
+    const INITIAL_VIEW_STATE = {
+        fov: 50,
+        distance: 20,
+        rotationX: 0,
+        rotationOrbit: 0,
+        zoom: 0.04,
+        offset: [0,0,0],
+        translationX: 0,
+        translationY: 0,
+    };
+
+    let CURRENT_VIEW_STATE = INITIAL_VIEW_STATE;
 
     /* Keys */
     const XKEY = 88;
@@ -43,12 +63,7 @@ $(document).ready(function() {
 
     var dataPoints = [];
 
-    function getPosition(alg, point) {
-        if (alg === 'tsne') { return [xScale(parseFloat(point.tsneX)), yScale(parseFloat(point.tsneY)), 0]; }
-        if (alg === 'som')  { return [xScale(parseFloat(point.somX)),  yScale(parseFloat(point.somY)), 0];  }
-        if (alg === 'pca')  { return [xScale(parseFloat(point.pcaX)),  yScale(parseFloat(point.pcaY)), 0];  }
-        if (alg === 'umap') { return [xScale(parseFloat(point.umapX)), yScale(parseFloat(point.umapY)), 0]; }
-    }
+
 
     function getColor(color) {
         if (color === 'black') return [51,58,63];
@@ -67,15 +82,14 @@ $(document).ready(function() {
     /* Setup data for display in deck.gl */
     for (let i = 0; i < data.length; i++) {
         dataPoints.push({
-            position: [0,0,0], // default position
             category: CURRENT_CATEGORY,
             id: 'p' + data[i].id,
             start: data[i].start,
             normal: [0,0,0],
-            'tsne': getPosition('tsne', data[i]),
-            'umap': getPosition('umap', data[i]),
-            'som': getPosition('som', data[i]),
-            'pca': getPosition('pca', data[i]),
+            'tsne': data[i].tsne,
+            'umap': data[i].umap,
+            'som': data[i].som,
+            'pca': data[i].pca,
         });
     };
 
@@ -89,20 +103,18 @@ $(document).ready(function() {
         views: [
             new deck.OrbitView({ controller: true })
         ],
-        viewState: {
-            fov: 50,
-            distance: 20,
-            rotationX: 0,
-            rotationOrbit: 0,
-            zoom: 0.04,
-            offset: [0,0,0],
+        viewState: INITIAL_VIEW_STATE,
+        onViewStateChange: ({viewState}) => {
+            console.log(viewState)
+            CURRENT_VIEW_STATE = viewState;
+            deckgl.setProps({viewState: CURRENT_VIEW_STATE});
         },
         layers: [
             new deck.PointCloudLayer({
                 id: 'pointCloud',
                 data: dataPoints,
                 coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-                getPosition: d => d.position,
+                getPosition: d => [0,0,0],
                 getColor: d => getColor(d.category),
                 getNormal: d => d.normal,
                 radiusPixels: 100,
@@ -126,6 +138,48 @@ $(document).ready(function() {
 
 
 
+    /* Orients camera to look at plane
+            -1 = origin
+             0 = x axis flatten
+             1 = y axis flatten
+             2 = z axis flatten
+    */
+    function focusCamera(axis) {
+        // XY plane
+        var rotX = 0;
+        var rotOrb = 0;
+
+        // x flattened
+        if (axis != -1) {
+            if (axis == 0) {
+                rotX = 90;
+                rotOrb = -90;
+            }
+            else if (axis == 1) {
+                rotX = 90;
+            }
+            else if (axis == 2) {
+            }
+        }
+
+        currentViewState = Object.assign({}, CURRENT_VIEW_STATE, {
+            translationX: 0,
+            translationY: 0,
+            distance: 20,
+            rotationX: rotX,
+            rotationOrbit: rotOrb,
+            transitionDuration: 2000,
+            transitionEasing: d3.easeExpOut,
+            transitionInterpolator: new deck.LinearInterpolator(['translationX',
+                                                                 'translationY',
+                                                                 'distance',
+                                                                 'rotationX',
+                                                                 'rotationOrbit'])
+        });
+        console.log(currentViewState)
+        deckgl.setProps({viewState: currentViewState})
+    }
+
 
     var colorTrigger = 0;
 
@@ -137,14 +191,19 @@ $(document).ready(function() {
             id: 'pointCloud',
             data: data,
             coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-            getPosition: d => d.position,
+            getPosition: d => {
+                let _pos = d[CURRENT_ALGORITHM];
+
+                /* handle flattning of axis */
+                return [_pos[0]*FLATTEN[0], _pos[1]*FLATTEN[1], _pos[2]*FLATTEN[2]];
+            },
             getColor: d => getColor(d.category),
             getNormal: d => d.normal,
-            radiusPixels: 100,
+            radiusPixels: POINT_RADIUS,
             lightSettings: {},
             updateTriggers: {
                 getColor: colorTrigger,
-                getPosition: CURRENT_ALGORITHM,
+                getPosition: [CURRENT_ALGORITHM, FLATTEN[0], FLATTEN[1], FLATTEN[2]]
             },
             transitions: {
                 getPosition: {
@@ -164,12 +223,12 @@ $(document).ready(function() {
 
 
 
+
+
     function changeAlgorithm(algo) {
         CURRENT_ALGORITHM = algo;
-        for (let i = 0; i < dataPoints.length; i++) {
-            dataPoints[i].position = dataPoints[i][CURRENT_ALGORITHM];
-        }
     }
+
 
     function categorize() {
         labeled = true;
@@ -310,9 +369,7 @@ $(document).ready(function() {
         }
     });
 
-
-
-    // Change algorithm, and therefor coords
+    // Change algorithm
     $("#buttonGroup2 button").on("click", function() {
         if (CURRENT_ALGORITHM !== this.value) {
             changeAlgorithm(this.value)
@@ -322,10 +379,28 @@ $(document).ready(function() {
     });
 
 
-    $("#buttonGroup5 button").on("click", function() {
+    $("#buttonGroup5 button").on("click", () => {
         retrain(this.value);
     });
 
+    $("#cameraFocus").on("click", () => {
+        console.log('refocus')
+        focusCamera(-1)
+    })
+
+    $("#buttonGroupNav button").on("click", function() {
+        const axis = this.value;
+        if (FLATTEN[axis] === 1) {
+            FLATTEN[axis] = 0;
+            $(this).addClass('active');
+            focusCamera(axis)
+        } else {
+            FLATTEN[axis] = 1;
+            $(this).removeClass('active');
+            focusCamera(-1)
+        }
+        redrawCanvas(dataPoints);
+    });
 
     $("#buttonGroup6 button").on("click", function() {
         console.log('seq',this.value)
@@ -339,6 +414,8 @@ $(document).ready(function() {
             $("#audioBar").trigger(this.value);
         }
     });
+
+
 
     //////////////////
     // Mouse events //
@@ -355,7 +432,8 @@ $(document).ready(function() {
 
     })
 
-
+    /* Setup point radius slider */
+    $("#pointRadiusSlider").val(POINT_RADIUS);
 
     ////////////////
     // Key events //

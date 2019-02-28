@@ -9,12 +9,10 @@ import os
 import wave
 import contextlib
 #from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-from MulticoreTSNE import MulticoreTSNE as TSNE
 from pydub import AudioSegment
 import csv
-from minisom import MiniSom
-import umap
+import json
+import cluster
 
 
 smilextract = '../opensmile-2.3.0/SMILExtract'
@@ -76,59 +74,32 @@ def main(session_key, config_file, segment_size, step_size):
     htk_reader.load(output_path)
     result = np.array(htk_reader.data)
 
-    print(result)
-    # Run data through t-SNE
-    tsne = TSNE(n_components=2, perplexity=25)#, random_state=None)
-    Y1 = convert_range(tsne.fit_transform(result))
-    print("t-SNE done")
-
-    # Run data through PCA
-    pca = PCA(n_components=2)
-    Y2 = convert_range(pca.fit_transform(result))
-    print("PCA done")
-
-    # Run data through SOM
-    som = False
-    if som:
-        som = MiniSom(25, 25, len(result[0]), sigma=0.3, learning_rate=0.1)
-        som.train_random(result, 1000)
-        Y3 = convert_range(np.array([np.array(som.winner(i)) for i in range(len(result))]))
-        print("SOM done")
-    else:
-        Y3 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
-
-    # Run data through UMAP
-    run_umap = True
-    if run_umap:
-        Y4 = convert_range(umap.UMAP().fit_transform(result))
-        print("UMAP done")
-    else:
-        Y4 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
-
-    # Format t-SNE output to correct dictionary format
     data = []
-    i = 0
-    for coord1, coord2, coord3, coord4 in zip(Y1, Y2, Y3, Y4):
-        data.append({"id":i, "tsneX":float(coord1[0]), "tsneY":float(coord1[1]), "pcaX":float(coord2[0]), "pcaY":float(coord2[1]), "somX":float(coord3[0]), "somY":float(coord3[1]), "umapX":float(coord4[0]), "umapY":float(coord4[1]), "start":int(i*step_size), "active":1, "color":"black"})
-        #data.append({"id":i, "tsneX":random.randint(1,99), "tsneY":random.randint(1,99), "pcaX":random.randint(1,99), "pcaY":random.randint(1,99), "start":int(i*step_size), "active":1, "color":"black"})
-        i+=1
+    for i, _tsne, _pca, _som, _umap in cluster.get_cluster_data(result):
+        data.append({
+            "id": i,
+            "tsne": _tsne.tolist(),
+            "pca": _pca.tolist(),
+            "som": _som.tolist(),
+            "umap": _umap.tolist(),
+            "start":int(i*step_size),
+            "active": 1,
+            "color": "black"
+        })
 
-    # Save data as csv to be able to load later
-    keys = data[0].keys()
-    with open(output_dir + "data.csv", 'w') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(data)
+    """ Write data to disk in json format """
+    with open(output_dir + "data.json", 'w') as output_file:
+        jsonObj = {
+            'meta': {
+                'audio_duration': audio_duration,
+                'audio_path': audio_path,
+                'segment_size': segment_size,
+                'step_size': step_size
+            },
+            'data': data,
+        }
+        json.dump(jsonObj, output_file, separators=(',', ':'))
 
-    # Save metadata as csv to be able to load later
-    metadata = [{"audio_duration":audio_duration, "audio_path":audio_path, "segment_size":segment_size, "step_size":step_size}]
-    keys = metadata[0].keys()
-    with open(output_dir + "metadata.csv", 'w') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(metadata)
-
-    #return data, audio_duration
 
 def retrain(valid_points, session_key, old_session_key, segment_size, step_size):
     # Get audiofilename
@@ -173,74 +144,28 @@ def retrain(valid_points, session_key, old_session_key, segment_size, step_size)
 
     new_result = np.array(new_result)
 
-
-    # Run data through t-SNE
-    tsne = TSNE(n_components=2, perplexity=25)#, random_state=None)
-    Y1 = convert_range(tsne.fit_transform(new_result))
-    print("t-SNE done")
-
-    # Run data through PCA
-    pca = PCA(n_components=2)
-    Y2 = convert_range(pca.fit_transform(new_result))
-    print("PCA done")
-
-    # Run data through SOM
-    som = False
-    if som:
-        som = MiniSom(25, 25, len(result[0]), sigma=0.3, learning_rate=0.1)
-        som.train_random(new_result, 1000)
-        Y3 = convert_range(np.array([np.array(som.winner(i)) for i in range(len(new_result))]))
-        print("SOM done")
-    else:
-        Y3 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
-
-    # Run data through UMAP
-    run_umap = True
-    if run_umap:
-        Y4 = convert_range(umap.UMAP().fit_transform(new_result))
-        print("UMAP done")
-    else:
-        Y4 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
-
-    # Format t-SNE output to correct dictionary format
     data = []
-    i = 0
+    for i, _tsne, _pca, _som, _umap in cluster.get_cluster_data(new_result):
+        data.append({
+            "id": i,
+            "tsne": _tsne.tolist(),
+            "pca": _pca.tolist(),
+            "som": _som.tolist(),
+            "umap": _umap.tolist(),
+            "start":int(i*step_size),
+            "active": 1,
+            "color": "black"
+        })
 
-
-    for coord1, coord2, coord3, coord4, start_time, color in zip(Y1, Y2, Y3, Y4, start_times, colors):
-        data.append({"id":i, "tsneX":float(coord1[0]), "tsneY":float(coord1[1]), "pcaX":float(coord2[0]), "pcaY":float(coord2[1]), "somX":float(coord3[0]), "somY":float(coord3[1]), "umapX":float(coord4[0]), "umapY":float(coord4[1]), "start":start_time, "active":1, "color":color})
-        #data.append({"id":i, "tsneX":random.randint(1,99), "tsneY":random.randint(1,99), "pcaX":random.randint(1,99), "pcaY":random.randint(1,99), "start":int(i*step_size), "active":1, "color":"black"})
-        i+=1
-
-    # Save data as csv to be able to load later
-    keys = data[0].keys()
-    with open(output_dir + "data.csv", 'w') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(data)
-
-    # Save metadata as csv to be able to load later
-    metadata = [{"audio_duration":audio_duration, "audio_path":audio_path, "segment_size":segment_size, "step_size":step_size}]
-    keys = metadata[0].keys()
-    with open(output_dir + "metadata.csv", 'w') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(metadata)
-
-    #return data, audio_duration
-
-def convert_range(Y):
-    # print(Y.shape)
-    # return Y
-    new_range = (80 - (-80))
-    Y_x = Y[:,0]
-
-
-    old_range_x = (max(Y_x) - min(Y_x))
-    new_Y_x = (((Y_x - min(Y_x)) * new_range) / old_range_x) + (-80)
-
-    Y_y = Y[:,1]
-    old_range_y = (max(Y_y) - min(Y_y))
-    new_Y_y = (((Y_y - min(Y_y)) * new_range) / old_range_y) + (-80)
-
-    return np.array((new_Y_x, new_Y_y)).T
+    """ Write data to disk in json format """
+    with open(output_dir + "data.json", 'w') as output_file:
+        jsonObj = {
+            'meta': {
+                'audio_duration': audio_duration,
+                'audio_path': audio_path,
+                'segment_size': segment_size,
+                'step_size': step_size
+            },
+            'data': data,
+        }
+        json.dump(jsonObj, output_file, separators=(',', ':'))

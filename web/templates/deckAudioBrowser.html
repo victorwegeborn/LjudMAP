@@ -14,7 +14,7 @@
     <script src="{{ url_for('static', filename='js/deckMain.js') }}"></script>
 
 	<!-- USED FOR DECK.GL -->
-	<script src="https://unpkg.com/deck.gl@^6.3.0/deckgl.min.js"></script>
+	<script src="https://unpkg.com/deck.gl@^6.4.5/deckgl.min.js"></script>
 
 
     <!-- <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
@@ -168,10 +168,34 @@
 			        </button> -->
 	            </div>
 			</div>
+
+			<!-- Mid section (3d view etc) -->
 			<div id="wrapper" style="height: 100%;" class="col-sm-10">
 				<div class="row" style="height: 90%; border-style: solid; border-width: 2px; margin-bottom: 0px;" id="map">
 					<text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text>
 				</div>
+				<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0">
+
+					<button type="button" value="refocus" class="btn btn-dark btn-sm py-0 mb-1" id="cameraFocus">focus camera</button>
+
+					<span class="badge badge-dark">flatten:</span>
+					<div class="btn-group" id="buttonGroupNav">
+						<button type="button" value="0" class="btn btn-dark btn-sm py-0">X</button>
+						<button type="button" value="1" class="btn btn-dark btn-sm py-0">Y</button>
+						<button type="button" value="2" class="btn btn-dark btn-sm py-0">Z</button>
+					</div>
+
+					<span class="badge badge-dark">selection depth:</span>
+	                <input style="width: 100px;" type="range" min="1" max="50" value="1" step="1" class="form-control-range py-0" id="depthSlider">
+
+					<span class="badge badge-dark">cursor radius:</span>
+	                <input style="width: 100px;" type="range" min="1" max="50" value="1" step="1" class="form-control-range py-0" id="radiusSlider">
+
+					<span class="badge badge-dark">point radius:</span>
+	                <input style="width: 100px;" type="range" min="50" max="1000" value="100" step="1" class="form-control-range py-0" id="pointRadiusSlider">
+				</nav>
+
+
 				<br>
 				<div class="row" style="height: 55px; border-style: solid; border-width: 2px;" id="sequenceMap">
 					<svg id="sequenceMap" hidden>
@@ -180,6 +204,8 @@
 					</svg>
 				</div>
 			</div>
+
+
 			<div class="col-sm-1">
 				<div id="metadata">
 	                <h4>Metadata</h4>
@@ -198,15 +224,15 @@
 	                <h4>Audio settings</h4>
 	                <h6 id="launchSliderText" class="top-buffer-sm"></h6>
 	                <div class="slidecontainer">
-	                    <input type="range" min="10" max="1000" value="250" step="10" class="slider" id="launchSlider">
+	                    <input type="range" min="10" max="1000" value="250" step="10" class="form-control-range" id="launchSlider">
 	                </div>
 	                <h6 id="fadeSliderText" class="top-buffer-sm"></h6>
 	                <div class="slidecontainer">
-	                    <input type="range" min="0" max="500" value="250" step="10" class="slider" id="fadeSlider">
+	                    <input type="range" min="0" max="500" value="250" step="10" class="form-control-range" id="fadeSlider">
 	                </div>
 	                <h6 id="gradientSliderText" class="top-buffer-sm"></h6>
 	                <div class="slidecontainer">
-	                    <input type="range" min="0" max="100" value="50" step="10" class="slider" id="gradientSlider">
+	                    <input type="range" min="0" max="100" value="50" step="10" class="form-control-range" id="gradientSlider">
 	                </div>
 	                <!-- <h6 id="paddingSliderText" class="top-buffer-sm"></h6>
 	                <div class="slidecontainer">

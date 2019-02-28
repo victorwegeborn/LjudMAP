@@ -103,24 +103,19 @@ def load_browser(session_key) -> str:
     data_dir = "static/data/" + session_key + "/"
     print(data_dir)
     if os.path.isdir(data_dir):
-        with open(data_dir + "data.csv", "r") as f:
-            reader = csv.reader(f, skipinitialspace=True)
-            header = next(reader)
-            data = [{k: v for k, v in zip(header, line)} for line in reader]
+        with open(data_dir + "data.json", "r") as f:
+            data = json.load(f)
 
-        with open(data_dir + "metadata.csv", "r") as f:
-            reader = csv.reader(f, skipinitialspace=True)
-            header = next(reader)
-            metadata = [{k: v for k, v in zip(header, line)} for line in reader][0]
         #return render_template('audioBrowser.html',
         return render_template('deckAudioBrowser.html',
-                                data=data,
-                                audioDuration=metadata["audio_duration"],
-                                segmentSize=metadata["segment_size"],
-                                stepSize=metadata["step_size"],
+                                data=data['data'],
+                                audioDuration=data['meta']["audio_duration"],
+                                segmentSize=data['meta']["segment_size"],
+                                audioPath="../" + data['meta']["audio_path"],
+                                stepSize=data["meta"]['step_size'],
                                 datapoints=len(data),
-                                session_key=session_key,
-                                audioPath="../" + metadata["audio_path"])
+                                session_key=session_key)
+
     else:
         return "<h3>Something went wrong, the files for the this audio session does not exist</h3>"
 
