@@ -113,7 +113,7 @@ def load_browser(session_key) -> str:
                                 segmentSize=data['meta']["segment_size"],
                                 audioPath="../" + data['meta']["audio_path"],
                                 stepSize=data["meta"]['step_size'],
-                                datapoints=len(data),
+                                datapoints=len(data['data']),
                                 session_key=session_key)
 
     else:

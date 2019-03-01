@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
 
     deck.log.enable()
@@ -8,17 +9,20 @@ $(document).ready(function() {
     /* used to render different sets of data points */
     var CURRENT_ALGORITHM = 'default';
     var CURRENT_CATEGORY = 'black';
-    var HIGHLIGHT = 'HIGHLIGHT';
+    const HIGHLIGHT_COLOR = [255, 40, 0, 0];
 
     var FLATTEN = [1, 1, 1];
 
+
+
     /* local mouse position on plot (Updated with callbacks) */
     var LOCALMOUSE = { x: 0, y: 0 };
+    var POINT_RADIUS = 40;
 
-    var POINT_RADIUS = 100;
 
-
+    var CURRENT_LAYER = 1;
     const INITIAL_VIEW_STATE = {
+        lookAt: [0,0,0,1],
         fov: 50,
         distance: 20,
         rotationX: 0,
@@ -30,7 +34,6 @@ $(document).ready(function() {
     };
 
     let CURRENT_VIEW_STATE = INITIAL_VIEW_STATE;
-    let VIEW_HAS_CHANGED = false;
 
     /* Keys */
     const XKEY = 88;
@@ -48,39 +51,13 @@ $(document).ready(function() {
     var labeled = false;
 
 
-    var max = 80;
-
-    // create scale objects
-    var xScale = d3.scaleLinear()
-        .domain([-max, max])
-        .range([-width/2, width/2]);
-    var yScale = d3.scaleLinear()
-        .domain([-max, max])
-        .range([height/2, -height/2]);
-
-    var new_xScale = xScale;
-    var new_yScale = yScale;
-
-
-    var dataPoints = [];
 
 
 
-    function getColor(color) {
-        if (color === 'black') return [51,58,63];
-        else if (color === "blue") return [0,125,255];
-        else if (color === "green") return [0, 167, 84];
-        else if (color === "yellow") return [255, 191, 66];
-        else if (color === "red") return [228, 47, 70];
-        else if (color === "purple") return [134,0,123];
-        else if (color === "orange") return [255, 163, 56];
-        else if (color === "teal") return [0, 129, 128];
-        else if (color === "brown") return [171, 38, 44];
-        else if (color === HIGHLIGHT) return [255, 255, 255];
-    }
 
 
     /* Setup data for display in deck.gl */
+    var dataPoints = [];
     for (let i = 0; i < data.length; i++) {
         dataPoints.push({
             category: CURRENT_CATEGORY,
@@ -95,6 +72,25 @@ $(document).ready(function() {
     };
 
 
+    function getColor(c) {
+        var alpha = PLAYING_AUDIO ? 50 : 240;
+        switch (c) {
+            case 'black' : return [ 51,  58,  63, alpha]; break;
+            case 'blue'  : return [  0, 125, 255, alpha]; break;
+            case 'green' : return [  0, 167,  84, alpha]; break;
+            case 'yellow': return [255, 191,  66, alpha]; break;
+            case 'red'   : return [228,  47,  70, alpha]; break;
+            case 'purple': return [134,   0, 123, alpha]; break;
+            case 'orange': return [255, 163,  56, alpha]; break;
+            case 'teal'  : return [  0, 129, 128, alpha]; break;
+            case 'brown' : return [171,  38,  44, alpha]; break;
+                default:
+                    console.log('Point without valid category');
+                    return [255,255,255,255];
+        }
+    }
+
+
 
     /* DECK GL RENDERER */
     const deckgl = new deck.DeckGL({
@@ -106,8 +102,7 @@ $(document).ready(function() {
         ],
         viewState: INITIAL_VIEW_STATE,
         onViewStateChange: ({viewState}) => {
-            console.log(viewState)
-            VIEW_HAS_CHANGED = true;
+            //console.log(viewState)
             CURRENT_VIEW_STATE = viewState;
             deckgl.setProps({viewState: CURRENT_VIEW_STATE});
         },
@@ -119,7 +114,7 @@ $(document).ready(function() {
                 getPosition: d => [0,0,0],
                 getColor: d => getColor(d.category),
                 getNormal: d => d.normal,
-                radiusPixels: 100,
+                radiusPixels: POINT_RADIUS,
                 lightSettings: {},
                 transitions: {
                     getPosition: {
@@ -139,7 +134,6 @@ $(document).ready(function() {
     })
 
 
-
     /* Orients camera to look at plane
             -1 = origin
              0 = x axis flatten
@@ -147,9 +141,6 @@ $(document).ready(function() {
              2 = z axis flatten
     */
     function focusCamera(axis) {
-        if (!VIEW_HAS_CHANGED) return;
-
-
         // XY plane
         var rotX = 0;
         var rotOrb = 0;
@@ -174,7 +165,7 @@ $(document).ready(function() {
             distance: 20,
             rotationX: rotX,
             rotationOrbit: rotOrb,
-            transitionDuration: 2000,
+            transitionDuration: 1000,
             transitionEasing: d3.easeExpOut,
             transitionInterpolator: new deck.LinearInterpolator(['translationX',
                                                                  'translationY',
@@ -188,9 +179,9 @@ $(document).ready(function() {
     }
 
 
-    var colorTrigger = 0;
 
     /* Canvas layer creation */
+    var colorTrigger = 0;
     function redrawCanvas(data) {
         // reset color trigger
         if (colorTrigger > Number.MAX_SAFE_INTEGER - 1) { colorTrigger = 0; }
@@ -208,9 +199,11 @@ $(document).ready(function() {
             getNormal: d => d.normal,
             radiusPixels: POINT_RADIUS,
             lightSettings: {},
+            highlightedObjectIndex: sequentialPlaybackIndex,
+            highlightColor: HIGHLIGHT_COLOR,
             updateTriggers: {
-                getColor: colorTrigger,
-                getPosition: [CURRENT_ALGORITHM, FLATTEN[0], FLATTEN[1], FLATTEN[2]]
+                getColor: [colorTrigger, PLAYING_AUDIO],
+                getPosition: [CURRENT_ALGORITHM, FLATTEN[0], FLATTEN[1], FLATTEN[2]],
             },
             transitions: {
                 getPosition: {
@@ -232,6 +225,8 @@ $(document).ready(function() {
     function changeAlgorithm(algo) {
         CURRENT_ALGORITHM = algo;
     }
+
+
 
 
     function categorize() {
@@ -382,15 +377,8 @@ $(document).ready(function() {
         }
     });
 
-
-    $("#buttonGroup5 button").on("click", () => {
-        retrain(this.value);
-    });
-
-    $("#cameraFocus").on("click", () => {
-        console.log('refocus')
-        focusCamera(-1)
-    })
+    $("#buttonGroup5 button").on("click", () => { retrain(this.value) });
+    $("#cameraFocus").on("click", () => { focusCamera(-1) })
 
     $("#buttonGroupNav button").on("click", function() {
         const axis = this.value;
@@ -407,18 +395,31 @@ $(document).ready(function() {
     });
 
     $("#buttonGroup6 button").on("click", function() {
-        console.log('seq',this.value)
-        if(this.value=="stop"){
-            var audio = document.getElementById('audioBar');
-            audio.pause();
-            audio.currentTime = 0;
-        }
-        else {
-            console.log($("#audioBar"));
-            $("#audioBar").trigger(this.value);
+        if (audioLoaded) {
+            if(this.value=="stop"){
+                stopSequential()
+            }
+            else if (this.value=="play" && !PLAYING_AUDIO) {
+                playSequential()
+            }
         }
     });
 
+    /////////////////////
+    // Layer controlls //
+    /////////////////////
+
+
+    $("#layerSlider").attr({
+        'value': 1,
+        'max': 10,
+        'min': 1
+    });
+
+    $(document).on('input', '#layerSlider', function() {
+        $('#slider_value').html(CURRENT_LAYER = $(this).val());
+        $('#layerText').text('Layer: ' + CURRENT_LAYER)
+    });
 
 
     //////////////////
@@ -436,8 +437,7 @@ $(document).ready(function() {
 
     })
 
-    /* Setup point radius slider */
-    $("#pointRadiusSlider").val(POINT_RADIUS);
+
 
     ////////////////
     // Key events //
@@ -576,6 +576,8 @@ $(document).ready(function() {
     var audioBuffer;
     var audioLoaded = false;
     var currentSegmentStartTimes = [];
+    var PLAYING_AUDIO = false;
+    var sequentialPlaybackIndex = -1;
     loadAudio(audioPath);
 
 
@@ -623,8 +625,39 @@ $(document).ready(function() {
         }
     }
 
+    var clock;
+    var sequencialSource;
+    var highlightPointEvent;
+    function playSequential() {
+        PLAYING_AUDIO = true;
+        clock = new WAAClock(audioCtx, {toleranceEarly: 0.1});
+        clock.start()
 
+        var volume = audioCtx.createGain();
+        volume.connect(audioCtx.destination);
+        sequencialSource = audioCtx.createBufferSource();
+        sequencialSource.buffer = audioBuffer;
+        sequencialSource.connect(volume);
+        sequencialSource.start(0)
 
+        highlightPointEvent = clock.callbackAtTime(() => {
+            sequentialPlaybackIndex++
+            redrawCanvas(dataPoints)
+        }, segmentSize/1000)
+        .repeat(segmentSize/1000)
+        .tolerance({late: 0.1})
+    }
+
+    function stopSequential() {
+        if (PLAYING_AUDIO) {
+            PLAYING_AUDIO = false;
+            highlightPointEvent.clear()
+            clock.stop()
+            sequencialSource.stop()
+            sequentialPlaybackIndex = -1;
+            redrawCanvas(dataPoints)
+        }
+    }
 
 
     // This function is called every 1000ms and samples and plays audio segments from

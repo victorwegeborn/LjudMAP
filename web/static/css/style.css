@@ -25,7 +25,10 @@ html, body {
 }
 
 
-
+.playback {
+    margin: auto;
+    color: white;
+}
 
 
 .customBar {
