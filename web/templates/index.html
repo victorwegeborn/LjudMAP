@@ -9,6 +9,7 @@
         <script src="//code.jquery.com/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
         <script type="text/javascript">
             function showLoadingGif(){
                 $("#loading").show()
@@ -75,6 +76,7 @@
                 <button class="btn btn-outline my-sm-0" type="submit">Go</button>
             </form>
         </nav>
+
         <div class="container" id="content">
             <div class="jumbotron">
                 <h1>Temporally Disassembled Audio</h1>
@@ -83,9 +85,9 @@
             <h5>Upload your audio (wav or mp3)</h5>
 
             <!-- <form action = "visualizer" method="POST" enctype=multipart/form-data> -->
-            <form action = "process_audio" method="POST" enctype=multipart/form-data>
+            <form action = "process_audio" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
-                    <input id="uploadButton" type=file name=file onclick="activateProcessButton()">
+                    <input id="uploadButton" type="file" name="file" onclick="activateProcessButton()">
                 </div>
             <br>
             <h5>Set parameters</h5>
@@ -193,60 +195,270 @@
                 </div>
             </div>
             <br>
+
+
             <div id="featureParameter">
                 <p class="font-weight-bold">Features</p>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="MFCC.conf" checked>
-                    <div class="state">
-                        <label>MFCC</label>
+
+                <!-- MFCC CARD -->
+                <div class="card border-dark mb-3" id="mfcc_card">
+                    <h5 class="card-header">
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="MFCC" id="mfccs" checked>
+                            <div class="state">
+                                <label>MFCC</label>
+                            </div>
+                        </div>
+                    </h5>
+                    <div class="card-body">
+                        <p class="card-text">Number of coefficients</p>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="2" >
+                            <div class="state">
+                                <label>2</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="3" >
+                            <div class="state">
+                                <label>3</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="4" >
+                            <div class="state">
+                                <label>4</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="5" >
+                            <div class="state">
+                                <label>5</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="6" >
+                            <div class="state">
+                                <label>6</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="7" >
+                            <div class="state">
+                                <label>7</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="8" >
+                            <div class="state">
+                                <label>8</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="9" >
+                            <div class="state">
+                                <label>9</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="10" >
+                            <div class="state">
+                                <label>10</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="11" >
+                            <div class="state">
+                                <label>11</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="12" checked>
+                            <div class="state">
+                                <label>12</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="mfcc_coefficients" value="13" >
+                            <div class="state">
+                                <label>13</label>
+                            </div>
+                        </div>
+
+                        <br>
+                        <br>
+                        <p class="card-text">Delta/Acceleration coefficients</p>
+
+                        <div class="pretty p-default p-round">
+                            <input type="checkbox" name="mfcc_delta" value="" checked>
+                            <div class="state">
+                                <label>Delta</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input type="checkbox" name="mfcc_deltadelta" value="" checked>
+                            <div class="state">
+                                <label>Acceleration (Delta-Delta)</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="MFCCZ.conf">
-                    <div class="state">
-                        <label>MFCC (normalized by mean)</label>
+
+
+
+                <!-- SPECTRAL CARD -->
+                <div class="card border-dark mb-3" id="spectral_card">
+                    <h5 class="card-header">
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="SPECTRAL" id="spectrals" checked>
+                            <div class="state">
+                                <label>SPECTRAL</label>
+                            </div>
+                        </div>
+                    </h5>
+                    <div class="card-body">
+
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="flux" checked>
+                            <div class="state">
+                                <label>Flux</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="fluxCentroid" checked>
+                            <div class="state">
+                                <label>Flux Centroid</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="centroid" checked>
+                            <div class="state">
+                                <label>Centroid</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="harmonicity" checked>
+                            <div class="state">
+                                <label>Harmonicity</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="flatness" checked>
+                            <div class="state">
+                                <label>Flatness</label>
+                            </div>
+                        </div>
+
+                        <div class="pretty p-default p-round">
+                            <input class="form-check-input" type="checkbox" value="" name="rollOff" checked>
+                            <div class="state">
+                                <label>rollOff (0.8)</label>
+                            </div>
+                        </div>
+
+                        <!--
+                        <br>
+                        <br>
+                        <p class="card-text">Spectral band energy</p>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                            <div class="card border-dark mb-3">
+                                <div class="card-header">Low</div>
+                                <div class="card-body text-dark">
+                                    <h5 class="card-title">Dark card title</h5>
+                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                            <div class="card border-dark mb-3">
+                                <div class="card-header">Mid</div>
+                                <div class="card-body text-dark">
+                                    <h5 class="card-title">Dark card title</h5>
+                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                            <div class="card border-dark mb-3">
+                                <div class="card-header">High</div>
+                                <div class="card-body text-dark">
+                                    <h5 class="card-title">Dark card title</h5>
+                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        -->
+
+
                     </div>
                 </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="PLP.conf">
-                    <div class="state">
-                        <label>PLP</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="PLPZ.conf">
-                    <div class="state">
-                        <label>PLPz</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="f0test.conf">
-                    <div class="state">
-                        <label>F0</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="speaker_trait.conf">
-                    <div class="state">
-                        <label>Speaker trait</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="speaker_trait_compat.conf">
-                    <div class="state">
-                        <label>Speaker trait compat</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio3" value="emobase2010.conf">
-                    <div class="state">
-                        <label>Emotion features</label>
-                    </div>
-                </div>
+
             </div>
             <br>
             <input type="submit" id="submitNewAudio" class="btn btn-info" value="Process audio" onclick="showLoadingGif()">
           </form>
         </div>
+        <script>
+            // Set defaults
+            var mfccs = true;
+            var spectr = true;
+
+            var mfcc_overlay = $('<div />').addClass('overlay')
+            var spectral_overlay = $('<div />').addClass('overlay')
+
+            $('#mfccs').on("click", function() {
+                var mfcc_card = $('#mfcc_card')
+                if (mfccs) {
+                    mfccs = false;
+                    mfcc_card.removeClass('border-dark')
+                    mfcc_card.append(mfcc_overlay)
+                    mfcc_card.find('.card-body').addClass('fadeContent')
+                } else {
+                    mfccs = true;
+                    mfcc_card.addClass('border-dark')
+                    mfcc_overlay.remove()
+                    mfcc_card.find('.card-body').removeClass('fadeContent')
+                }
+            })
+
+            $('#spectrals').on("click", function() {
+                var spectral_card = $('#spectral_card')
+                if (spectr) {
+                    spectr = false;
+                    spectral_card.removeClass('border-dark')
+                    spectral_card.append(spectral_overlay)
+                    spectral_card.find('.card-body').addClass('fadeContent')
+                } else {
+                    spectr = true;
+                    spectral_card.addClass('border-dark')
+                    spectral_overlay.remove()
+                    spectral_card.find('.card-body').removeClass('fadeContent')
+                }
+            })
+
+
+        </script>
     </body>
 </html>

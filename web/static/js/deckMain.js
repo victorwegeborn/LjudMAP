@@ -377,7 +377,7 @@ $(document).ready(function() {
         }
     });
 
-    $("#buttonGroup5 button").on("click", () => { retrain(this.value) });
+    $("#buttonGroup5 button").on("click", function() { retrain(this.value) });
     $("#cameraFocus").on("click", () => { focusCamera(-1) })
 
     $("#buttonGroupNav button").on("click", function() {
@@ -526,16 +526,17 @@ $(document).ready(function() {
             $("#loadText").show();
 
             validPoints = [["id", "startTime(ms)", "label"]]
-
-            if (arg === 'labeled') {
+            console.log(arg, arg === 'lab')
+            if (arg === 'lab') {
                 for (let i = 0; i < dataPoints.length; i++) {
-                    if (dataPoints[i].category !== 'black') {
+                    if (dataPoints[i].category != 'black') {
+                        console.log('!= black', dataPoints[i].category)
                         validPoints.push([dataPoints[i].start/stepSize, dataPoints[i].start, dataPoints[i].category])
                     }
                 }
             } else {
                 for (let i = 0; i < dataPoints.length; i++) {
-                    if (dataPoints[i].category === 'black') {
+                    if (dataPoints[i].category == 'black') {
                         validPoints.push([dataPoints[i].start/stepSize, dataPoints[i].start, dataPoints[i].category])
                     }
                 }
@@ -548,6 +549,7 @@ $(document).ready(function() {
                 "segmentSize": segmentSize,
                 "stepSize": stepSize
             }
+
 
             $.ajax({
                 type: "POST",

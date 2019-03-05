@@ -21,9 +21,9 @@ def get_cluster_data(data, n_components=3):
     print("PCA done")
 
     # Run data through SOM
-    som = True
+    som = False
     if som:
-        som = MiniSom(25, 25, len(data[0]), sigma=0.1, learning_rate=0.6)
+        som = MiniSom(25, 25, len(data[0]), sigma=0.001, learning_rate=0.6)
         som.train_random(data, 100)
         Y3 = convert_range(np.array([np.array(som.winner(i)) for i in range(len(data))]))
         print("SOM done")

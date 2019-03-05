@@ -20,6 +20,37 @@ app = Flask(__name__)
 app.secret_key = 'hejhej00'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def parse_request_form(form):
+    features = {}
+    segmentation = {}
+
+    # here we will deal with layers in the feature
+    segmentation['size'] = float(form['radio1'])
+    segmentation['step'] = float(form['radio2'])
+
+    if 'MFCC' in form:
+        print('using mfccs')
+        features['MFCC'] = {}
+        features['MFCC']['coefficients'] = form['mfcc_coefficients']
+        features['MFCC']['delta'] = True if 'mfcc_delta' in form else False
+        features['MFCC']['deltadelta'] = True if 'mfcc_deltadelta' in form else False
+
+    if 'SPECTRAL' in form:
+        print('using spectral')
+        features['SPECTRAL'] = {}
+        features['SPECTRAL']['flux'] = True if 'flux' in form else False
+        features['SPECTRAL']['fluxCentroid'] = True if 'fluxCentroid' in form else False
+        features['SPECTRAL']['centroid'] = True if 'centroid' in form else False
+        features['SPECTRAL']['harmonicity'] = True if 'harmonicity' in form else False
+        features['SPECTRAL']['flatness'] = True if 'flatness' in form else False
+        features['SPECTRAL']['rolloff'] = True if 'rolloff' in form else False
+    print(segmentation)
+    print(features)
+    return segmentation, features
+
+
+
+
 # Checks so file is allowed
 def allowed_file(filename):
     return '.' in filename and \
@@ -36,6 +67,7 @@ def upload_file():
 @app.route('/process_audio', methods=['GET', 'POST'])
 def process_audio() -> str:
     # Check so audio file is included and valid
+    print(json.dumps(request.form, indent=2))
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -56,11 +88,12 @@ def process_audio() -> str:
                 print("File extension not allowed")
                 return "<h3>File extension not allowed. Please use WAV or MP3.</h3>"
 
-    segment_size = float(request.form['radio1'])
-    step_size = float(request.form['radio2'])
-    config_file = request.form['radio3']
+    segmentation, features = parse_request_form(request.form)
+    if not features:
+        flash('No features selected')
+        return "<h3>You did not select any features. Try again.</h3>"
 
-    audio_processing.main(session_key, config_file, segment_size, step_size)
+    audio_processing.main(session_key, segmentation, features)
 
     return redirect("/"+session_key)
 
@@ -72,16 +105,18 @@ def retrain() -> str:
         valid_points = json.loads(request.form['validPoints'])
         old_session_key = request.form['sessionKey']
         filename = request.form['audioPath'].split("/")[-1]
-        segment_size = float(request.form['segmentSize'])
-        step_size = float(request.form['stepSize'])
 
+        # adapt for layers
+        segmentation = {}
+        segmentation['size'] = float(request.form['segmentSize'])
+        segmentation['step'] = float(request.form['stepSize'])
 
         new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
 
         subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
         subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
 
-        audio_processing.retrain(valid_points, new_session_key, old_session_key, segment_size, step_size)
+        audio_processing.retrain(valid_points, new_session_key, old_session_key, segmentation)
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
 
