@@ -4,3 +4,4 @@ venv
 python/__pycache__
 web/static/uploads
 opensmile-2.3.0
+python/configuration/testing

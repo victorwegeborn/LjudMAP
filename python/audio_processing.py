@@ -14,7 +14,7 @@ from pydub import AudioSegment
 import pandas
 import json
 import cluster
-
+from sklearn.preprocessing import minmax_scale
 
 smilextract = '../opensmile-2.3.0/SMILExtract'
 MASTER_CONF = 'ANALYSIS.conf'
@@ -23,8 +23,7 @@ MASTER_CONF = 'ANALYSIS.conf'
 
 def csv_to_data(filename):
     csv_file = pandas.read_csv(filename, sep=';', header=1, float_precision='round_trip')
-    print(csv_file.values)
-    return csv_file.values
+    return minmax_scale(csv_file.values, axis=0)
 
 def main(session_key, segmentation, features):
 

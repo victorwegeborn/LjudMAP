@@ -1,254 +1,213 @@
+import subprocess
+import pandas
+import numpy as np
+import sys
+from sklearn.preprocessing import minmax_scale
+import os
+script_dir = os.path.dirname(__file__)
+
+np.set_printoptions(threshold=np.nan)
 
 
-_FRAMESIZE = 1
-_FRAMESTEP = 2
+def _header(target_path, segmentation):
+    file_path = os.path.join(script_dir, 'configuration/header.conf')
+    config = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            config.append(line)
 
-_COEFFICIENTS = 9
+    with open(target_path, 'w') as f:
+        for line in config:
+            if line.startswith('FRAMESIZE'):
+                line = 'frameSize=' + str(segmentation['size']/1000) + '\n'
+            if line.startswith('FRAMESTEP'):
+                line = 'frameStep=' + str(segmentation['step']/1000) + '\n'
+            f.write(line)
+        f.write('\n')
 
-_FLUX = 3
-_FLUXCENTROID = 4
-_CENTROID = 5
-_HARMONICITY = 6
-_FLATNESS = 7
-_ROLLOFF = 8
+def _footer(target_path, output_string):
+    file_path = os.path.join(script_dir, 'configuration/footer.conf')
+    config = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            config.append(line)
 
-_OUTPUT = 10
+    with open(target_path, 'a') as f:
+        for line in config:
+            if line.startswith('OUTPUT'):
+                line = output_string + '\n'
+            f.write(line)
+        f.write('\n')
 
-BASE = ['[componentInstances:cComponentManager]',
-        'instance[dataMemory].type=cDataMemory',
-        '',
-        'instance[waveIn].type=cWaveSource',
-        '',
-        '[waveIn:cWaveSource]',
-        'writer.dmLevel=wave',
-        'buffersize_sec = 5.0',
-        'filename=\\cm[inputfile(I){test.wav}:name of input file]',
-        'start=\\cm[start{0}:audio start position in seconds]',
-        'end=\\cm[end{-1}:audio end position in seconds, -1 for end of file]',
-        'monoMixdown=1',
-        'outFieldName = pcm',
-        '',
-        '[componentInstances:cComponentManager]',
-        'instance[frame].type=cFramer',
-        'instance[win].type=cWindower',
-        'instance[fft].type=cTransformFFT',
-        'instance[fftmag].type=cFFTmagphase',
-        'instance[melspec].type=cMelspec',
-        '',
-        'nThreads=1',
-        'printLevelStats=0',
-        '',
-        '[frame:cFramer]',
-        'reader.dmLevel=wave',
-        'writer.dmLevel=frames',
-        'noPostEOIprocessing = 1',
-        'copyInputName = 1',
-        _FRAMESIZE,
-        _FRAMESTEP,
-        'frameMode = fixed',
-        'frameCenterSpecial = left',
-        '',
-        '[win:cWindower]',
-        'reader.dmLevel=frames',
-        'writer.dmLevel=winframes',
-        'copyInputName = 1',
-        'processArrayFields = 1',
-        'winFunc = ham',
-        'gain = 1.0',
-        'offset = 0',
-        '',
-        '[fft:cTransformFFT]',
-        'reader.dmLevel=winframes',
-        'writer.dmLevel=fft',
-        'copyInputName = 1',
-        'processArrayFields = 1',
-        'inverse = 0',
-        'zeroPadSymmetric = 0',
-        '',
-        '[fftmag:cFFTmagphase]',
-        'reader.dmLevel=fft',
-        'writer.dmLevel=fftmag',
-        'copyInputName = 1',
-        'processArrayFields = 1',
-        'inverse = 0',
-        'magnitude = 1',
-        'phase = 0',
-        '',
-        '[melspec:cMelspec]',
-        'reader.dmLevel=fftmag',
-        'writer.dmLevel=melspec',
-        'copyInputName = 1',
-        'processArrayFields = 1',
-        'nBands = 26',
-        'usePower = 1',
-        'lofreq = 0',
-        'hifreq = 16000',
-        'specScale = mel',
-        'inverse = 0',
-        '']
+def _mfcc(target_path, mfcc):
+    file_path = os.path.join(script_dir, 'configuration/mfcc.conf')
+    config = []
+    local_output = 'mfcc;'
+    with open(file_path, 'r') as f:
+        for line in f:
+            config.append(line)
 
-MFCC = ['[componentInstances:cComponentManager]',
-        'instance[mfcc].type=cMfcc',
-        '',
-        '[mfcc:cMfcc]',
-        'reader.dmLevel=melspec',
-        'writer.dmLevel=mfcc',
-        'copyInputName = 1',
-        'processArrayFields = 1',
-        'firstMfcc = 1',
-        _COEFFICIENTS,
-        'cepLifter = 22.0',
-        'htkcompatible = 1',
-        '',]
+    with open(target_path, 'a') as f:
+        for line in config:
+            if line.startswith('COEFFICIENT'):
+                line = 'nMfcc=' + str(mfcc['coefficients']) + '\n'
+            f.write(line)
+        f.write('\n')
 
-DELTA =['[componentInstances:cComponentManager]',
-        'instance[energy].type=cEnergy',
-        'instance[cat].type=cVectorConcat',
-        'instance[delta].type=cDeltaRegression',
-        '',
-        '[energy:cEnergy]',
-        'reader.dmLevel=frames',
-        'writer.dmLevel=energy',
-        'nameAppend = energy',
-        'copyInputName = 1',
-        'processArrayFields = 0',
-        'htkcompatible=1',
-        'rms = 0',
-        'log = 1',
-        '',
-        '[cat:cVectorConcat]',
-        'reader.dmLevel=mfcc;energy',
-        'writer.dmLevel=ft0',
-        'copyInputName = 1',
-        'processArrayFields = 0',
-        '',
-        '[delta:cDeltaRegression]',
-        'reader.dmLevel=ft0',
-        'writer.dmLevel=ft0de',
-        'nameAppend = de',
-        'copyInputName = 1',
-        'noPostEOIprocessing = 0',
-        'deltawin=2',
-        'blocksize=1',
-        '']
+    # handle mfcc delta
+    if mfcc['delta'] or mfcc['deltadelta']:
+        delta_path = os.path.join(script_dir, 'configuration/delta.conf')
+        deltadelta_path = os.path.join(script_dir, 'configuration/deltadelta.conf')
+        delta = []
+        deltadelta = []
+        with open(delta_path, 'r') as f:
+            for line in f:
+                delta.append(line)
 
-ACCEL =['[componentInstances:cComponentManager]',
-        'instance[accel].type=cDeltaRegression',
-        '',
-        '[accel:cDeltaRegression]',
-        'reader.dmLevel=ft0de',
-        'writer.dmLevel=ft0dede',
-        'nameAppend = de',
-        'copyInputName = 1',
-        'noPostEOIprocessing = 0',
-        'deltawin=2',
-        'blocksize=1',
-        '']
+        if mfcc['delta']:
+            with open(target_path, 'a') as f:
+                for line in delta:
+                    f.write(line)
+                f.write(line)
+            local_output += 'mfccD;'
 
-SPEC = ['[componentInstances:cComponentManager]',
-        'instance[spectral].type=cSpectral',
-        '',
-        '[spectral:cSpectral]',
-        'reader.dmLevel=melspec',
-        'writer.dmLevel=spec',
-        'processArrayFields=1',
-        _FLUX, # flux=0
-        _FLUXCENTROID, # fluxCentroid=0,
-        _CENTROID, # centroid=0
-        _HARMONICITY, # harmonicity=0
-        _FLATNESS, # flatness=0
-        _ROLLOFF, # rollOff=0.8 domain [0,1]
-        ';bands=0-250;250-4000;4000-16000',
-        'normBandEnergies=1',
-        '']
+        if mfcc['deltadelta']:
+            with open(deltadelta_path, 'r') as f:
+                for line in f:
+                    deltadelta.append(line)
 
-OUT  = ['[componentInstances:cComponentManager]',
-        'instance[audspec_lldconcat].type=cVectorConcat',
-        'instance[lldcsvsink].type=cCsvSink',
-        '',
-        '[audspec_lldconcat:cVectorConcat]',
-        _OUTPUT,
-        'writer.dmLevel = lld',
-        'includeSingleElementFields = 1',
-        '',
-        '[lldcsvsink:cCsvSink]',
-        'reader.dmLevel = lld',
-        'filename=\\cm[csvoutput{?}:output csv file for LLD, disabled by default ?, only written if filename given]',
-        'append = 0',
-        'timestamp = 0',
-        'number = 0',
-        'printHeader = 1',
-        'errorOnNoOutput = 1',
-        '']
+            if not mfcc['delta']:
+                with open(target_path, 'a') as f:
+                    for line in delta:
+                        f.write(line)
+                    f.write(line)
+
+            with open(target_path, 'a') as f:
+                for line in deltadelta:
+                    f.write(line)
+                f.write(line)
+                local_output += 'mfccDD;'
+
+    return local_output
 
 
+def _spectral(target_path, spectral):
+    file_path = os.path.join(script_dir, 'configuration/spectral.conf')
+    config = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            config.append(line)
+
+    with open(target_path, 'a') as f:
+        for line in config:
+            if line == 'FLUX\n':
+                line = 'flux='
+                line += '1\n' if spectral['flux'] else '0\n'
+            if line == 'FLUXCENTROID\n':
+                line = 'fluxCentroid='
+                line += '1\n' if spectral['fluxCentroid'] else '0\n'
+            if line == 'CENTROID\n':
+                line = 'centroid='
+                line += '1\n' if spectral['centroid'] else '0\n'
+            if line == 'HARMONICITY\n':
+                line = 'harmonicity='
+                line += '1\n' if spectral['harmonicity'] else '0\n'
+            if line == 'FLATNESS\n':
+                line = 'flatness='
+                line += '1\n' if spectral['flatness'] else '0\n'
+            if line == 'ROLLOFF\n':
+                line = 'rolloff[0]=0.8\n' if spectral['rolloff'] else ''
+            f.write(line)
+        f.write('\n')
+    return 'spec;'
 
 
+def write_config(target_path, segmentation, features):
+    output = 'reader.dmLevel='
 
-def write_config(filepath, segmentation, features):
-    READER_STRING = 'reader.dmLevel = '
-    with open(filepath, 'w') as f:
-        for row in BASE:
-            if isinstance(row, int):
-                if row == _FRAMESIZE: row = 'frameSize = ' + str(segmentation['size']/1000)
-                if row == _FRAMESTEP: row = 'frameStep = ' + str(segmentation['step']/1000)
-            f.write(row)
-            f.write('\n')
-        if 'MFCC' in features:
-            for row in MFCC:
-                if row == _COEFFICIENTS: row = 'lastMfcc=' + str(features['MFCC']['coefficients'])
-                f.write(row)
-                f.write('\n')
-            if features['MFCC']['delta']:
-                for row in DELTA:
-                    f.write(row)
-                    f.write('\n')
-                READER_STRING += 'ft0;ft0de;'
-            if features['MFCC']['deltadelta']:
-                if not features['MFCC']['delta']:
-                    for row in DELTA:
-                        f.write(row)
-                        f.write('\n')
-                for row in ACCEL:
-                    f.write(row)
-                    f.write('\n')
-                READER_STRING += 'ft0dede;'
-            else:
-                READER_STRING += 'mfcc;'
-        if 'SPECTRAL' in features:
-            for row in SPEC:
-                if isinstance(row, int):
-                    if row == _FLUX: row = 'flux=1' if features['SPECTRAL']['flux'] else 'flux=0'
-                    if row == _FLUXCENTROID: row = 'fluxCentroid=1' if features['SPECTRAL']['fluxCentroid'] else 'fluxCentroid=0'
-                    if row == _CENTROID: row = 'centroid=1' if features['SPECTRAL']['centroid'] else 'centroid=0'
-                    if row == _HARMONICITY: row = 'harmonicity=1' if features['SPECTRAL']['harmonicity'] else 'harmonicity=0'
-                    if row == _FLATNESS: row = 'flatness=1' if features['SPECTRAL']['flatness'] else 'flatness=0'
-                    if row == _ROLLOFF: row = 'rollOff=0.8' if features['SPECTRAL']['rolloff'] else ''
-                f.write(row)
-                f.write('\n')
-            READER_STRING += 'spec;'
-        for row in OUT:
-            if row == _OUTPUT:
-                row = READER_STRING
-            f.write(row)
-            f.write('\n')
+    # Always write header
+    _header(target_path, segmentation)
+
+    # check for mfccs
+    if 'MFCC' in features:
+        output += _mfcc(target_path, features['MFCC'])
+
+    # check for spectrals
+    if 'SPECTRAL' in features:
+        output += _spectral(target_path, features['SPECTRAL'])
+
+    # Always write footer
+    _footer(target_path, output)
+
+
+def _analyze(file):
+    csv_file = pandas.read_csv(file, sep=';', float_precision='round_trip')
+
+    data = csv_file.values
+    #data = minmax_scale(data, axis=0)
+    frames = data.shape[0]
+    features = data.shape[1]
+
+    columns = csv_file.columns
+
+    print('----- ANALYSIS -----')
+    print(f'n frames: {frames}')
+    print(f'n features: {features}')
+    print(columns)
+    print()
+
+
+    mean = np.mean(data, axis=0)
+    var = np.var(data, axis=0)
+
+    mean_max = np.where(mean == np.amax(mean))
+    mean_min = np.where(mean == np.amin(mean))
+
+    var_max = np.where(var == np.amax(var))
+    var_min = np.where(var == np.amin(var))
+
+    print()
+    print('Mean:', mean)
+    print('Mean max:', np.amax(mean), 'feature:', columns[mean_max[0]][0])
+    print('Mean min:', np.amin(mean), 'feature:', columns[mean_min[0]][0])
+    print('Mean (mean):', np.mean(mean))
+    print('Mean (var):', np.var(mean))
+    print()
+    print('Variance:', var)
+    print('Variance max:', np.amax(var), 'feature:', columns[var_max[0]][0])
+    print('Variance min:', np.amin(var), 'feature:', columns[var_min[0]][0])
+    print('Variance (mean):', np.mean(var))
+    print('Variance (var):', np.var(var))
+
 
 
 if __name__ == '__main__':
-    segmentation = {'size': 1.000, 'step': 1.000}
+    segmentation = {
+        'size': 1.000,
+        'step': 1.000
+    }
+
     features = {
         'MFCC': {
             'coefficients': 12,
             'delta': True,
             'deltadelta': False
-            },
+        },
         'SPECTRAL': {
-            'flux': True,
-            'fluxCentroid': True,
+            'flux': False,
+            'fluxCentroid': False,
             'centroid': True,
             'harmonicity': True,
             'flatness': True,
             'rolloff': False}
     }
 
-    write_config('test.conf', segmentation, features)
+    test_path = 'configuration/testing/'
+    test_config = test_path + 'out.conf'
+    test_audio =  test_path + 'test.wav'
+    test_csv = test_path + 'test.csv'
+
+    write_config(test_config, segmentation, features)
+
+    subprocess.call(['../opensmile-2.3.0/SMILExtract', "-C", test_config, "-I", test_audio, "-csvoutput", test_csv])
+    _analyze(test_csv)
