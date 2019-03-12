@@ -215,6 +215,13 @@ audio::-webkit-media-controls-timeline {
     height: 200px; /* Slider handle height */
 }
 
+#tooltip {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    align-content: left;
+}
+
 .unSelectableText {
     cursor: none;
    -moz-user-select: -moz-none;

@@ -117,9 +117,11 @@
 		        </div>
 	            <hr>
 
+				<!--
 				<h6 id="layerText">Layer: 1</h6>
 					<input style="width: 100px;" type="range" step="1" class="form-control-range py-0" id="layerSlider">
 				<hr>
+				-->
 
 	                <h6>Retrain</h6>
 		            <div class="btn-group-vertical btn-block" id="buttonGroup5">
@@ -159,7 +161,7 @@
 			</div>
 
 			<!-- Mid section (3d view etc) -->
-			<div id="wrapper" style="height: 100%;" class="col-sm-10">
+			<div id="wrapper" style="height: 100%;" class="col-sm-10 justify-content-center">
 
 				<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 my-0">
 
@@ -174,7 +176,10 @@
 
 				<div class="row my-0 py-0" style="height: 90%; border-style: solid; border-width: 2px; margin-bottom: 0px;" id="map">
 					<text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text>
+					<div id="tooltip" class="badge badge-dark unSelectableText" ></div>
 				</div>
+
+
 				<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0">
 
 					<button type="button" value="refocus" class="btn btn-dark btn-sm py-0 mb-1" id="cameraFocus">focus camera</button>
@@ -186,10 +191,11 @@
 						<button type="button" value="2" class="btn btn-dark btn-sm py-0">Z</button>
 					</div>
 
-					<!--
-					<span class="badge badge-dark">selection depth:</span>
-	                <input style="width: 100px;" type="range" min="1" max="50" value="1" step="1" class="form-control-range py-0" id="depthSlider">
 
+					<span class="badge badge-dark">Scale:</span>
+	                <input style="width: 100px;" type="range" min="1" max="4" value="1" step="0.01" class="form-control-range py-0" id="scaleSlider">
+
+					<!--
 					<span class="badge badge-dark">cursor radius:</span>
 	                <input style="width: 100px;" type="range" min="1" max="50" value="1" step="1" class="form-control-range py-0" id="radiusSlider">
 
@@ -198,7 +204,6 @@
 	                <input style="width: 100px;" type="range" min="50" max="1000" value="100" step="1" class="form-control-range py-0" id="pointRadiusSlider">
 					-->
 				</nav>
-
 
 				<br>
 				<div class="row" style="height: 55px; border-style: solid; border-width: 2px;" id="sequenceMap">
@@ -258,7 +263,7 @@
 			<svg id="graphMap"></svg>
 		</div>
 	-->
-		<audio id="audioBar"controls controlsList="nodownload" style="display:none">
+		<audio id="audioBar" controls controlsList="nodownload" style="display:none">
 	  		<source src="{{audioPath}}">
 		</audio>
 		<!-- <div class="row top-buffer-sm" id="row3">

@@ -71,7 +71,7 @@ def main(session_key, segmentation, features):
             "umap": _umap.tolist(),
             "start": int(i*segmentation['step']),
             "active": 1,
-            "color": "black"
+            "category": "black"
         })
 
     # Write data to disk in json format
@@ -139,7 +139,7 @@ def retrain(valid_points, session_key, old_session_key, segmentation):
             "umap": _umap.tolist(),
             "start": int(i*segmentation['size']),
             "active": 1,
-            "color": "black"
+            "category": "black"
         })
 
     # Write data to disk in json format
