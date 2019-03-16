@@ -90,112 +90,141 @@
                     <input id="uploadButton" type="file" name="file" onclick="activateProcessButton()">
                 </div>
             <br>
-            <h5>Set parameters</h5>
-            <div id="sizeParameter">
-                <p class="font-weight-bold">Segment size</p>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio1" value="25">
-                    <div class="state">
-                        <label>25ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio1" value="50">
-                    <div class="state">
-                        <label>50ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio1" value="100">
-                    <div class="state">
-                        <label>100ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio1" value="250">
-                    <div class="state">
-                        <label>250ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio1" value="500">
-                    <div class="state">
-                        <label>500ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio1" value="1000" checked>
-                    <div class="state">
-                        <label>1000ms</label>
-                    </div>
-                </div>
-            </div>
-            <br>
-            <div id="stepParameter">
-                <p class="font-weight-bold">Step size</p>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="10">
-                    <div class="state">
-                        <label>10ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="25">
-                    <div class="state">
-                        <label>25ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="50">
-                    <div class="state">
-                        <label>50ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="100">
-                    <div class="state">
-                        <label>100ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="250">
-                    <div class="state">
-                        <label>250ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="500">
-                    <div class="state">
-                        <label>500ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="1000" checked>
-                    <div class="state">
-                        <label>1000ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="2500">
-                    <div class="state">
-                        <label>2500ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="5000">
-                    <div class="state">
-                        <label>5000ms</label>
-                    </div>
-                </div>
-                <div class="pretty p-default p-round">
-                    <input type="radio" name="radio2" value="10000">
-                    <div class="state">
-                        <label>10000ms</label>
-                    </div>
-                </div>
-            </div>
-            <br>
 
+            <!-- Segmentation card -->
+            <div class="card border-dark mb-3" id="settings_card">
+                <h5 class="card-header">
+                    Segmentation and Visualization
+                </h5>
+                <div class="card-body">
+
+                    <div id="sizeParameter">
+                        <p class="font-weight-bold">Segment size</p>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio1" value="25">
+                            <div class="state">
+                                <label>25ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio1" value="50">
+                            <div class="state">
+                                <label>50ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio1" value="100">
+                            <div class="state">
+                                <label>100ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio1" value="250">
+                            <div class="state">
+                                <label>250ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio1" value="500">
+                            <div class="state">
+                                <label>500ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio1" value="1000" checked>
+                            <div class="state">
+                                <label>1000ms</label>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div id="stepParameter">
+                        <p class="font-weight-bold">Step size</p>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="10">
+                            <div class="state">
+                                <label>10ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="25">
+                            <div class="state">
+                                <label>25ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="50">
+                            <div class="state">
+                                <label>50ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="100">
+                            <div class="state">
+                                <label>100ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="250">
+                            <div class="state">
+                                <label>250ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="500">
+                            <div class="state">
+                                <label>500ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="1000" checked>
+                            <div class="state">
+                                <label>1000ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="2500">
+                            <div class="state">
+                                <label>2500ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="5000">
+                            <div class="state">
+                                <label>5000ms</label>
+                            </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                            <input type="radio" name="radio2" value="10000">
+                            <div class="state">
+                                <label>10000ms</label>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <p class="font-weight-bold">Cluster settings</p>
+                    <div class="pretty p-default p-round">
+                        <input class="form-check-input" type="checkbox" value="" name="sub" id="sub">
+                        <div class="state">
+                            <label>Subdivide segmentation</label>
+                        </div>
+                    </div>
+
+                    <div class="pretty p-default p-round">
+                        <input class="form-check-input" type="checkbox" value="" name="2D" id="sub">
+                        <div class="state">
+                            <label>2D cluster component</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="d-flex justify-content-center">
+            <p class="card-text "><small class="text-muted">Smaller resolutions takes longer to process. Adding a subdivision and 2D components also increases processing time.</small></p>
+            </div>
+            <hr>
 
             <div id="featureParameter">
                 <p class="font-weight-bold">Features</p>
@@ -206,7 +235,7 @@
                         <div class="pretty p-default p-round">
                             <input class="form-check-input" type="checkbox" value="" name="MFCC" id="mfccs" checked>
                             <div class="state">
-                                <label>MFCC</label>
+                                <label>Mfcc</label>
                             </div>
                         </div>
                     </h5>
@@ -325,7 +354,7 @@
                         <div class="pretty p-default p-round">
                             <input class="form-check-input" type="checkbox" value="" name="SPECTRAL" id="spectrals" checked>
                             <div class="state">
-                                <label>SPECTRAL</label>
+                                <label>Spectral</label>
                             </div>
                         </div>
                     </h5>
@@ -419,6 +448,8 @@
             <br>
             <input type="submit" id="submitNewAudio" class="btn btn-info" value="Process audio" onclick="showLoadingGif()">
           </form>
+          <br>
+          <br>
         </div>
         <script>
             // Set defaults

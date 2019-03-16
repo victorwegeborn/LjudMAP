@@ -24,9 +24,21 @@ def parse_request_form(form):
     features = {}
     segmentation = {}
 
-    # here we will deal with layers in the feature
-    segmentation['size'] = float(form['radio1'])
-    segmentation['step'] = float(form['radio2'])
+    # this will always be passed to audio processing
+    segmentation['default'] = {
+        'size': float(form['radio1']),
+        'step': float(form['radio2'])
+    }
+
+    # only pass more segmentation objects if subdivision is checked
+    if 'sub' in form:
+        segmentation['sub'] = {
+            'size': float(form['radio1'])/2,
+            'step': float(form['radio2'])/2
+        }
+
+    # pass on compinent information
+    components = [3] if '2D' not in form else [2,3]
 
     if 'MFCC' in form:
         print('using mfccs')
@@ -46,7 +58,7 @@ def parse_request_form(form):
         features['SPECTRAL']['rolloff'] = True if 'rolloff' in form else False
     print(segmentation)
     print(features)
-    return segmentation, features
+    return segmentation, components, features
 
 
 
@@ -88,12 +100,12 @@ def process_audio() -> str:
                 print("File extension not allowed")
                 return "<h3>File extension not allowed. Please use WAV or MP3.</h3>"
 
-    segmentation, features = parse_request_form(request.form)
+    segmentation, components, features = parse_request_form(request.form)
     if not features:
         flash('No features selected')
         return "<h3>You did not select any features. Try again.</h3>"
 
-    audio_processing.main(session_key, segmentation, features)
+    audio_processing.main(session_key, segmentation, components, features)
 
     return redirect("/"+session_key)
 
@@ -138,17 +150,22 @@ def load_browser(session_key) -> str:
     data_dir = "static/data/" + session_key + "/"
     print(data_dir)
     if os.path.isdir(data_dir):
-        with open(data_dir + "data.json", "r") as f:
-            data = json.load(f)
+        if os.path.isfile(data_dir + "default_data.json"):
+            with open(data_dir + "default_data.json", "r") as f:
+                data = json.load(f)
+
+        if os.path.isfile(data_dir + "sub_data.json"):
+            with open(data_dir + "sub_data.json", "r") as f:
+                sub_data = json.load(f)
+        else:
+            sub_data = False
 
         #return render_template('audioBrowser.html',
         return render_template('deckAudioBrowser.html',
-                                data=data['data'],
+                                data=data,
+                                sub=sub_data,
                                 audioDuration=data['meta']["audio_duration"],
-                                segmentSize=data['meta']["segment_size"],
                                 audioPath="../" + data['meta']["audio_path"],
-                                stepSize=data["meta"]['step_size'],
-                                datapoints=len(data['data']),
                                 session_key=session_key)
 
     else:

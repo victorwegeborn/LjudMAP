@@ -25,7 +25,7 @@ def csv_to_data(filename):
     csv_file = pandas.read_csv(filename, sep=';', header=1, float_precision='round_trip')
     return minmax_scale(csv_file.values, axis=0)
 
-def main(session_key, segmentation, features):
+def main(session_key, segmentation, components, features):
 
     # Get audiofilename
     audio_dir = "static/uploads/" + session_key + "/"
@@ -48,44 +48,67 @@ def main(session_key, segmentation, features):
     # Create dir for ouput and set filenames
     output_dir = "static/data/" + session_key + "/"
     subprocess.call(["mkdir", output_dir])
-    output_path = output_dir + audio_name.split(".")[0] + ".csv"
-    config_path = output_dir + 'config.conf'
 
-    # create config file in session dir
-    configuration.write_config(config_path, segmentation, features)
+    # compute feature vectors for all segmentations
+    for name, settings in segmentation.items():
+        output_path = output_dir + name + '_' + audio_name.split(".")[0] + ".csv"
+        config_path = output_dir + name + '_' + 'config.conf'
 
-    # Run opensmile to output features in output dir
-    subprocess.call([smilextract, "-C", config_path, "-I", audio_path, "-csvoutput", output_path])
+        # create config file in session dir
+        configuration.write_config(config_path, settings, features)
 
-    # Read file, and return formatted data
-    result = csv_to_data(output_path)
+        # Run opensmile to output features in output dir
+        subprocess.call([smilextract, "-C", config_path, "-I", audio_path, "-csvoutput", output_path])
+        segmentation[name]['path'] = output_path
+
+    # compute all clusters given number of components and data
+    for name, seg in segmentation.items():
+        print(seg)
+        # Read file, and return formatted data
+        result = csv_to_data(seg['path'])
+        cluster_data = {}
+        for c in components:
+            cluster_data[f'{c}D'] = cluster.get_cluster_data(result, c)
 
 
-    data = []
-    for i, _tsne, _pca, _som, _umap in cluster.get_cluster_data(result):
-        data.append({
-            "id": i,
-            "tsne": _tsne.tolist(),
-            "pca": _pca.tolist(),
-            "som": _som.tolist(),
-            "umap": _umap.tolist(),
-            "start": int(i*segmentation['step']),
-            "active": 1,
-            "category": "black"
-        })
+        data = []
+        #for i, _tsne, _pca, _som, _umap in cluster_data['3D']:
+        for i, _tsne, _pca, _umap in cluster_data['3D']:
+            data.append({
+                'id': i,
+                '3D': {
+                    "tsne": _tsne.tolist(),
+                    "pca": _pca.tolist(),
+                    #"som": _som.tolist(),
+                    "umap": _umap.tolist(),
+                },
+                'start': int(i*seg['step']),
+                'active': 1,
+                'category': 'black'
+            })
 
-    # Write data to disk in json format
-    with open(output_dir + "data.json", 'w') as output_file:
-        jsonObj = {
-            'meta': {
-                'audio_duration': audio_duration,
-                'audio_path': audio_path,
-                'segment_size': segmentation['size'],
-                'step_size': segmentation['step']
-            },
-            'data': data,
-        }
-        json.dump(jsonObj, output_file, separators=(',', ':'))
+        if '2D' in cluster_data:
+            #for i, _tsne, _pca, _som, _umap in cluster_data['2D']:
+            for i, _tsne, _pca, _umap in cluster_data['2D']:
+                data[i]['2D'] = {
+                    "tsne": _tsne.tolist(),
+                    "pca": _pca.tolist(),
+                    #"som": _som.tolist(),
+                    "umap": _umap.tolist(),
+                }
+
+        # Write data to disk in json format
+        with open(output_dir + f'{name}_' + "data.json", 'w') as output_file:
+            jsonObj = {
+                'meta': {
+                    'audio_duration': audio_duration,
+                    'audio_path': audio_path,
+                    'segment_size': seg['size'],
+                    'step_size': seg['step']
+                },
+                'data': data,
+            }
+            json.dump(jsonObj, output_file, separators=(',', ':'))
 
 
 def retrain(valid_points, session_key, old_session_key, segmentation):

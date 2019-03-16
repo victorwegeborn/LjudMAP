@@ -20,15 +20,17 @@ def get_cluster_data(data, n_components=3):
     Y2 = convert_range(pca.fit_transform(data))
     print("PCA done")
 
+    '''
     # Run data through SOM
     som = False
     if som:
-        som = MiniSom(25, 25, len(data[0]), sigma=0.001, learning_rate=0.6)
+        som = MiniSom(25, 25, len(data[0]), sigma=0.01, learning_rate=0.6)
         som.train_random(data, 100)
         Y3 = convert_range(np.array([np.array(som.winner(i)) for i in range(len(data))]))
         print("SOM done")
     else:
         Y3 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
+    '''
 
     # Run data through UMAP
     run_umap = True
@@ -38,7 +40,7 @@ def get_cluster_data(data, n_components=3):
     else:
         Y4 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
 
-    return zip(count(), Y1, Y2, Y3, Y4)
+    return zip(count(), Y1, Y2, Y4)
 
 def convert_range(Y):
     new_range = (80 - (-80))
