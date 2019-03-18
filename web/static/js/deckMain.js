@@ -2,6 +2,8 @@
 
 $(document).ready(function() {
 
+    // initialize sequence map
+    initSequence()
     deck.log.enable()
     deck.log.priority = 1
 
@@ -114,7 +116,6 @@ $(document).ready(function() {
         onLoad: () => {
             changeAlgorithm('tsne')
             redrawCanvas()
-            initializeSequenceMap()
         }
     })
 
@@ -124,6 +125,7 @@ $(document).ready(function() {
     var subDeckgl;
     function initializeSub() {
         if (!_is_sublayer_initialized) {
+            _is_sublayer_initialized = true;
             subDeckgl = new deck.DeckGL({
                 container: 'subMap',
                 mapbox: false,
@@ -226,7 +228,14 @@ $(document).ready(function() {
                 /* handle flattning of axis */
                 return [_pos[0]*_flatten[0]*_scale, _pos[1]*_flatten[1]*_scale, _pos[2]*_flatten[2]*_scale];
             },
-            getColor: d => getColor(d.category),
+            getColor: d => {
+                if (!_is_sublayer_initialized) {
+                    updateSubSegmentById(d.id*2)
+                    updateSubSegmentById(d.id*2+1)
+                }
+                updateDefaultSegmentById(d.id)
+                return getColor(d.category)
+            },
             getNormal: d => d.normal,
             radiusPixels: _point_radius,
             lightSettings: {},
@@ -261,7 +270,10 @@ $(document).ready(function() {
                 /* handle flattning of axis */
                 return [_pos[0]*_flatten[0]*_sub_scale, _pos[1]*_flatten[1]*_sub_scale, _pos[2]*_flatten[2]*_sub_scale];
             },
-            getColor: d => getColor(d.category),
+            getColor: d => {
+                updateSubSegmentById(d.id)
+                return getColor(d.category);
+            },
             getNormal: d => d.normal,
             radiusPixels: _point_radius,
             lightSettings: {},
@@ -317,14 +329,12 @@ $(document).ready(function() {
             $('#activateSublayer').text('Hide subdivision')
             $(subMap).prop('hidden', false)
             $('#subMapFooter').prop('hidden', false)
-            initializeSub()
-
+            initializeSub();
         } else {
             _is_sublayer_active = false;
             $('#activateSublayer').text('Show subdivision')
             $(subMap).prop('hidden', true)
             $('#subMapFooter').prop('hidden', true)
-            delete subDeckgl;
             redrawCanvas()
         }
     }
@@ -333,7 +343,9 @@ $(document).ready(function() {
         _current_algorithm = algo;
     }
 
+    var colorLock = false;
     function categorize(o) {
+        colorLock = true;
         var isDefault = o.props.layers[0].id === 'default' ? true : false;
 
         // local mouse updated in both sub and default canvas
@@ -341,32 +353,25 @@ $(document).ready(function() {
             x: _local_mouse.x,
             y: _local_mouse.y,
             radius: 20,
-            depth: 200,
+            depth: 40,
         })
 
+        // TODO: optimize this
         if (pickedPoints.length > 1) {
-            ids = [];
-            subIds = [];
-
             for (let i = 0; i < pickedPoints.length; i++) {
+                var previousCategory = pickedPoints[i].object.category;
                 pickedPoints[i].object.category = _current_category;
                 var id = pickedPoints[i].object.id;
-                isDefault ? ids.push(id) : subIds.push(id)
 
-                if (_sub_exists) {
-                    var subs_per_seg = data.meta.segment_size / subData.meta.segment_size;
-                    var _id = isDefault ? subs_per_seg * id : Math.floor(id/subs_per_seg);
-
-                    if (isDefault) {
-                        // Should be fast ~O(1)
-                        for (var j = 0; j < subs_per_seg; j++) {
-                            subData.data[_id + j].category = _current_category;
-                            subIds.push(_id + j)
-                        }
-                    } else {
-                        if (_id < data.data.length) {
-                            data.data[_id].category = _current_category;
-                            ids.push(_id)
+                // sequence updates
+                if (previousCategory !== _current_category) {
+                    if (_sub_exists) {
+                        var subPerDefault = data.meta.segment_size / subData.meta.segment_size;
+                        if (isDefault) {
+                            subData.data[id*subPerDefault].category = _current_category
+                            subData.data[id*subPerDefault+1].category = _current_category
+                        } else {
+                            data.data[Math.floor(id / subPerDefault)].category = _current_category
                         }
                     }
                 }
@@ -375,11 +380,8 @@ $(document).ready(function() {
             // update deck.gl's and sequenceMap's
             colorTrigger++;
             redrawCanvas()
-            colorSequenceRect(ids, _current_category, '.rectBar')
-            if (_sub_exists) {
-                colorSequenceRect(subIds, _current_category, '.subRectBar')
-            }
         }
+        colorLock = false;
     }
 
 
@@ -400,130 +402,6 @@ $(document).ready(function() {
         }
     }
 
-
-    //////////////////////////// SEQUENCE MAP ////////////////////////////
-
-    var seqMax = 100;
-
-
-    var seqDims = {
-        width: $('#sequenceMap').width(),
-        height: $('#sequenceMap').height(),
-        svg_dx: 100,
-        svg_dy: 100,
-    };
-
-
-    var xScaleSequence = d3.scaleLinear()
-        .domain([0, 100])
-        .range([0, seqDims.width+2])
-
-    var zoom = d3.zoom()
-        .scaleExtent([1.0, 10])
-        .extent([
-            [0],
-            [seqDims.width+2]
-        ])
-        .translateExtent([
-            [0],
-            [seqDims.width+2]
-        ])
-        .on("zoom", zoomed);
-
-
-    var seqContainer = d3.select("#sequenceMap")
-        .append("svg")
-        .attr("width", seqDims.width)
-        .attr("height", seqDims.height)
-        .append("g")
-
-
-    var rects = seqContainer.selectAll("div").data(data.data)
-    var subRects;
-    function initializeSequenceMap () {
-        rects = rects.enter().append("rect")
-            .classed("rectBar", true)
-            .attr("x", d => { return xScaleSequence(d.start/audioDuration*101) })
-            .attr("y", 0)
-            .attr('id', d => { return d.id })
-            .attr("width", (xScaleSequence(data.meta.segment_size/audioDuration)*100) - xScaleSequence(0))
-            .attr("height", () => { return _sub_exists ? '50%' : '100%'; })
-            .attr("fill", d => { return d.category; })
-            .style('fill-opacity', 0.5)
-            .on("mouseenter", function(d){
-                var coords = d3.mouse(this)
-                $("#timeBarDuration").show()
-                $("#timeBarDuration").css({
-                    'position': 'absolute',
-                    'z-index': '1000',
-                    'background-color': "black",
-                    'color': "white",
-                    'pointer-events': 'none',
-                    'left': coords[0]
-                    //'left': d.start / audioDuration * 100 + '%'
-                });
-                $("#timeBarDuration").text(msToTime(d.start));
-            })
-            .on("mouseleave", function(d){
-                $("#timeBarDuration").hide()
-            })
-
-        if (_sub_exists) {
-            subRects = seqContainer.selectAll("div").data(subData.data)
-            subRects = subRects.enter().append("rect")
-                        .classed("subRectBar", true)
-                        .attr("x", d => { return xScaleSequence(d.start/audioDuration*101) })
-                        .attr("y", '50%')
-                        .attr('id', d => { return d.id })
-                        .attr("width", (xScaleSequence(subData.meta.segment_size/audioDuration)*100) - xScaleSequence(0))
-                        .attr("height", '50%')
-                        .attr("fill", d => { return d.category; })
-                        .style('fill-opacity', 0.5)
-                        .on("mouseenter", function(d){
-                            var coords = d3.mouse(this)
-                            $("#timeBarDuration").show()
-                            $("#timeBarDuration").css({
-                                'position': 'absolute',
-                                'z-index': '1000',
-                                'background-color': "black",
-                                'color': "white",
-                                'pointer-events': 'none',
-                                'left': coords[0]
-                                //'left': d.start / audioDuration * 100 + '%'
-                            });
-                            $("#timeBarDuration").text(msToTime(d.start));
-                        })
-                        .on("mouseleave", function(d){
-                            $("#timeBarDuration").hide()
-                        })
-        }
-
-        seqContainer.style("pointer-events", "all")
-        seqContainer.call(zoom)
-        seqContainer.on("dblclick.zoom", null)
-    }
-
-
-    function colorSequenceRect(ids, color, target) {
-        rectsBars = d3.selectAll(target)
-            .filter(d => { return ids.includes(d.id) })
-        rectsBars.style('fill', color)
-    }
-
-    function resetSequenceBar(target) {
-        bars = d3.selectAll(target);
-        bars.style('fill', d => { console.log(d.category); return d.category; })
-    }
-
-    function zoomed() {
-        var xNewScale = d3.event.transform.rescaleX(xScaleSequence)
-        rects.attr('x', d => { return xNewScale(d.start/audioDuration*101) })
-             .attr("width", xNewScale(data.meta.segment_size/audioDuration*100) - xNewScale(0))
-        if (_sub_exists) {
-            subRects.attr('x', d => { return xNewScale(d.start/audioDuration*101) })
-                 .attr("width", xNewScale(subData.meta.segment_size/audioDuration*100) - xNewScale(0))
-        }
-    }
 
 
     //////////////////////////// BUTTON EVENTS ////////////////////////////
@@ -981,87 +859,6 @@ $(document).ready(function() {
 
     setInterval(playSegments, 1000);
     //setInterval(updateTimeBar, 100);
-
-
-
-    //////////////////////////// PIXI RENDERER ////////////////////////////
-    var pixiWidth = $('#pixiSequence').width();
-    var pixiHeight = $('#pixiSequence').height();
-
-    let audioWidth = audioDuration / pixiWidth;
-
-    PIXI.settings.RESOLUTION = window.devicePixelRatio * 10;
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-
-
-    let px = new PIXI.Application({
-        width: pixiWidth,
-        height: 80,
-        view: document.getElementById('pixiSequence'),
-        autoResize: true,
-        transparent: true,
-        antialias: false
-    });
-
-    var sequenceRectangles = [];
-    var sunSequenceRectangles = [];
-
-
-    function initializeSequence() {
-        if (!_sub_exists) {
-
-        } else {
-            for (var i = 0; i < data.data.length; i++) {
-                var p = data.data[i];
-
-                // Create rectangles for each datapoint
-                var rectangle = new PIXI.Graphics(true);
-                //rectangle.lineStyle(2, getSegmentColor('line'), 1);
-                rectangle.beginFill(getSegmentColor(p.category));
-                rectangle.lineAlignment = 0;
-                rectangle.drawRect(
-                    0,
-                    0,
-                    1,
-                    pixiHeight+2);
-                rectangle.endFill();
-                rectangle.alpha = 0.8;
-                rectangle.x = Math.round(i);
-                rectangle.y = 0;
-
-                px.stage.addChild(rectangle);
-            }
-        }
-    }
-
-    initializeSequence()
-
-
-
-    function getSegmentColor(c) {
-        switch (c) {
-            case 'black' : return '0x333a3f'; break;
-            case 'blue'  : return '0x007dff'; break;
-            case 'green' : return '0x00a754'; break;
-            case 'yellow': return '0xffbf42'; break;
-            case 'red'   : return '0xe42f46'; break;
-            case 'purple': return '0x86007b'; break;
-            case 'orange': return '0xffa338'; break;
-            case 'teal'  : return '0x008180'; break;
-            case 'brown' : return '0xab262c'; break;
-                default:
-                    console.log('Point without valid category');
-                    return '0xffffff';
-        }
-    }
-
-    /*
-    .attr("x", d => { return xScaleSequence(d.start/audioDuration*101) })
-    .attr("y", 0)
-    .attr("width", (xScaleSequence(data.meta.segment_size/audioDuration)*100) - xScaleSequence(0))
-    .attr("height", () => { return _sub_exists ? '50%' : '100%'; })
-    */
-
 })
 
 

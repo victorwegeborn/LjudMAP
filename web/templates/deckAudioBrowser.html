@@ -6,15 +6,29 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
     <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/style.css') }}>
 	<script src="//code.jquery.com/jquery.min.js"></script>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.js"></script>
+	<script src="https://d3js.org/d3.v5.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.1/pixi.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 	<script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
+
+	<script type="text/javascript">
+		// Define variables passed from app.py, they are used in js-file
+		var audioDuration = '{{audioDuration}}';
+		var segmentSize = '{{segmentSize}}';
+		var stepSize = '{{stepSize}}';
+		var audioPath = '{{audioPath}}';
+		var sessionKey = '{{session_key}}';
+		var subData = {{sub | tojson}}
+		var data = {{data | tojson}};
+	</script>
+
 	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
     <!-- <script src="{{ url_for('static', filename='js/audio.js') }}"></script> -->
     <script src="{{ url_for('static', filename='js/deckMain.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/WAAClock.js') }}"></script>
+
 
 	<!-- USED FOR DECK.GL -->
 	<script src="https://unpkg.com/deck.gl@^6.4.5/deckgl.min.js"></script>
@@ -182,7 +196,7 @@
 				</div>
 
 
-					<!-- flexbox for multiple views -->
+				<!-- flexbox for multiple views -->
 				<div class="col mx-0 px-0">
 					<div class="d-flex flex-column h-100">
 						<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 my-0 bar flex-shrink-0 flex-grow-0" id="mapHeader">
@@ -272,18 +286,10 @@
 							</nav>
 						</div>
 
-						<div class="w-100" style="height: 80px; border-style: solid; border-width: 1px;" id="sequenceMap">
-							<svg id="sequenceMap" hidden>
-								<rect id="timeBar"></rect>
-								<span id="timeBarDuration" class="unSelectableText"></span>
-							</svg>
-						</div>
 
-						<!-- Pixi canvas texting
 						<canvas class="w-100" style="height: 80px; border-style: solid; border-width: 1px;" id="pixiSequence">
 
 						</canvas>
-						-->
 					</div>
 				</div>
 			</div>
@@ -300,16 +306,7 @@
 			</div>
 		</div> -->
 	</div>
-
+	<script src="{{ url_for('static', filename='js/sequence.js') }}"></script>
     <div id="selectionBox" hidden></div>
-	<script type="text/javascript">
-		// Define variables passed from app.py, they are used in js-file
-		var audioDuration = '{{audioDuration}}';
-		var segmentSize = '{{segmentSize}}';
-		var stepSize = '{{stepSize}}';
-		var audioPath = '{{audioPath}}';
-		var sessionKey = '{{session_key}}';
-		var subData = {{sub | tojson}}
-		var data = {{data | tojson}};
-	</script>
+
 </body>
