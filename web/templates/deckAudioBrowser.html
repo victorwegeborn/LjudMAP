@@ -13,21 +13,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 	<script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
 
-	<script type="text/javascript">
-		// Define variables passed from app.py, they are used in js-file
-		var audioDuration = '{{audioDuration}}';
-		var segmentSize = '{{segmentSize}}';
-		var stepSize = '{{stepSize}}';
-		var audioPath = '{{audioPath}}';
-		var sessionKey = '{{session_key}}';
-		var subData = {{sub | tojson}}
-		var data = {{data | tojson}};
-	</script>
-
-	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
-    <!-- <script src="{{ url_for('static', filename='js/audio.js') }}"></script> -->
-    <script src="{{ url_for('static', filename='js/deckMain.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/WAAClock.js') }}"></script>
 
 
 	<!-- USED FOR DECK.GL -->
@@ -306,7 +291,19 @@
 			</div>
 		</div> -->
 	</div>
+	<script type="text/javascript">
+		// Define variables passed from app.py, they are used in js-file
+		var audioDuration = '{{audioDuration}}';
+		var segmentSize = '{{segmentSize}}';
+		var stepSize = '{{stepSize}}';
+		var audioPath = '{{audioPath}}';
+		var sessionKey = '{{session_key}}';
+		var subData = {{sub | tojson}}
+		var data = {{data | tojson}};
+	</script>
+	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/sequence.js') }}"></script>
-    <div id="selectionBox" hidden></div>
+	<script src="{{ url_for('static', filename='js/deckMain.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/WAAClock.js') }}"></script>
 
 </body>

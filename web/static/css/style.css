@@ -229,6 +229,7 @@ audio::-webkit-media-controls-timeline {
     left: 5px;
     bottom: 5px;
     align-content: left;
+    width: 150px;
 }
 
 .metaInfo {

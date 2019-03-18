@@ -229,7 +229,7 @@ $(document).ready(function() {
                 return [_pos[0]*_flatten[0]*_scale, _pos[1]*_flatten[1]*_scale, _pos[2]*_flatten[2]*_scale];
             },
             getColor: d => {
-                if (!_is_sublayer_initialized) {
+                if (_sub_exists && !_is_sublayer_initialized) {
                     updateSubSegmentById(d.id*2)
                     updateSubSegmentById(d.id*2+1)
                 }
@@ -255,7 +255,7 @@ $(document).ready(function() {
             onHover: info => {
                  _local_mouse.x = info.x,
                  _local_mouse.y = info.y;
-                 showToolTip(info.object, info.index, info.x, info.y, '#tooltip')
+                 showToolTip(info.object, info.index, '#tooltip')
              }
             //onHover: info => hoverInteraction(info)
         });
@@ -293,7 +293,7 @@ $(document).ready(function() {
             onHover: info => {
                      _local_mouse.x = info.x,
                      _local_mouse.y = info.y;
-                     showToolTip(info.object, info.index, info.x, info.y, '#subTooltip')
+                     showToolTip(info.object, info.index, '#subTooltip')
              }
             //onHover: info => hoverInteraction(info)
         });
@@ -311,16 +311,6 @@ $(document).ready(function() {
 
     }
 
-    function showToolTip(object, index, x, y, target) {
-        const el = $(target);
-        if (object) {
-            el.html('index: ' + index + '<br>time: ' + msToTime(object.start));
-            el.css('display', 'block')
-            el.css('height', '30')
-        } else {
-            el.css('display', 'none')
-        }
-    }
 
 
     function toggleSubCanvas() {
@@ -528,10 +518,7 @@ $(document).ready(function() {
         if (audioLoaded) {
             if(this.value=="stop"){
                 stopSequential()
-                resetSequenceBar('.rectBar')
-                if (_sub_exists) {
-                    resetSequenceBar('.subRectBar')
-                }
+                setSequencePlayheadAt(0)
             }
             else if (this.value=="play" && !PLAYING_AUDIO) {
                 playSequential()
@@ -793,19 +780,18 @@ $(document).ready(function() {
 
         highlightPointEvent = clock.callbackAtTime(() => {
             sequentialPlaybackIndex++
-            colorSequenceRect([sequentialPlaybackIndex], '#ff2800', '.rectBar')
+            setSequencePlayheadAt(sequentialPlaybackIndex)
             redrawCanvas()
-        }, data.meta.segment_size/1000)
-        .repeat(data.meta.segment_size/1000)
+        }, data.meta.step_size/1000)
+        .repeat(data.meta.step_size/1000)
         .tolerance({late: 0.1})
 
         if (_sub_exists) {
             subHighlightPointEvent = clock.callbackAtTime(() => {
                 subSequentialPlaybackIndex++
-                colorSequenceRect([subSequentialPlaybackIndex], '#ff2800', '.subRectBar')
                 redrawCanvas()
-            }, subData.meta.segment_size/1000)
-            .repeat(subData.meta.segment_size/1000)
+            }, subData.meta.step_size/1000)
+            .repeat(subData.meta.step_size/1000)
             .tolerance({late: 0.1})
         }
     }
@@ -861,7 +847,16 @@ $(document).ready(function() {
     //setInterval(updateTimeBar, 100);
 })
 
-
+function showToolTip(object, index, target) {
+    const el = $(target);
+    if (object) {
+        el.html('index: ' + index + '<br>time: ' + msToTime(object.start));
+        el.css('display', 'block')
+        el.css('height', '30')
+    } else {
+        el.css('display', 'none')
+    }
+}
 
 // Outside document.ready as it is used in html code
 function msToTime(ms) {
