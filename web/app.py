@@ -114,21 +114,38 @@ def process_audio() -> str:
 def retrain() -> str:
     print("INSIDE RETRAIN")
     if request.method == 'POST':
-        valid_points = json.loads(request.form['validPoints'])
+
+        # parse points
+        points = {}
+        points['default'] = json.loads(request.form['defaultPoints'])
+        if 'subPoints' in request.form:
+            points['sub'] = json.loads(request.form['subPoints'])
+
+        # parse segmentation
+        segmentation = {}
+        segmentation['default'] = {
+            'size': float(request.form['defaultSize']),
+            'step': float(request.form['defaultStep'])
+        }
+        if 'subSize' in request.form:
+            segmentation['sub'] = {
+                'size': float(request.form['subSize']),
+                'step': float(request.form['subStep'])
+            }
+
+        # pass on component information
+        components = [2, 3] if '2D' in request.form else [3]
+
+
         old_session_key = request.form['sessionKey']
         filename = request.form['audioPath'].split("/")[-1]
-
-        # adapt for layers
-        segmentation = {}
-        segmentation['size'] = float(request.form['segmentSize'])
-        segmentation['step'] = float(request.form['stepSize'])
 
         new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
 
         subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
         subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
 
-        audio_processing.retrain(valid_points, new_session_key, old_session_key, segmentation)
+        audio_processing.retrain(points, new_session_key, old_session_key, segmentation, components)
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
 

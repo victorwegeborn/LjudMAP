@@ -58,6 +58,8 @@ $(document).ready(function() {
     const _max_scale = 6;
     const _scale_step = 0.01;
 
+    var _subs_per_default;
+
 
     function getColor(c) {
         var alpha = PLAYING_AUDIO ? 50 : 240;
@@ -333,9 +335,7 @@ $(document).ready(function() {
         _current_algorithm = algo;
     }
 
-    var colorLock = false;
     function categorize(o) {
-        colorLock = true;
         var isDefault = o.props.layers[0].id === 'default' ? true : false;
 
         // local mouse updated in both sub and default canvas
@@ -370,8 +370,8 @@ $(document).ready(function() {
             // update deck.gl's and sequenceMap's
             colorTrigger++;
             redrawCanvas()
+            _labeled = true;
         }
-        colorLock = false;
     }
 
 
@@ -409,6 +409,8 @@ $(document).ready(function() {
     } else {
         // set up event
         _sub_exists = true;
+        _subs_per_default = data.meta.segment_size / subData.meta.segment_size  ;
+        console.log('segments -> sub/default:', _subs_per_default)
         $('#activateSublayer').on('click', toggleSubCanvas)
     }
 
@@ -657,36 +659,52 @@ $(document).ready(function() {
         else {
             $("#loadText").show();
 
-            validPoints = [["id", "startTime(ms)", "label"]]
-            console.log(arg, arg === 'lab')
-            if (arg === 'lab') {
-                for (let i = 0; i < dataPoints.length; i++) {
-                    if (dataPoints[i].category != 'black') {
-                        console.log('!= black', dataPoints[i].category)
-                        validPoints.push([dataPoints[i].start/stepSize, dataPoints[i].start, dataPoints[i].category])
-                    }
+
+            defaultValidPoints = [["id", "startTime(ms)", "label"]]
+            subValidPoints = _sub_exists ? [["id", "startTime(ms)", "label"]] : null;
+            for (let i = 0; i < data.data.length; i++) {
+                if (data.data[i].category != 'black') {
+                    defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
                 }
-            } else {
-                for (let i = 0; i < dataPoints.length; i++) {
-                    if (dataPoints[i].category == 'black') {
-                        validPoints.push([dataPoints[i].start/stepSize, dataPoints[i].start, dataPoints[i].category])
+
+                if (subValidPoints) {
+                    for (var j = i; j < i + _subs_per_default; j++) {
+                        subValidPoints.push([subData.data[j].start/subData.meta.step_size, subData.data[j].start, subData.data[j].category])
                     }
                 }
             }
 
-            myData = {
-                "validPoints": JSON.stringify(validPoints),
-                "sessionKey":sessionKey,
-                "audioPath":audioPath,
-                "segmentSize": segmentSize,
-                "stepSize": stepSize
+
+
+
+            __data = {
+                "defaultPoints": JSON.stringify(defaultValidPoints),
+                "sessionKey": sessionKey,
+                "audioPath": audioPath,
+                "defaultSize": data.meta.segment_size,
+                "defaultStep": data.meta.step_size,
+            }
+
+            if (_sub_exists) {
+                $.extend(__data, {
+                    'subPoints': JSON.stringify(subValidPoints),
+                    'subSize': subData.meta.segment_size,
+                    'subStep': subData.meta.step_size
+                });
+            }
+
+            // ensure we compute 2D versions if we have them
+            if('2D' in data.data[0]) {
+                $.extend(__data, {
+                    "2D": ""
+                });
             }
 
 
             $.ajax({
                 type: "POST",
                 url: "/retrain",
-                data: myData,
+                data: __data,
                 dataType: "json",
                 success: function(data, textStatus) {
                     if (data.redirect) {

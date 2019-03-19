@@ -111,7 +111,7 @@ def main(session_key, segmentation, components, features):
             json.dump(jsonObj, output_file, separators=(',', ':'))
 
 
-def retrain(valid_points, session_key, old_session_key, segmentation):
+def retrain(valid_points, session_key, old_session_key, segmentation, components):
     # Get audiofilename
     audio_dir = "static/uploads/" + session_key + "/"
     for file_name in os.listdir(audio_dir):
@@ -130,15 +130,83 @@ def retrain(valid_points, session_key, old_session_key, segmentation):
     # Get metadata
     audio_duration = len(AudioSegment.from_wav(audio_path))
 
+
     # Create dir for ouput and set filenames
     output_dir = "static/data/" + session_key + "/"
     subprocess.call(["mkdir", output_dir])
 
-    # Copy audio
-    path_to_old_htk = "static/data/" + old_session_key + "/" + audio_name.split(".")[0] + ".csv"
-    path_to_new_htk = "static/data/" + session_key + "/" + audio_name.split(".")[0] + ".csv"
-    subprocess.call(["cp", path_to_old_htk, path_to_new_htk])
 
+    # compute all clusters given number of components and data
+    for name, seg in segmentation.items():
+
+        # Copy csv files
+        path_to_old_csv = "static/data/" + old_session_key + "/" + name + '_' + audio_name.split(".")[0] + ".csv"
+        path_to_new_csv = "static/data/" + session_key + "/" + name + '_' + audio_name.split(".")[0] + ".csv"
+        subprocess.call(["cp", path_to_old_csv, path_to_new_csv])
+
+        # read in old csv file
+        result = csv_to_data(path_to_old_csv)
+        # parse data from labeled points
+        idxs =   [i[0] for i in valid_points[name][1:]]
+        starts = [i[1] for i in valid_points[name][1:]]
+        colors = [i[2] for i in valid_points[name][1:]]
+
+        new_result = []
+
+        for i in range(result.shape[0]):
+            if i in idxs:
+                print(i)
+                new_result.append(result[i,:])
+        new_result = np.array(new_result)
+
+        print(result.shape, new_result, len(idxs))
+
+        cluster_data = {}
+        for c in components:
+            cluster_data[f'{c}D'] = cluster.get_cluster_data(new_result, c)
+
+
+        data = []
+        #for i, _tsne, _pca, _som, _umap in cluster_data['3D']:
+        for i, _tsne, _pca, _umap in cluster_data['3D']:
+            data.append({
+                'id': i,
+                '3D': {
+                    "tsne": _tsne.tolist(),
+                    "pca": _pca.tolist(),
+                    #"som": _som.tolist(),
+                    "umap": _umap.tolist(),
+                },
+                'start': starts[i],
+                'active': 1,
+                'category': colors[i]
+            })
+
+        if '2D' in cluster_data:
+            #for i, _tsne, _pca, _som, _umap in cluster_data['2D']:
+            for i, _tsne, _pca, _umap in cluster_data['2D']:
+                data[i]['2D'] = {
+                    "tsne": _tsne.tolist(),
+                    "pca": _pca.tolist(),
+                    #"som": _som.tolist(),
+                    "umap": _umap.tolist(),
+                }
+
+        # Write data to disk in json format
+        with open(output_dir + f'{name}_' + "data.json", 'w') as output_file:
+            jsonObj = {
+                'meta': {
+                    'audio_duration': audio_duration,
+                    'audio_path': audio_path,
+                    'segment_size': seg['size'],
+                    'step_size': seg['step']
+                },
+                'data': data,
+            }
+            json.dump(jsonObj, output_file, separators=(',', ':'))
+
+
+    '''
     # Read file, and return formatted data
     result = csv_to_data(path_to_old_htk)
     new_result = []
@@ -177,3 +245,4 @@ def retrain(valid_points, session_key, old_session_key, segmentation):
             'data': data,
         }
         json.dump(jsonObj, output_file, separators=(',', ':'))
+        '''

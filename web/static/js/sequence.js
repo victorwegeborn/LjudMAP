@@ -20,10 +20,10 @@ var seq_defaultOnly = true;
 
 // segment drawing globals
 var SEGMENT_SIZE = data.meta.segment_size;
-var LINE_SEGMENT = Math.floor(SEGMENT_SIZE * 0.1 * 2)
-var SEGMENT_ALPHA = 0.5;
+var LINE_SEGMENT = Math.floor(data.meta.step_size * 0.1)
+var SEGMENT_ALPHA = 0.6;
 var SUB_PER_DEFAULT_SEGMENT;
-var LINE_ALPHA = 0.3;
+var LINE_ALPHA = 0.8;
 var SUB_PER_SEG;
 
 // initialize sequence map when doc is ready
@@ -38,7 +38,7 @@ var seq_container = new PIXI.Container(); // master container
 var seq_highlight = new PIXI.Container();
 var seq_playhead = new PIXI.Container();
 
-const MIN_xSCALE = seq_width/(data.data.length*data.meta.step_size+data.meta.segment_size);
+const MIN_xSCALE = seq_width/(data.data.length*data.meta.step_size);
 const MAX_xSCALE = seq_width/(70*data.meta.step_size);
 const SEQ_HIGHLIGHT_COLOR = '0xffffff';
 const SEQ_PLAYHEAD_COLOR = '0xff2800';
@@ -52,12 +52,11 @@ var seq_app = new PIXI.Application({
     height: seq_height,
     view: document.getElementById('pixiSequence'),
     autoResize: true,
-    backgroundColor: '0x606060',
-    antialias: false
+    backgroundColor: '0xf8f9fa',
+    antialias: true
 });
 
 // hookup pixi containers
-seq_container.addChild(seq_highlight);
 seq_container.addChild(seq_defaultRects);
 if (subData !== false) {
     seq_defaultOnly = false;
@@ -65,6 +64,7 @@ if (subData !== false) {
     SUB_PER_DEFAULT_SEGMENT = data.meta.segment_size / subData.meta.segment_size;
 }
 seq_container.addChild(seq_lines);
+seq_container.addChild(seq_highlight);
 seq_container.addChild(seq_playhead);
 seq_app.stage.addChild(seq_container);
 
@@ -190,6 +190,7 @@ function initSequence() {
                 height: 0.5 * seq_height + 2,
             });
 
+
             // second sub-segment
             _constructSegment(seq_subRects, {
                 size: subData.meta.segment_size,
@@ -248,7 +249,7 @@ function _interactivePlayheadSegment(i, start) {
     seg.mouseover = function(e) {
         // add canvas highlighting here
         showToolTip({start: start}, i, '#tooltip')
-        this.alpha = 1;
+        this.alpha = 0.3;
     }
     seg.mouseout = function(e) {
         this.alpha = 0;
@@ -258,17 +259,6 @@ function _interactivePlayheadSegment(i, start) {
 }
 
 
-/*
-function _constructSegment(idx, segmentSize, yOffset, width, height, color, alpha, container) {
-    var seg = new PIXI.Graphics(true);
-    seg.beginFill(color);
-    seg.lineAlignment = 0;
-    seg.drawRect(0, yOffset, width, height)
-    seg.endFill();
-    seg.alpha = alpha;
-    seg.x = idx*segmentSize;
-    container.addChild(seg);
-}*/
 
 function _constructSegment(container, style) {
     var seg = new PIXI.Graphics(true);
