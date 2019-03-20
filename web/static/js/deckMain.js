@@ -231,11 +231,7 @@ $(document).ready(function() {
                 return [_pos[0]*_flatten[0]*_scale, _pos[1]*_flatten[1]*_scale, _pos[2]*_flatten[2]*_scale];
             },
             getColor: d => {
-                if (_sub_exists && !_is_sublayer_initialized) {
-                    updateSubSegmentById(d.id*2)
-                    updateSubSegmentById(d.id*2+1)
-                }
-                updateDefaultSegmentById(d.id)
+                colorSegmentByIndex(d.id, true)
                 return getColor(d.category)
             },
             getNormal: d => d.normal,
@@ -273,7 +269,7 @@ $(document).ready(function() {
                 return [_pos[0]*_flatten[0]*_sub_scale, _pos[1]*_flatten[1]*_sub_scale, _pos[2]*_flatten[2]*_sub_scale];
             },
             getColor: d => {
-                updateSubSegmentById(d.id)
+                colorSegmentByIndex(d.id, false)
                 return getColor(d.category);
             },
             getNormal: d => d.normal,
@@ -665,16 +661,16 @@ $(document).ready(function() {
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].category != 'black') {
                     defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
-                }
 
-                if (subValidPoints) {
-                    for (var j = i; j < i + _subs_per_default; j++) {
-                        subValidPoints.push([subData.data[j].start/subData.meta.step_size, subData.data[j].start, subData.data[j].category])
+                    // store subdata relative to default
+                    if (subValidPoints) {
+                        var idx = data.data[i].start / subData.meta.step_size;
+                        for (var j = idx; j < idx + _subs_per_default; j++) {
+                            subValidPoints.push([subData.data[j].start/subData.meta.step_size, subData.data[j].start, subData.data[j].category])
+                        }
                     }
                 }
             }
-
-
 
 
             __data = {

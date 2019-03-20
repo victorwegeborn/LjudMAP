@@ -38,7 +38,7 @@ var seq_container = new PIXI.Container(); // master container
 var seq_highlight = new PIXI.Container();
 var seq_playhead = new PIXI.Container();
 
-const MIN_xSCALE = seq_width/(data.data.length*data.meta.step_size);
+const MIN_xSCALE = seq_width/(data.data[data.data.length-1].start/data.meta.step_size*data.meta.step_size + data.meta.segment_size);
 const MAX_xSCALE = seq_width/(70*data.meta.step_size);
 const SEQ_HIGHLIGHT_COLOR = '0xffffff';
 const SEQ_PLAYHEAD_COLOR = '0xff2800';
@@ -67,7 +67,6 @@ seq_container.addChild(seq_lines);
 seq_container.addChild(seq_highlight);
 seq_container.addChild(seq_playhead);
 seq_app.stage.addChild(seq_container);
-
 // setup interaction
 var _mousePos = null;
 
@@ -107,6 +106,7 @@ function _translate(dx) {
         if (seq_container.x > 0) seq_container.x = 0;
         if (seq_container.x < max_x) seq_container.x = max_x;
 
+
         // render transform
         seq_container.updateTransform();
     }
@@ -115,7 +115,6 @@ function _translate(dx) {
 
 function _zoom(dy, x){
     // get the boundary for the sequence container at last pixel of last segment
-    var limit_x = -Math.floor(seq_container.width - seq_width);
 
     if (seq_container.scale.x >= MIN_xSCALE && seq_container.scale.x <= MAX_xSCALE) {
         var zoom_target = (x - seq_container.position.x) / seq_container.scale.x
@@ -124,9 +123,16 @@ function _zoom(dy, x){
         seq_container.scale.x += dy / seq_width;
         seq_container.scale.x = Math.max(MIN_xSCALE, Math.min(MAX_xSCALE, seq_container.scale.x))
 
-        // focus on mouse point
+        // zoom on pointer
         seq_container.position.x = -zoom_target * seq_container.scale.x + x
-        seq_container.position.x = Math.min(0, Math.max(limit_x, seq_container.position.x))
+
+        // make sure sequence map stays inside container on zoom out
+        if (seq_container.position.x > 0)
+            seq_container.position.x = 0;
+        if (seq_container.position.x + seq_container.width < seq_width) {
+            seq_container.position.x = - seq_container.width + seq_width;
+        }
+
 
         // render transform
         seq_container.updateTransform();
@@ -135,87 +141,59 @@ function _zoom(dy, x){
 
 
 function initSequence() {
-    if (seq_defaultOnly) {
-        for (var i = 0; i < data.data.length; i++) {
-            _constructSegment(seq_defaultRects, {
-                size: data.meta.segment_size,
-                start: data.data[i].start,
-                color: getSegmentColor(data.data[i].category),
-                alpha: SEGMENT_ALPHA,
-                offsetY: 0,
-                height: seq_height + 2
-            });
-            _constructSegment(seq_lines, {
-                size: Math.floor(data.meta.segment_size * 0.1),
-                start: data.data[i].start,
-                color: getSegmentColor('black'),
-                alpha: LINE_ALPHA,
-                offsetY: 0,
-                height: seq_height + 2
-            });
-            //_constructSegment(i, SEGMENT_SIZE, 0, SEGMENT_SIZE, seq_height + 2, getSegmentColor(data.data[i].category), SEGMENT_ALPHA, seq_defaultRects)
-            //_constructSegment(i, SEGMENT_SIZE, 0, 1, seq_height + 2, 'black', LINE_ALPHA,  seq_lines)
-            _interactivePlayheadSegment(i, data.data[i].start)
+
+    var h = seq_defaultOnly ? seq_height + 2 : 0.5 * seq_height + 2;
+
+    for (var i = 0; i < data.data.length; i++) {
+        _constructSegment(seq_defaultRects, {
+            size: data.meta.segment_size,
+            start: data.data[i].start,
+            color: getSegmentColor(data.data[i].category),
+            alpha: SEGMENT_ALPHA,
+            offsetY: 0,
+            height: h
+        });
+        _constructSegment(seq_lines, {
+            size: Math.floor(data.meta.segment_size * 0.1),
+            start: data.data[i].start,
+            color: getSegmentColor('black'),
+            alpha: LINE_ALPHA,
+            offsetY: 0,
+            height: h
+        });
+
+
+        if (!seq_defaultOnly) {
+            for (var j = i*SUB_PER_DEFAULT_SEGMENT; j < i*SUB_PER_DEFAULT_SEGMENT + SUB_PER_DEFAULT_SEGMENT; j++) {
+
+                //console.log(i, j, subData.data.length, data.data[i].start ,'->', subData.data[j].start)
+
+                // first sub-segment
+                _constructSegment(seq_subRects, {
+                    size: subData.meta.segment_size,
+                    start: subData.data[j].start,
+                    color: getSegmentColor(subData.data[j].category),
+                    alpha: SEGMENT_ALPHA,
+                    offsetY: h,
+                    height: h
+                });
+
+
+                // second sub-segment line
+                _constructSegment(seq_lines, {
+                    size: LINE_SEGMENT,
+                    start: subData.data[j].start,
+                    color: getSegmentColor('black'),
+                    alpha: LINE_ALPHA,
+                    offsetY: h,
+                    height: h
+                });
+            }
         }
-    } else {
-        var lastIdx;
-        for (var i = 0; i < data.data.length; i++) {
-            // default segment
-            _constructSegment(seq_defaultRects, {
-                size: data.meta.segment_size,
-                start: data.data[i].start,
-                color: getSegmentColor(data.data[i].category),
-                alpha: SEGMENT_ALPHA,
-                offsetY: 0,
-                height: 0.5 * seq_height + 2
-            });
 
-            // default segment line ( full length )
-            _constructSegment(seq_lines, {
-                size: LINE_SEGMENT,
-                start: data.data[i].start,
-                color: getSegmentColor('black'),
-                alpha: LINE_ALPHA,
-                offsetY: 0,
-                height: seq_height + 2
-            });
-
-            // first sub-segment
-            _constructSegment(seq_subRects, {
-                size: subData.meta.segment_size,
-                start: subData.data[i*SUB_PER_DEFAULT_SEGMENT].start,
-                color: getSegmentColor(subData.data[i*SUB_PER_DEFAULT_SEGMENT].category),
-                alpha: SEGMENT_ALPHA,
-                offsetY: 0.5 * seq_height,
-                height: 0.5 * seq_height + 2,
-            });
-
-
-            // second sub-segment
-            _constructSegment(seq_subRects, {
-                size: subData.meta.segment_size,
-                start: subData.data[i*SUB_PER_DEFAULT_SEGMENT+1].start,
-                color: getSegmentColor(subData.data[i*SUB_PER_DEFAULT_SEGMENT+1].category),
-                alpha: SEGMENT_ALPHA,
-                offsetY: 0.5 * seq_height,
-                height: 0.5 * seq_height + 2
-            });
-
-            // second sub-segment line
-            _constructSegment(seq_lines, {
-                size: LINE_SEGMENT,
-                start: subData.data[i*SUB_PER_DEFAULT_SEGMENT+1].start,
-                color: getSegmentColor('black'),
-                alpha: LINE_ALPHA,
-                offsetY: 0.5 * seq_height,
-                height: 0.5 * seq_height + 2
-            });
-
-
-            // highlight segments
-            _interactivePlayheadSegment(i, data.data[i].start)
-        }
+        _interactivePlayheadSegment(i, data.data[i].start)
     }
+
     // scale to canvas
     seq_container.scale.x = MIN_xSCALE;
     seq_container.updateTransform()
@@ -272,32 +250,45 @@ function _constructSegment(container, style) {
 }
 
 
-function _updateSegment(i, container, color, yOffset) {
+function _updateSegment(container, i, isDefault) {
     var segment = container.getChildAt(i)
-    var w = segment.width;
-    var h = segment.height;
     var alpha = segment.alpha;
+    var w = segment.width
+    var h = segment.height;
+    var y = isDefault ? 0 : h;
+    var c = isDefault ? data.data[i].category : subData.data[i].category
+    var s = isDefault ? data.data[i].start : subData.data[i].start;
 
-    segment.clear()
-    segment.beginFill(color);
+    segment.clear();
+
+    segment.beginFill(getSegmentColor(c));
     segment.lineAlignment = 0;
-    segment.drawRect(0, yOffset, w, h)
+    segment.drawRect(0, y, w, h)
     segment.endFill();
+    segment.x = s
     segment.alpha = alpha;
 }
 
 
+function colorSegmentByIndex(index, isDefault) {
+    if (isDefault) {
+        _updateSegment(seq_defaultRects, index, isDefault)
 
-function updateDefaultSegmentById(i) {
-    _updateSegment(i, seq_defaultRects, getSegmentColor(data.data[i].category), 0)
+        // make sure to color subsegments if they exist
+        if (!seq_defaultOnly) {
+            var sub_index = index*SUB_PER_DEFAULT_SEGMENT;
+            for (var i = sub_index; i < sub_index + SUB_PER_DEFAULT_SEGMENT; i++) {
+                _updateSegment(seq_subRects, i, false)
+            }
+        }
+    } else {
+        _updateSegment(seq_subRects, index, false)
+
+        // get default data index
+        var i = Math.floor(index / SUB_PER_DEFAULT_SEGMENT)
+        _updateSegment(seq_defaultRects, i, isDefault)
+    }
 }
-
-
-function updateSubSegmentById(i) {
-    if (i < subData.data.length - 1)
-        _updateSegment(i, seq_subRects, getSegmentColor(subData.data[i].category), seq_height * 0.5 + 2)
-}
-
 
 function setSequencePlayheadAt(i) {
     seq_playhead.position.x = i * data.meta.step_size

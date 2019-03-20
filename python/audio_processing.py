@@ -146,21 +146,20 @@ def retrain(valid_points, session_key, old_session_key, segmentation, components
 
         # read in old csv file
         result = csv_to_data(path_to_old_csv)
+
         # parse data from labeled points
         idxs =   [i[0] for i in valid_points[name][1:]]
         starts = [i[1] for i in valid_points[name][1:]]
         colors = [i[2] for i in valid_points[name][1:]]
-
         new_result = []
-
+        print(starts)
         for i in range(result.shape[0]):
             if i in idxs:
                 print(i)
                 new_result.append(result[i,:])
         new_result = np.array(new_result)
 
-        print(result.shape, new_result, len(idxs))
-
+        # cluster
         cluster_data = {}
         for c in components:
             cluster_data[f'{c}D'] = cluster.get_cluster_data(new_result, c)
