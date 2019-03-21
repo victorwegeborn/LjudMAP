@@ -59,7 +59,9 @@
 								<h6 class="dropdown-header">Florian Hecker - Concat-Speech</h6>
 								<a class="dropdown-item" href="/15530034158784142">Window: 1000 ms, Hop: 1000 ms [Sub]</a>
 								<a class="dropdown-item" href="/1553005302084086">Window: 1000 ms, Hop: 1000 ms [Sub] (Re-clustered)</a>
-						    </div>
+								<h6 class="dropdown-header">The Moth Gatherer fyllepodden</h6>
+								<a class="dropdown-item" href="/15531677362393">Window: 500 ms, Hop: 500 ms [2D]</a>
+							</div>
 		                </li>
 		            </ul>
 		            <a class="nav-link" id="keyLink" style='color:white'>ID: {{session_key}}</a>
@@ -209,13 +211,13 @@
 						</div>
 
 						<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 flex-shrink-0 flex-grow-0" id="mapFooter">
-							<button type="button" value="refocus" class="btn btn-dark btn-sm py-0 mb-1" id="cameraFocus">focus camera</button>
+							<button type="button" class="btn btn-dark btn-sm py-0 mb-1 cameraFocus" value="default">focus camera</button>
 
 							<span class="badge badge-dark">flatten:</span>
 							<div class="btn-group" id="buttonGroupNav">
-								<button type="button" value="0" class="btn btn-dark btn-sm py-0">X</button>
-								<button type="button" value="1" class="btn btn-dark btn-sm py-0">Y</button>
-								<button type="button" value="2" class="btn btn-dark btn-sm py-0">Z</button>
+								<button type="button" value="0" class="btn btn-dark btn-sm py-0 default">X</button>
+								<button type="button" value="1" class="btn btn-dark btn-sm py-0 default">Y</button>
+								<button type="button" value="2" class="btn btn-dark btn-sm py-0 default">Z</button>
 							</div>
 
 							<span class="badge badge-dark">Scale:</span>
@@ -243,13 +245,13 @@
 
 						<div id="subMapFooter" hidden>
 							<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 flex-shrink-0 flex-grow-0">
-								<button type="button" value="refocus" class="btn btn-dark btn-sm py-0 mb-1" id="cameraFocus">focus camera</button>
+								<button type="button" class="btn btn-dark btn-sm py-0 mb-1 cameraFocus" value="sub">focus camera</button>
 
 								<span class="badge badge-dark">flatten:</span>
 								<div class="btn-group" id="buttonGroupNav">
-									<button type="button" value="0" class="btn btn-dark btn-sm py-0">X</button>
-									<button type="button" value="1" class="btn btn-dark btn-sm py-0">Y</button>
-									<button type="button" value="2" class="btn btn-dark btn-sm py-0">Z</button>
+									<button type="button" value="0" class="btn btn-dark btn-sm py-0 sub">X</button>
+									<button type="button" value="1" class="btn btn-dark btn-sm py-0 sub">Y</button>
+									<button type="button" value="2" class="btn btn-dark btn-sm py-0 sub">Z</button>
 								</div>
 
 								<span class="badge badge-dark">Scale:</span>
@@ -290,8 +292,10 @@
 		var data = {{data | tojson}};
 	</script>
 	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/sequence.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/deckMain.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/WAAClock.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/Audio.js')        }}"></script>
+	<script src="{{ url_for('static', filename='js/Sequence.js')     }}"></script>
+	<script src="{{ url_for('static', filename='js/Plot.js')         }}"></script>
+	<script src="{{ url_for('static', filename='js/Main.js')         }}"></script>
+	<script src="{{ url_for('static', filename='js/WAAClock.js')     }}"></script>
 
 </body>
