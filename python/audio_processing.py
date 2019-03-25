@@ -4,7 +4,7 @@ import random
 import sys
 sys.path.append("../python")
 import configuration
-from HTK import HTKFile
+import waveform
 import numpy as np
 import os
 import wave
@@ -14,7 +14,7 @@ from pydub import AudioSegment
 import pandas
 import json
 import cluster
-from sklearn.preprocessing import minmax_scale
+from sklearn.preprocessing import minmax_scale, normalize
 
 smilextract = '../opensmile-2.3.0/SMILExtract'
 MASTER_CONF = 'ANALYSIS.conf'
@@ -61,19 +61,29 @@ def main(session_key, segmentation, components, features):
         subprocess.call([smilextract, "-C", config_path, "-I", audio_path, "-csvoutput", output_path])
         segmentation[name]['path'] = output_path
 
+
     # compute all clusters given number of components and data
     for name, seg in segmentation.items():
         print(seg)
         # Read file, and return formatted data
         result = csv_to_data(seg['path'])
+        n_points = result.shape[0]
+        waveform_data = None
+
+        # construct wavedata
+        if name == 'default':
+            waveform_data = waveform.getJson(output_dir, audio_path, seg['step'], n_points)
+
         cluster_data = {}
         for c in components:
             cluster_data[f'{c}D'] = cluster.get_cluster_data(result, c)
 
 
         data = []
+        last_start = 0;
         #for i, _tsne, _pca, _som, _umap in cluster_data['3D']:
         for i, _tsne, _pca, _umap in cluster_data['3D']:
+            last_start = int(i*seg['step']);
             data.append({
                 'id': i,
                 '3D': {
@@ -82,10 +92,11 @@ def main(session_key, segmentation, components, features):
                     #"som": _som.tolist(),
                     "umap": _umap.tolist(),
                 },
-                'start': int(i*seg['step']),
+                'start': last_start,
                 'active': 1,
                 'category': 'black'
             })
+
 
         if '2D' in cluster_data:
             #for i, _tsne, _pca, _som, _umap in cluster_data['2D']:
@@ -104,7 +115,8 @@ def main(session_key, segmentation, components, features):
                     'audio_duration': audio_duration,
                     'audio_path': audio_path,
                     'segment_size': seg['size'],
-                    'step_size': seg['step']
+                    'step_size': seg['step'],
+                    'waveform': waveform_data
                 },
                 'data': data,
             }

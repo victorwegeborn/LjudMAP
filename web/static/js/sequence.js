@@ -16,6 +16,8 @@ px: 0     w     2w                 (n-1)w   nw
 
 */
 
+
+
 var seq_defaultOnly = true;
 
 // segment drawing globals
@@ -27,7 +29,7 @@ var LINE_ALPHA = 0.8;
 var SUB_PER_SEG;
 
 // initialize sequence map when doc is ready
-var sequenceCanvas = $('pixiSequence')
+var sequenceCanvas = $('#pixiSequence')
 var seq_width = $('#pixiSequence').width();
 var seq_height = $('#pixiSequence').height();
 
@@ -51,6 +53,7 @@ const SEQ_PLAYHEAD_COLOR = '0xff2800';
 
 PIXI.settings.RESOLUTION = window.devicePixelRatio * 1;
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
 
 // initialize pixi renderer
 var seq_app = new PIXI.Application({
@@ -147,6 +150,30 @@ function _zoom(dy, x){
     }
 };
 
+/* OPTIMIZE */
+function drawWaveform() {
+    var line = new PIXI.Graphics();
+    line.lineStyle(1, getSegmentColor('black'), 1);
+    var zero = 0.5 * seq_height + 1
+    var length = data.meta.waveform.data.length;
+    var scale = Math.abs(data.meta.waveform.max - data.meta.waveform.min) / seq_height
+    for (var i = 0; i < length; i++) {
+        var val = data.meta.waveform.data[i] / scale;
+        if (val === 0) {
+            line.moveTo(i, zero)
+            line.lineTo(i+1, zero)
+        } else {
+            line.moveTo(i, Math.ceil(zero - val))
+            line.lineTo(i, Math.ceil(zero + val))
+        }
+    }
+
+    line.alpha = 0.9
+    // scale to fit
+    line.scale.x = N_PX / length;
+    seq_container.addChild(line)
+}
+
 
 function initSequence() {
     var h = seq_defaultOnly ? seq_height + 2 : 0.5 * seq_height + 2;
@@ -202,6 +229,8 @@ function initSequence() {
 
     // draw playhead at start
     initPlayhead()
+    // Needs to be optimized
+    drawWaveform()
 }
 
 function initPlayhead() {

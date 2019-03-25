@@ -228,7 +228,6 @@ class Plot {
         var ratio = null;
         if (other) ratio = this._segment_size / other._segment_size;
 
-        console.log(other._id, ratio)
 
         // pick points in this plot
         var pickedPoints = this.renderer.pickMultipleObjects({

@@ -262,7 +262,7 @@
 						</div>
 
 
-						<canvas class="w-100" style="height: 80px; border-style: solid; border-width: 1px;" id="pixiSequence">
+						<canvas class="w-100" style="height: 120px; border-style: solid; border-width: 1px;" id="pixiSequence">
 
 						</canvas>
 					</div>
@@ -292,6 +292,7 @@
 		var data = {{data | tojson}};
 	</script>
 	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/waveform-data.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/Audio.js')        }}"></script>
 	<script src="{{ url_for('static', filename='js/Sequence.js')     }}"></script>
 	<script src="{{ url_for('static', filename='js/Plot.js')         }}"></script>
