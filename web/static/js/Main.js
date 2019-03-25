@@ -1,6 +1,14 @@
 
 console.log(subData ? 'sub included' : 'no sub');
 
+const SHIFT = 16;
+const SPACE = 32;
+
+/* key globals */
+var space_down = false;
+var shift_down = false;
+
+
 $(document).ready(function() {
 
     var map = $('#map');
@@ -9,10 +17,6 @@ $(document).ready(function() {
     /* subdivision layer globals */
     var sync_views = false;
     var is_sublayer_active = false;
-
-    /* key globals */
-    var shift_down = false;
-    var ctrl_down = false;
 
     /* Scale slider defaults */
     const min_scale = 1;
@@ -200,35 +204,15 @@ $(document).ready(function() {
     $("#buttonGroup6 button").on("click", function() {
         if (audioLoaded) {
             if(this.value=="stop"){
-                stopSequential(reset)
+                stopSequential(plots)
                 setSequencePlayheadAt(0)
             }
             else if (this.value=="play" && !PLAYING_AUDIO) {
-                playSequential(draw, drawSub)
+                playSequential(plots)
             }
         }
     });
 
-
-    function draw() {
-        sequentialPlaybackIndex++;
-        setSequencePlayheadAt(sequentialPlaybackIndex)
-        redrawCanvas()
-    }
-
-
-    function drawSub() {
-        subSequentialPlaybackIndex++;
-        redrawCanvas()
-    }
-
-
-    function reset() {
-        sequentialPlaybackIndex = -1;
-        subSequentialPlaybackIndex = -1;
-        setSequencePlayheadAt(0)
-        redrawCanvas()
-    }
 
 
     //////////////////////////// SCALE SLIDERS ////////////////////////////
@@ -261,23 +245,22 @@ $(document).ready(function() {
 
 
     map.on("mousemove", function(ev) {
-        if (shift_down) {
+        if (space_down) {
             labeled = true;
             plots[0].categorize(plots[1]);
         }
-        else if (ctrl_down) {
-            updateAudioList();
+        else if (shift_down) {
+            plots[0].updateAudioList(playSegment);
         }
     })
 
     subMap.on('mousemove', function(ev) {
-        if (shift_down) {
+        if (space_down) {
             labeled = true;
             plots[1].categorize(plots[0]);
         }
-        else if (ctrl_down) {
-            console.log('should playback')
-            //updateAudioList();
+        else if (shift_down) {
+            plots[1].updateAudioList(setCurrentStartTimes);
         }
     })
 
@@ -285,21 +268,22 @@ $(document).ready(function() {
     //////////////////////////// KEYBOARD ////////////////////////////
 
     $(document).keydown(function(ev) {
-        if (ev.shiftKey) {
-            shift_down = true;
+        if (ev.keyCode == SPACE) {
+            space_down = true;
         }
-        else if (ev.ctrlKey) {
-            ctrl_down = true;
+        else if (ev.keyCode == SHIFT) {
+            shift_down = true;
         }
     });
 
     $(document).keyup(function(ev) {
-        if (shift_down) {
-            shift_down = false;
-        }
-        else if (ctrl_down) {
-            ctrl_down = false;
+        if (space_down) {
+            space_down = false;
             currentSegmentStartTimes = [];
+        }
+        else if (shift_down) {
+            shift_down = false;
+
         } else {
             var c;
             if (ev.keyCode == 48) {

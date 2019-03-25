@@ -12,7 +12,6 @@ var sequentialPlaybackIndex = -1;
 var subSequentialPlaybackIndex = -1;
 loadAudio(audioPath);
 
-
 var launchInterval = data.meta.segment_size/2;
 $("#launchSlider").val(launchInterval);
 $("#launchSliderText").text("Launch interval: " + launchInterval);
@@ -63,7 +62,7 @@ var clock;
 var sequencialSource;
 var highlightPointEvent;
 var subHighlightPointEvent;
-function playSequential(draw, subDraw) {
+function playSequential(plots) {
     PLAYING_AUDIO = true;
     clock = new WAAClock(audioCtx, {toleranceEarly: 0.1});
     clock.start()
@@ -76,14 +75,16 @@ function playSequential(draw, subDraw) {
     sequencialSource.start(0)
 
     highlightPointEvent = clock.callbackAtTime(() => {
-        draw()
+        var index = plots[0].incrementHighlight()
+        setSequencePlayheadAt(index)
     }, data.meta.step_size/1000)
     .repeat(data.meta.step_size/1000)
     .tolerance({late: 0.1})
 
     if (subData) {
         subHighlightPointEvent = clock.callbackAtTime(() => {
-            subDraw()
+            var index = plots[1].incrementHighlight()
+            setSequencePlayheadAt(index)
         }, subData.meta.step_size/1000)
         .repeat(subData.meta.step_size/1000)
         .tolerance({late: 0.1})
@@ -91,16 +92,18 @@ function playSequential(draw, subDraw) {
 }
 
 
-function stopSequential(draw) {
+function stopSequential(plots) {
     if (PLAYING_AUDIO) {
         PLAYING_AUDIO = false;
         highlightPointEvent.clear()
         clock.stop()
         sequencialSource.stop()
+        plots[0].resetHighlight()
         if (subData) {
             subHighlightPointEvent.clear()
+            plots[1].resetHighlight()
         }
-        draw()
+
     }
 }
 
@@ -128,10 +131,10 @@ function playSegments(){
     if(currentSegmentStartTimes.length > 0) {
         var i;
         var startTime
-        console.log(launchInterval);
+        //console.log(launchInterval);
         for (i = 0; i < 100; i++) {
             startTime = audioCtx.currentTime + (i*launchInterval)/1000;
-            var audioInterval = currentSegmentStartTimes[Math.floor(Math.random()*currentSegmentStartTimes.length)];
+            var audioInterval = currentSegmentStartTimes[Math.floor(Math.random()*currentSegmentStartTimes.length)].object.start;
             var source = audioCtx.createBufferSource();
             source.buffer = audioBuffer;
             var volume = audioCtx.createGain();
@@ -147,7 +150,7 @@ function playSegments(){
                 break;
             }
             source.start(startTime, audioInterval/1000, data.meta.segment_size/1000);
-            console.log(audioInterval + " starting in: " + startTime);
+            //console.log(audioInterval + " starting in: " + startTime);
         }
     }
 }

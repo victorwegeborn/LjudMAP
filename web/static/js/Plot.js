@@ -90,7 +90,7 @@ class Plot {
                     data: this._data,
                     coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
                     getPosition: d => [0,0,0],
-                    getColor: d => getColor(d.category),
+                    getColor: d => this._getColor(d.category),
                     getNormal: d => d.normal,
                     radiusPixels: this._point_radius,
                     lightSettings: {},
@@ -128,7 +128,7 @@ class Plot {
             },
             getColor: d => {
                 this._colorSegmentByIndex(d.id)
-                return getColor(d.category)
+                return this._getColor(d.category)
             },
             getNormal: d => d.normal,
             radiusPixels: this._point_radius,
@@ -237,6 +237,7 @@ class Plot {
             depth: 40,
         })
 
+
         if (pickedPoints.length > 1) {
             for (let i = 0; i < pickedPoints.length; i++) {
                 pickedPoints[i].object.category = this._current_category;
@@ -264,23 +265,19 @@ class Plot {
     }
 
 
-    updateAudioList() {
-        if (audioLoaded) {
-            pointsInRadius = deckgl.pickMultipleObjects({
-                x: _local_mouse.x, y: _local_mouse.y,
-                radius: 20,
-                depth: 200,
-            });
-            if (pointsInRadius.length > 0) {
-                startList = [];
-                for (let i = 0; i < pointsInRadius.length; i++) {
-                    startList.push(pointsInRadius[i].object.start);
-                }
-                currentSegmentStartTimes = startList;
-            }
+    updateAudioList(callback) {
+        var pointsInRadius = this.renderer.pickMultipleObjects({
+            x: this._local_mouse.x, y: this._local_mouse.y,
+            radius: 20,
+            depth: 2,
+        });
+
+        for (var i = 0; i < pointsInRadius.length; i++) {
+            callback(pointsInRadius[i].object.start, function() {
+                console.log('done')
+            })
         }
     }
-
 
 
     /* Setters */
@@ -310,25 +307,45 @@ class Plot {
         this._scale = s;
         this._redraw()
     }
+
+    incrementHighlight() {
+        this._highlight_index++;
+        this._redraw()
+        return this._highlight_index;
+    }
+
+    setHighlight(i) {
+        this._highlight_index = i;
+        this._redraw()
+    }
+
+    resetHighlight() {
+        this._highlight_index = -1;
+        this._redraw()
+    }
+
+
+
+    _getColor(c) {
+        var alpha = this._is_playing ? 50 : 240;
+        switch (c) {
+            case 'black' : return [ 51,  58,  63, alpha]; break;
+            case 'blue'  : return [  0, 125, 255, alpha]; break;
+            case 'green' : return [  0, 167,  84, alpha]; break;
+            case 'yellow': return [255, 191,  66, alpha]; break;
+            case 'red'   : return [228,  47,  70, alpha]; break;
+            case 'purple': return [134,   0, 123, alpha]; break;
+            case 'orange': return [255, 163,  56, alpha]; break;
+            case 'teal'  : return [  0, 129, 128, alpha]; break;
+            case 'brown' : return [171,  38,  44, alpha]; break;
+                default:
+                    console.log('Point without valid category');
+                    return [255,255,255,255];
+        }
+    }
+
 }
 
-function getColor(c) {
-    var alpha = this._is_playing ? 50 : 240;
-    switch (c) {
-        case 'black' : return [ 51,  58,  63, alpha]; break;
-        case 'blue'  : return [  0, 125, 255, alpha]; break;
-        case 'green' : return [  0, 167,  84, alpha]; break;
-        case 'yellow': return [255, 191,  66, alpha]; break;
-        case 'red'   : return [228,  47,  70, alpha]; break;
-        case 'purple': return [134,   0, 123, alpha]; break;
-        case 'orange': return [255, 163,  56, alpha]; break;
-        case 'teal'  : return [  0, 129, 128, alpha]; break;
-        case 'brown' : return [171,  38,  44, alpha]; break;
-            default:
-                console.log('Point without valid category');
-                return [255,255,255,255];
-    }
-}
 
 
 function showToolTip(object, index, target) {

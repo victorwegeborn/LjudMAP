@@ -54,6 +54,8 @@ const SEQ_PLAYHEAD_COLOR = '0xff2800';
 PIXI.settings.RESOLUTION = window.devicePixelRatio * 1;
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
+var seq_textures = {}
+var seq_segmentHighlights = []
 
 // initialize pixi renderer
 var seq_app = new PIXI.Application({
@@ -98,12 +100,13 @@ $('#pixiSequence').off("mousewheel").on("mousewheel", function (event) {
     _mousePos = null
     showToolTip(null, 0, '#tooltip')
 }).mousemove(function(e){
-    if (_mousePos) {
+    if (_mousePos && !shift_down) {
         var dx = e.offsetX - _mousePos.x;
         _mousePos.x = e.offsetX
         _translate(dx)
     }
 });
+
 
 
 function _translate(dx) {
@@ -176,46 +179,50 @@ function drawWaveform() {
 
 
 function initSequence() {
-    var h = seq_defaultOnly ? seq_height + 2 : 0.5 * seq_height + 2;
+
+    // segment height
+    var height = seq_defaultOnly ? seq_height + 2 : 0.5 * seq_height + 2;
+
+    // default data segment textures
+    seq_textures.data_segment = _constructTexture(data.meta.segment_size, height);
+    seq_textures.line = _constructTexture(LINE_SEGMENT, height)
+
+    // construct subData segment textures
+    if (subData) {
+        seq_textures.subData_segment = _constructTexture(subData.meta.segment_size, height);
+        seq_textures.sub_line = _constructTexture(LINE_SEGMENT, height)
+    }
+
+    // render sprite per data point
     for (var i = 0; i < data.data.length; i++) {
-        _constructSegment(seq_defaultRects, {
-            size: data.meta.segment_size,
+        // draw default segment
+        _constructSprite(seq_textures.data_segment, seq_defaultRects, {
+            start: data.data[i].start,
+            color: getSegmentColor(data.data[i].category)
+        })
+
+        // draw default segment line
+        _constructSprite(seq_textures.line, seq_lines, {
             start: data.data[i].start,
             color: getSegmentColor(data.data[i].category),
-            alpha: SEGMENT_ALPHA,
-            offsetY: 0,
-            height: h
-        });
-        _constructSegment(seq_lines, {
-            size: LINE_SEGMENT,
-            start: data.data[i].start,
-            color: getSegmentColor('black'),
-            alpha: LINE_ALPHA,
-            offsetY: 0,
-            height: h
-        });
+            alpha: LINE_ALPHA
+        })
 
 
+        // draw subdata segments sprites
         if (!seq_defaultOnly) {
             for (var j = i*SUB_PER_DEFAULT_SEGMENT; j < i*SUB_PER_DEFAULT_SEGMENT + SUB_PER_DEFAULT_SEGMENT; j++) {
-                // first sub-segment
-                _constructSegment(seq_subRects, {
-                    size: subData.meta.segment_size,
+                _constructSprite(seq_textures.subData_segment, seq_subRects, {
                     start: subData.data[j].start,
                     color: getSegmentColor(subData.data[j].category),
-                    alpha: SEGMENT_ALPHA,
-                    offsetY: h,
-                    height: h
+                    offsetY: height,
                 });
 
-                // second sub-segment line
-                _constructSegment(seq_lines, {
-                    size: LINE_SEGMENT,
+                _constructSprite(seq_textures.sub_line, seq_lines, {
                     start: subData.data[j].start,
                     color: getSegmentColor('black'),
                     alpha: LINE_ALPHA,
-                    offsetY: h,
-                    height: h
+                    offsetY: height,
                 });
             }
         }
@@ -237,20 +244,16 @@ function initPlayhead() {
     var head = new PIXI.Graphics(true);
     head.beginFill(SEQ_PLAYHEAD_COLOR);
     head.lineAlignment = 0;
-    head.drawRect(0, 0, data.meta.segment_size, 2*seq_height)
+    head.drawRect(0, 0, data.meta.step_size, 2*seq_height)
     head.endFill();
     head.alpha = 0.6;
-    seq_playhead.addChild(head);
+    seq_playhead.addChild(new PIXI.Sprite.from(seq_app.renderer.generateTexture(head)));
 }
 
 
 
 function _interactivePlayheadSegment(i, start) {
-    var seg = new PIXI.Graphics(true);
-    seg.beginFill(SEQ_HIGHLIGHT_COLOR);
-    seg.lineAlignment = 0;
-    seg.drawRect(0, 0, SEGMENT_SIZE, seq_height + 2)
-    seg.endFill();
+    var seg = new PIXI.Sprite.from(seq_textures.data_segment)
     seg.alpha = 0;
     seg.x = start;
 
@@ -260,6 +263,10 @@ function _interactivePlayheadSegment(i, start) {
         // add canvas highlighting here
         showToolTip({start: start}, i, '#tooltip')
         this.alpha = 0.3;
+
+        if(space_down) {
+            console.log('should color')
+        }
     }
     seg.mouseout = function(e) {
         this.alpha = 0;
@@ -275,37 +282,29 @@ function _interactivePlayheadSegment(i, start) {
 }
 
 
-function _constructSegment(container, style) {
-    var seg = new PIXI.Graphics(true);
-    seg.beginFill(style.color);
-    seg.lineAlignment = 0;
-    seg.drawRect(0, style.offsetY, style.size, style.height)
-    seg.endFill();
-    seg.alpha = style.alpha;
-    seg.x = style.start;
-    container.addChild(seg);
+
+function _constructTexture(width, height) {
+    var segment = new PIXI.Graphics(true);
+    segment.beginFill('0xFFFFFF');
+    segment.lineAlignment = 0;
+    segment.drawRect(0, 0, width, height)
+    segment.endFill();
+    return seq_app.renderer.generateTexture(segment)
 }
 
+function _constructSprite(texture, container, settings) {
+    var sprite = new PIXI.Sprite.from(texture)
+    sprite.y = settings.offsetY || 0;
+    sprite.tint = settings.color;
+    sprite.alpha = settings.alpha || SEGMENT_ALPHA;
+    sprite.position.x = settings.start;
+    container.addChild(sprite)
+}
 
 function _updateSegment(container, i, isDefault) {
     var segment = container.getChildAt(i)
-    var alpha = segment.alpha;
-    var w = segment.width
-    var h = segment.height;
-    var y = isDefault ? 0 : h;
-    var c = isDefault ? data.data[i].category : subData.data[i].category
-    var s = isDefault ? data.data[i].start : subData.data[i].start;
-
-    segment.clear();
-
-    segment.beginFill(getSegmentColor(c));
-    segment.lineAlignment = 0;
-    segment.drawRect(0, y, w, h)
-    segment.endFill();
-    segment.x = s
-    segment.alpha = alpha;
+    segment.tint = getSegmentColor(data.data[i].category)
 }
-
 
 function colorSegmentByIndex(index) {
     _updateSegment(seq_defaultRects, index, true)
