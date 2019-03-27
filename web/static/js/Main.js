@@ -1,12 +1,17 @@
 
 console.log(subData ? 'sub included' : 'no sub');
 
+/* key codes */
 const SHIFT = 16;
 const SPACE = 32;
 
 /* key globals */
 var space_down = false;
 var shift_down = false;
+
+/* global objects */
+var PLOTS = null;
+var AUDIO = null;
 
 
 $(document).ready(function() {
@@ -27,7 +32,7 @@ $(document).ready(function() {
 
     //////////////////////////// INITIALIZING ////////////////////////////
 
-    var plots = [new Plot({
+    PLOTS = [new Plot({
         id: 'default',
         data: data.data,
         meta: data.meta,
@@ -36,20 +41,30 @@ $(document).ready(function() {
         colorSegment: colorSegmentByIndex,
     })];
 
-    /* initialize subplots if available */
+    /* initialize subPLOTS if available */
     if (subData)
-        plots.push(new Plot({
+        PLOTS.push(new Plot({
             id: 'sub',
             data: subData.data,
             meta: subData.meta,
             canvas: 'subMap',
             tooltip: '#subTooltip',
-            colorSegment: colorSubSegmentsByIndex
         }));
 
 
     initSequence()
 
+    var audio_settings = {
+        audio_path: audioPath,
+        plots: PLOTS,
+        f: {
+            set_sequence: setSequencePlayheadAt,
+            reset_sequence: resetSequencePlayhead
+        }
+    }
+
+    AUDIO = new Audio(audio_settings);
+    AUDIO.load()
 
     // enable switch between 2D and 3D clustering
     if ('2D' in data.data[0]) {
@@ -101,15 +116,12 @@ $(document).ready(function() {
 
     //////////////////////////// BUTTON EVENTS ////////////////////////////
 
-
     function toggleSubCanvas() {
-        if (!is_sublayer_active) {
-            is_sublayer_active = true;
+        if ($(subMap).prop('hidden')) {
             $('#activateSublayer').text('Hide subdivision')
             $(subMap).prop('hidden', false)
             $('#subMapFooter').prop('hidden', false)
         } else {
-            is_sublayer_active = false;
             $('#activateSublayer').text('Show subdivision')
             $(subMap).prop('hidden', true)
             $('#subMapFooter').prop('hidden', true)
@@ -137,8 +149,9 @@ $(document).ready(function() {
 
     // Button category selection
     $("#buttonGroup1 button").on("click", function() {
-        $.each(plots, function() {
-            this.changeCategory(this.value)
+        var color = this.value;
+        $.each(PLOTS, function() {
+            this.changeCategory(color)
         });
     });
 
@@ -146,7 +159,7 @@ $(document).ready(function() {
     // Change algorithm
     $("#buttonGroup2 button").on("click", function() {
         if (this.value === '2D') {
-            $.each(plots, function() {
+            $.each(PLOTS, function() {
                 this.changeDimensions('2D');
             });
 
@@ -154,7 +167,7 @@ $(document).ready(function() {
             $('#btn-2D').addClass('active')
         }
         else if(this.value === '3D') {
-            $.each(plots, function() {
+            $.each(PLOTS, function() {
                 this.changeDimensions('3D');
             });
 
@@ -163,7 +176,7 @@ $(document).ready(function() {
         }
         else {
         var algo = this.value;
-            $.each(plots, function() {
+            $.each(PLOTS, function() {
                 this.changeAlgorithm(algo)
             });
         }
@@ -177,9 +190,9 @@ $(document).ready(function() {
     // re-initialize camera on click
     $(".cameraFocus").on("click", function() {
         if ($(this).val() == 'default') {
-            plots[0].focusCamera(-1);
+            PLOTS[0].focusCamera(-1);
         } else {
-            plots[1].focusCamera(-1);
+            PLOTS[1].focusCamera(-1);
         }
     })
 
@@ -188,31 +201,52 @@ $(document).ready(function() {
     $("#buttonGroupNav button").on("click", function() {
         const axis = this.value;
         const plt = $(this).hasClass('default') ? 0 : 1;
-        if (plots[plt].getFlatState(axis) === 1) {
+        if (PLOTS[plt].getFlatState(axis) === 1) {
             $(this).addClass('active');
-            plots[plt].setFlatState(axis, 0)
-            plots[plt].focusCamera(axis);
+            PLOTS[plt].setFlatState(axis, 0)
+            PLOTS[plt].focusCamera(axis);
         } else {
             $(this).removeClass('active');
-            plots[plt].setFlatState(axis, 1)
-            plots[plt].focusCamera(-1);
+            PLOTS[plt].setFlatState(axis, 1)
+            PLOTS[plt].focusCamera(-1);
         }
     });
 
 
     // Sequential play, pause (todo), and stop
     $("#buttonGroup6 button").on("click", function() {
-        if (audioLoaded) {
-            if(this.value=="stop"){
-                stopSequential(plots)
-                setSequencePlayheadAt(0)
+        if (AUDIO_LOADED) {
+            if(this.value=="stop" && AUDIO.isPlaying()){
+                AUDIO.STOP()
             }
-            else if (this.value=="play" && !PLAYING_AUDIO) {
-                playSequential(plots)
+            else if (this.value=="play" && !AUDIO.isPlaying()) {
+                AUDIO.PLAY([{
+                    start: 0,
+                    duration: audioDuration
+                }])
             }
         }
     });
 
+
+    //////////////////////////// AUDIO SLIDERS ////////////////////////////
+
+    $("#launchSlider").val(AUDIO.launchInterval);
+    $("#launchSliderText").text("Launch interval: " + AUDIO.launchInterval);
+
+    $("#fadeSlider").val(AUDIO.fade);
+    $("#fadeSliderText").text("Fade in/out: " + AUDIO.fade);
+
+
+    $("#launchSlider").on("mousemove", function() {
+        AUDIO.launchInterval = this.value;
+        $("#launchSliderText").text("Launch interval: " + AUDIO.launchInterval);
+    })
+
+    $("#fadeSlider").on("mousemove", function() {
+        AUDIO.fade = this.value;
+        $("#fadeSliderText").text("Fade in/out: " + AUDIO.fade);
+    })
 
 
     //////////////////////////// SCALE SLIDERS ////////////////////////////
@@ -234,11 +268,11 @@ $(document).ready(function() {
     });
 
     $(subScaleSlider).on('input', function() {
-        plots[1].updateScale($(this).val());
+        PLOTS[1].updateScale($(this).val());
     });
 
     $(scaleSlider).on('input', function() {
-        plots[0].updateScale($(this).val());
+        PLOTS[0].updateScale($(this).val());
     });
 
     ////////////////////////////////////////////////////////////////////////
@@ -246,21 +280,19 @@ $(document).ready(function() {
 
     map.on("mousemove", function(ev) {
         if (space_down) {
-            labeled = true;
-            plots[0].categorize(plots[1]);
+            PLOTS[0].categorize(PLOTS[1]);
         }
-        else if (shift_down) {
-            plots[0].updateAudioList(playSegment);
+        else if (shift_down && !SEQUENCE_PLAYING_LOCKED) {
+            PLOTS[0].updateAudioList(AUDIO);
         }
     })
 
     subMap.on('mousemove', function(ev) {
         if (space_down) {
-            labeled = true;
-            plots[1].categorize(plots[0]);
+            PLOTS[1].categorize(PLOTS[0]);
         }
-        else if (shift_down) {
-            plots[1].updateAudioList(setCurrentStartTimes);
+        else if (shift_down && !SEQUENCE_PLAYING_LOCKED) {
+            PLOTS[1].updateAudioList(AUDIO);
         }
     })
 
@@ -279,11 +311,13 @@ $(document).ready(function() {
     $(document).keyup(function(ev) {
         if (space_down) {
             space_down = false;
-            currentSegmentStartTimes = [];
         }
         else if (shift_down) {
             shift_down = false;
-
+            if (!SEQUENCE_PLAYING_LOCKED) {
+                resetSequenceHighlighting()
+                AUDIO.resetHooverPlayStack()
+            }
         } else {
             var c;
             if (ev.keyCode == 48) {
@@ -308,7 +342,7 @@ $(document).ready(function() {
                 return;
             }
 
-            $.each(plots, function() {
+            $.each(PLOTS, function() {
                 this.changeCategory(c)
             });
         }
@@ -319,70 +353,67 @@ $(document).ready(function() {
 
 
     function retrain (arg) {
-        if (!labeled) {
-            alert("Can't retrain, there are no labels")
+
+        $("#loadText").show();
+
+
+        defaultValidPoints = [["id", "startTime(ms)", "label"]]
+        subValidPoints = subData ? [["id", "startTime(ms)", "label"]] : null;
+        for (let i = 0; i < data.data.length; i++) {
+            if (data.data[i].category != 'black') {
+                defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
+
+                // store subdata relative to default
+                if (subValidPoints) {
+                    var idx = data.data[i].start / subData.meta.step_size;
+                    for (var j = idx; j < idx + data.meta.segment_size / subData.meta.segment_size; j++) {
+                        subValidPoints.push([subData.data[j].start/subData.meta.step_size, subData.data[j].start, subData.data[j].category])
+                    }
+                }
+            }
         }
-        else {
-            $("#loadText").show();
 
+        if (defaultValidPoints.length == 0) {
+            alert("Can't retrain, there are no labels")
+            $("#loadText").hide();
+        }
 
-            defaultValidPoints = [["id", "startTime(ms)", "label"]]
-            subValidPoints = subData ? [["id", "startTime(ms)", "label"]] : null;
-            for (let i = 0; i < data.data.length; i++) {
-                if (data.data[i].category != 'black') {
-                    defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
-
-                    // store subdata relative to default
-                    if (subValidPoints) {
-                        var idx = data.data[i].start / subData.meta.step_size;
-                        for (var j = idx; j < idx + data.meta.segment_size / subData.meta.segment_size; j++) {
-                            subValidPoints.push([subData.data[j].start/subData.meta.step_size, subData.data[j].start, subData.data[j].category])
-                        }
-                    }
-                }
-            }
-
-
-            __data = {
-                "defaultPoints": JSON.stringify(defaultValidPoints),
-                "sessionKey": sessionKey,
-                "audioPath": audioPath,
-                "defaultSize": data.meta.segment_size,
-                "defaultStep": data.meta.step_size,
-            }
-
-            if (subData) {
-                $.extend(__data, {
-                    'subPoints': JSON.stringify(subValidPoints),
-                    'subSize': subData.meta.segment_size,
-                    'subStep': subData.meta.step_size
-                });
-            }
-
-            // ensure we compute 2D versions if we have them
-            if('2D' in data.data[0]) {
-                $.extend(__data, {
-                    "2D": ""
-                });
-            }
-
-
-            $.ajax({
-                type: "POST",
-                url: "/retrain",
-                data: __data,
-                dataType: "json",
-                success: function(data, textStatus) {
-                    if (data.redirect) {
-                        // data.redirect contains the string URL to redirect to
-                        window.location.href = data.redirect;
-                    }
-                    else {
-                        console.log("Check ajax request, went to else-statement there");
-                    }
-                }
+        __data = {
+            "defaultPoints": JSON.stringify(defaultValidPoints),
+            "sessionKey": sessionKey,
+            "audioPath": audioPath,
+            "defaultSize": data.meta.segment_size,
+            "defaultStep": data.meta.step_size,
+        }
+        if (subData) {
+            $.extend(__data, {
+                'subPoints': JSON.stringify(subValidPoints),
+                'subSize': subData.meta.segment_size,
+                'subStep': subData.meta.step_size
             });
         }
+        // ensure we compute 2D versions if we have them
+        if('2D' in data.data[0]) {
+            $.extend(__data, {
+                "2D": ""
+            });
+        }
+        $.ajax({
+            type: "POST",
+            url: "/retrain",
+            data: __data,
+            dataType: "json",
+            success: function(data, textStatus) {
+                if (data.redirect) {
+                    // data.redirect contains the string URL to redirect to
+                    window.location.href = data.redirect;
+                }
+                else {
+                    console.log("Check ajax request, went to else-statement there");
+                }
+            }
+        });
+
     }
 })
 

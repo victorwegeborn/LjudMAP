@@ -2,6 +2,8 @@ deck.log.enable()
 deck.log.priority = 1
 
 class Plot {
+
+
     /*
     @param o passes default settings for plot
         data - referense to JSON data object
@@ -13,6 +15,8 @@ class Plot {
         dim - default component display
     */
     constructor(o) {
+        // ensure method calls inside scope
+
         if (!o.id) throw 'must assign string id to plot';
         this._id = o.id;
 
@@ -58,15 +62,12 @@ class Plot {
         this._local_mouse = { x: 0, y: 0 };
         this._picking_radius = o.picking_radius || 30;
 
-        /* audio related tracking */
-        this._highlight_index = -1;
 
         /* attribute triggers */
         this._color_trigger = 0;
-        this._is_playing = false;
+        this._highlight_index = -1;
 
         /* setup callbacks */
-        if (!o.colorSegment) throw 'No callback set on _colorSegmentByIndex'
         this._colorSegmentByIndex = o.colorSegment
 
 
@@ -127,7 +128,8 @@ class Plot {
                         _pos[2]*this._flatten[2]*this._scale];
             },
             getColor: d => {
-                this._colorSegmentByIndex(d.id)
+                if (this._colorSegmentByIndex)
+                    this._colorSegmentByIndex(d.id)
                 return this._getColor(d.category)
             },
             getNormal: d => d.normal,
@@ -137,7 +139,7 @@ class Plot {
             highlightColor: this._highlight_color,
             updateTriggers: {
                 getColor: [this._color_trigger,
-                           this._is_playing],
+                           this._highlight_index],
                 getPosition: [this._current_algorithm,
                               this._flatten[0],
                               this._flatten[1],
@@ -244,11 +246,13 @@ class Plot {
                 var id = pickedPoints[i].object.id;
 
 
-                // other is sub, update accordingly
                 if (ratio) {
+                    // other is sub, update accordingly
                     if (ratio > 1) {
-                        other._data[id*ratio + 0].category = this._current_category;
-                        other._data[id*ratio + 1].category = this._current_category;
+                        var index = id * ratio;
+                        for (var j = index; j < index + ratio; j++) {
+                            other._data[j].category = this._current_category;
+                        }
                     }
 
                     // other is default, update accordingly
@@ -261,21 +265,32 @@ class Plot {
 
             /* re-render canvas after update */
             this.updateColors()
+            if (other) {
+                other.updateColors()
+            }
         }
     }
 
 
-    updateAudioList(callback) {
+    updateAudioList(o) {
         var pointsInRadius = this.renderer.pickMultipleObjects({
             x: this._local_mouse.x, y: this._local_mouse.y,
-            radius: 20,
-            depth: 2,
+            radius: 10,
+            depth: 5,
         });
 
+        var m = pointsInRadius.length, t, i;
+        while (m) {
+            // Pick a remaining element…
+            i = Math.floor(Math.random() * m--);
+            // And swap it with the current element.
+            t = pointsInRadius[m];
+            pointsInRadius[m] = pointsInRadius[i];
+            pointsInRadius[i] = t;
+        }
+
         for (var i = 0; i < pointsInRadius.length; i++) {
-            callback(pointsInRadius[i].object.start, function() {
-                console.log('done')
-            })
+            o.hooverPlay(pointsInRadius[i].object.id, pointsInRadius[i].object.start, this._segment_size)
         }
     }
 
@@ -291,10 +306,13 @@ class Plot {
         this._current_algorithm = a;
         this._redraw()
     }
-
     changeCategory(c) {
         if (this._current_category === c) return;
         this._current_category = c;
+    }
+
+    getCategory() {
+        return this._current_category;
     }
 
     changeDimensions(d) {
@@ -327,7 +345,7 @@ class Plot {
 
 
     _getColor(c) {
-        var alpha = this._is_playing ? 50 : 240;
+        var alpha = this._highlight_index > 0 ? 35 : 240;
         switch (c) {
             case 'black' : return [ 51,  58,  63, alpha]; break;
             case 'blue'  : return [  0, 125, 255, alpha]; break;

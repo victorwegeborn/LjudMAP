@@ -156,6 +156,7 @@ def retrain(valid_points, session_key, old_session_key, segmentation, components
         path_to_new_csv = "static/data/" + session_key + "/" + name + '_' + audio_name.split(".")[0] + ".csv"
         subprocess.call(["cp", path_to_old_csv, path_to_new_csv])
 
+
         # read in old csv file
         result = csv_to_data(path_to_old_csv)
 
@@ -164,12 +165,14 @@ def retrain(valid_points, session_key, old_session_key, segmentation, components
         starts = [i[1] for i in valid_points[name][1:]]
         colors = [i[2] for i in valid_points[name][1:]]
         new_result = []
-        print(starts)
         for i in range(result.shape[0]):
             if i in idxs:
-                print(i)
                 new_result.append(result[i,:])
         new_result = np.array(new_result)
+
+        # get old waveform data
+        if name == 'default':
+            waveform_data = waveform.getJson(output_dir, audio_path, seg['step'], starts[-1] / seg['step'])
 
         # cluster
         cluster_data = {}
@@ -210,50 +213,9 @@ def retrain(valid_points, session_key, old_session_key, segmentation, components
                     'audio_duration': audio_duration,
                     'audio_path': audio_path,
                     'segment_size': seg['size'],
-                    'step_size': seg['step']
+                    'step_size': seg['step'],
+                    'waveform': waveform_data
                 },
                 'data': data,
             }
             json.dump(jsonObj, output_file, separators=(',', ':'))
-
-
-    '''
-    # Read file, and return formatted data
-    result = csv_to_data(path_to_old_htk)
-    new_result = []
-
-    valid_points_indexes = [i[0] for i in valid_points[1:]]
-    start_times = [i[1] for i in valid_points[1:]]
-    colors = [i[2] for i in valid_points[1:]]
-    for i, line in enumerate(result):
-        if i in valid_points_indexes:
-            new_result.append(line)
-
-    new_result = np.array(new_result)
-
-    data = []
-    for i, _tsne, _pca, _som, _umap in cluster.get_cluster_data(new_result):
-        data.append({
-            "id": i,
-            "tsne": _tsne.tolist(),
-            "pca": _pca.tolist(),
-            "som": _som.tolist(),
-            "umap": _umap.tolist(),
-            "start": int(i*segmentation['size']),
-            "active": 1,
-            "category": "black"
-        })
-
-    # Write data to disk in json format
-    with open(output_dir + "data.json", 'w') as output_file:
-        jsonObj = {
-            'meta': {
-                'audio_duration': audio_duration,
-                'audio_path': audio_path,
-                'segment_size': segmentation['size'],
-                'step_size': segmentation['step']
-            },
-            'data': data,
-        }
-        json.dump(jsonObj, output_file, separators=(',', ':'))
-        '''

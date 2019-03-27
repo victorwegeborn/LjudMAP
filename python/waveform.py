@@ -5,7 +5,6 @@ import os
 import numpy
 
 def getJson(output_dir, audio_path, step_size, n_windows):
-
     # load audio data
     with wave.open(audio_path, 'r') as audio:
 
@@ -23,6 +22,7 @@ def getJson(output_dir, audio_path, step_size, n_windows):
         waveform_path = output_dir + 'wavedata.json'
         tmp_audio_path = output_dir + 'tmp.wav'
 
+        # format waveform data
         if running_time != total_time:
 
             # number of windowed frames
@@ -67,6 +67,8 @@ def getJson(output_dir, audio_path, step_size, n_windows):
             d['max'] = int(numpy.amax(d['data']))
             d['min'] = int(numpy.amin(d['data']))
             return d
+
+
 
 
 if __name__ == '__main__':

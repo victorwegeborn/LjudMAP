@@ -27,6 +27,7 @@ var SEGMENT_ALPHA = 0.6;
 var SUB_PER_DEFAULT_SEGMENT;
 var LINE_ALPHA = 0.8;
 var SUB_PER_SEG;
+var SEQUENCE_PLAYING_LOCKED = false;
 
 // initialize sequence map when doc is ready
 var sequenceCanvas = $('#pixiSequence')
@@ -56,6 +57,11 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 var seq_textures = {}
 var seq_segmentHighlights = []
+var seq_is_highlighting = false
+const SEQ_HIGHLIGHT_AT = 0.5;
+const SEQ_HIGHLIGHT_IDLE = 0.25;
+const SEQ_HIGHLIGHT_HOOVER = 0.3;
+
 
 // initialize pixi renderer
 var seq_app = new PIXI.Application({
@@ -112,7 +118,6 @@ $('#pixiSequence').off("mousewheel").on("mousewheel", function (event) {
 function _translate(dx) {
     // get the boundary for the sequence container at last pixel of last segment
     var max_x = -Math.floor(seq_container.width - seq_width);
-
     if (seq_container.x <= 0 && seq_container.x >= max_x) {
         // update container x position
         seq_container.x += dx * 2;
@@ -120,7 +125,6 @@ function _translate(dx) {
         // ensure we never cross position x = 0
         if (seq_container.x > 0) seq_container.x = 0;
         if (seq_container.x < max_x) seq_container.x = max_x;
-
 
         // render transform
         seq_container.updateTransform();
@@ -153,7 +157,7 @@ function _zoom(dy, x){
     }
 };
 
-/* OPTIMIZE */
+
 function drawWaveform() {
     var line = new PIXI.Graphics();
     line.lineStyle(1, getSegmentColor('black'), 1);
@@ -227,7 +231,12 @@ function initSequence() {
             }
         }
 
-        _interactivePlayheadSegment(i, data.data[i].start)
+        _interactiveDefaultPlayheadSegment({
+            index: i,
+            start: data.data[i].start,
+            width: data.meta.segment_size,
+            texture: seq_textures.data_segment,
+        })
     }
 
     // scale to canvas
@@ -240,6 +249,7 @@ function initSequence() {
     drawWaveform()
 }
 
+
 function initPlayhead() {
     var head = new PIXI.Graphics(true);
     head.beginFill(SEQ_PLAYHEAD_COLOR);
@@ -251,37 +261,118 @@ function initPlayhead() {
 }
 
 
-
-function _interactivePlayheadSegment(i, start) {
-    var seg = new PIXI.Sprite.from(seq_textures.data_segment)
+function _interactiveDefaultPlayheadSegment(o) {
+    var seg = new PIXI.Sprite.from(o.texture)
+    var i = o.index
     seg.alpha = 0;
-    seg.x = start;
+    seg.x = o.start;
+    seg.included = false;
+    seg.scale.y = subData ? 2 : 1;
 
     seg.interactive = true;
-    seg.hitArea = new PIXI.Rectangle(0, 0, SEGMENT_SIZE, seq_height + 2)
+    seg.hitArea = new PIXI.Rectangle(0, 0, o.width, seq_height + 2)
     seg.mouseover = function(e) {
-        // add canvas highlighting here
-        showToolTip({start: start}, i, '#tooltip')
-        this.alpha = 0.3;
+
+        showToolTip({start: o.start}, i, '#tooltip')
 
         if(space_down) {
-            console.log('should color')
+            data.data[i].category = PLOTS[0].getCategory();
+            PLOTS[0].updateColors();
+            if (subData) {
+                var index = i * SUB_PER_DEFAULT_SEGMENT;
+                for (var j = index; j < index + SUB_PER_DEFAULT_SEGMENT; j++) {
+                    subData.data[j].category = PLOTS[1].getCategory();
+                }
+                PLOTS[1].updateColors();
+            }
+        }
+
+        if (seq_is_highlighting && !this.included) {
+            this.alpha = SEQ_HIGHLIGHT_AT
+            this.included = true;
+            seq_segmentHighlights.push(this)
+        }
+        else {
+            this.alpha = SEQ_HIGHLIGHT_HOOVER;
         }
     }
     seg.mouseout = function(e) {
-        this.alpha = 0;
+        if (this.included) {
+            this.alpha = SEQ_HIGHLIGHT_IDLE
+        } else {
+            this.alpha = 0
+        }
     }
-    seg.pointerdown = function(e) {
-        // play segment on click
-        var start = e.target.x;
-        var index = start / data.meta.step_size;
-        setSequencePlayheadAt(index)
-        playSegment(start, setSequencePlayheadAt)
+    seg.mousedown = function(e) {
+        if (AUDIO_LOADED) {
+            if (shift_down) {
+                // play portion on click/mark/release
+                seq_is_highlighting = true;
+                seq_segmentHighlights.push(this)
+                this.included = true;
+                this.alpha = SEQ_HIGHLIGHT_AT
+            } else {
+                // play one segment on click
+                var start = e.target.x;
+                console.log(msToTime(start))
+                AUDIO.PLAY([{
+                    start: start,
+                    duration: data.meta.segment_size,
+                    step: data.meta.step_size
+                }])
+            }
+        }
+    }
+    seg.mouseup = function(e) {
+        if (seq_is_highlighting && shift_down) {
+            // add last segment
+            if (!this.included) {
+                this.included = true;
+                seq_segmentHighlights.push(this)
+            }
+
+            SEQUENCE_PLAYING_LOCKED = true;
+            playSequenceHighlights()
+        }
     }
     seq_highlight.addChild(seg)
 }
 
 
+function playSequenceHighlights() {
+    if (seq_segmentHighlights.length > 0) {
+        seq_is_highlighting = false
+
+        var start = N_PX + 1, end = -1;
+        $.each(seq_segmentHighlights, function() {
+            this.alpha = 0.2;
+            this.tint = SEQ_PLAYHEAD_COLOR
+            start = Math.min(start, this.x)
+            end = Math.max(end, this.x)
+        })
+
+
+        AUDIO.PLAY([{
+            start: start,
+            duration: end - start + data.meta.segment_size,
+            step: data.meta.step_size
+        }], resetSequenceHighlighting)
+    }
+}
+
+
+function resetSequenceHighlighting() {
+    if (seq_segmentHighlights.length > 0) {
+        $.each(seq_segmentHighlights, function() {
+            this.alpha = 0;
+            this.tint = SEQ_HIGHLIGHT_COLOR
+            this.included = false;
+        })
+        seq_is_highlighting = false;
+        seq_segmentHighlights = []
+        SEQUENCE_PLAYING_LOCKED = false;
+    }
+}
 
 function _constructTexture(width, height) {
     var segment = new PIXI.Graphics(true);
@@ -292,6 +383,7 @@ function _constructTexture(width, height) {
     return seq_app.renderer.generateTexture(segment)
 }
 
+
 function _constructSprite(texture, container, settings) {
     var sprite = new PIXI.Sprite.from(texture)
     sprite.y = settings.offsetY || 0;
@@ -301,35 +393,33 @@ function _constructSprite(texture, container, settings) {
     container.addChild(sprite)
 }
 
-function _updateSegment(container, i, isDefault) {
+
+function _updateSegment(container, o, i) {
     var segment = container.getChildAt(i)
-    segment.tint = getSegmentColor(data.data[i].category)
+    segment.tint = getSegmentColor(o[i].category)
 }
 
+
 function colorSegmentByIndex(index) {
-    _updateSegment(seq_defaultRects, index, true)
+    _updateSegment(seq_defaultRects, data.data, index)
     // make sure to color subsegments if they exist
-    if (!seq_defaultOnly) {
+    if (subData) {
         var sub_index = index*SUB_PER_DEFAULT_SEGMENT;
         for (var i = sub_index; i < sub_index + SUB_PER_DEFAULT_SEGMENT; i++) {
-            _updateSegment(seq_subRects, i, false)
+            _updateSegment(seq_subRects, subData.data, i)
         }
     }
 }
 
-function colorSubSegmentsByIndex(index) {
-    if (index > data.data.length) return;
-    _updateSegment(seq_subRects, index, false)
-    // get default data index
-    var i = Math.floor(index / SUB_PER_DEFAULT_SEGMENT)
-    _updateSegment(seq_defaultRects, i, true)
-}
 
 
 function setSequencePlayheadAt(i) {
     seq_playhead.position.x = i * data.meta.step_size
 }
 
+function resetSequencePlayhead() {
+    seq_playhead.position.x = 0;
+}
 
 function getSegmentColor(c) {
     switch (c) {

@@ -57,4 +57,4 @@ dependencies:
     - numba==0.42.1
     - pydub==0.23.1
     - umap-learn==0.3.7
-prefix: /Users/victorwegeborn/miniconda3/envs/TDA
+
