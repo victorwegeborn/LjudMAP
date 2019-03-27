@@ -22,7 +22,7 @@ $ brew install audiowaveform
 $ conda env create -f environment.yml
 ```
 
-6. Run application
+6. Run application within web folder
 ```
-$ (TDA) python3.6 web/app.py
+$ (TDA) python3.6 app.py
 ```
