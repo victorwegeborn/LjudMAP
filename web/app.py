@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from flask import Flask, render_template, request, flash, redirect, jsonify
+from flask import Flask, render_template, request, flash, redirect, jsonify, send_file
 from werkzeug.utils import secure_filename
 import subprocess
 import sys
@@ -9,7 +9,6 @@ sys.path.append(os.path.abspath("../python"))
 sys.path.append(os.path.abspath(".."))
 import time
 import audio_processing
-from flask import send_file
 import csv
 import json
 

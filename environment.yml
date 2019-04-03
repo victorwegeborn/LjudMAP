@@ -1,11 +1,14 @@
 name: TDA
-channels:
-  - defaults
 dependencies:
-  - python=3.6.8=haf84260_0
-  - pip=19.0.1=py36_0
+  - pip=19.0.1
+  - python=3.6.8
   - pip:
-    - -r requirements.txt
+    - numpy==1.14.5
+    - scipy==1.1.0
+    - scikit-learn==0.19.1
+    - pandas==0.24.2
+    - flask==1.0.2
+    - werkzeug==0.14.1
     - llvmlite==0.27.1
     - minisom==2.1.4
     - multicoretsne==0.1
