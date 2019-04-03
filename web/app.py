@@ -177,7 +177,7 @@ def load_browser(session_key) -> str:
         else:
             sub_data = False
 
-        return render_template('AudioBrowser.html',
+        return render_template('audioBrowser.html',
                                 data=data,
                                 sub=sub_data,
                                 audioDuration=data['meta']["audio_duration"],

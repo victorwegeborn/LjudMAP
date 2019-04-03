@@ -3,5 +3,6 @@ venv
 .DS_Store
 python/__pycache__
 web/static/uploads
+web/smile.log
 opensmile-2.3.0
 python/configuration/testing
