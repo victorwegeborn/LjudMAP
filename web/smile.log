@@ -1,13 +1,13 @@
-[ 03.04.2019 - 12:54:18 ]
+[ 03.04.2019 - 14:34:56 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 03.04.2019 - 12:54:18 ]
-    (MSG) [2] in SMILExtract : config file is: static/data/1554288857286575/default_config.conf
-[ 03.04.2019 - 12:54:18 ]
+[ 03.04.2019 - 14:34:56 ]
+    (MSG) [2] in SMILExtract : config file is: static/data/155429489536658/default_config.conf
+[ 03.04.2019 - 14:34:56 ]
     (MSG) [2] in cComponentManager : successfully registered 96 component types.
-[ 03.04.2019 - 12:54:18 ]
+[ 03.04.2019 - 14:34:56 ]
     (MSG) [2] in cComponentManager : successfully finished createInstances
                                  (12 component instances were finalised, 1 data memories were finalised)
-[ 03.04.2019 - 12:54:18 ]
+[ 03.04.2019 - 14:34:56 ]
     (MSG) [2] in cComponentManager : starting single thread processing loop
-[ 03.04.2019 - 12:54:24 ]
-    (MSG) [2] in cComponentManager : Processing finished! System ran for 463 ticks.
+[ 03.04.2019 - 14:35:00 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 252 ticks.
