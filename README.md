@@ -1,28 +1,31 @@
 # Temporally Disassembled Audio (TDA)
 
 Install
-------
+-----
+This application requires two external softwares in order to run.
+Get them here:
+1. [openSMILE](https://www.audeering.com/opensmile/) 
+2. [BBC's audiowaveform](https://github.com/bbc/audiowaveform)
+3. [FFMPEG](http://www.ffmpeg.org/) - only needed for .mp3-files
 
-1. Clone repository
-2. Download openSMILE from https://www.audeering.com/opensmile/
-3. Extract openSMILE inside repository folder. Ensure relative path to executable:
+Extract and install openSMILE in the repository directory. Ensure relative path to executable:
 ```
 /Temporally-Disassembled-Audio/opensmile-2.3.0/SMILExtract
 ```
-5. Build openSMILE. [Mac workaround](https://stackoverflow.com/questions/42736091/macos-configure-error-c-compiler-cannot-create-executables)
-4. Install [BBC's audiowaveform](https://github.com/bbc/audiowaveform):
 
-```
-$ brew tap bbc/audiowaveform
-$ brew install audiowaveform
-```
-
-5. Setup conda environment
+Install environment
+------
+Use anaconda or conda to install python dependencies:
 ```
 $ conda env create -f environment.yml
 ```
 
-6. Run application within web folder
+activate environment
 ```
-$ (TDA) python3.6 app.py
+$ source activate TDA
+```
+
+run from within /web
+```
+(TDA) $ python3.6 app.py
 ```
