@@ -79,7 +79,7 @@ def upload_file():
 @app.route('/process_audio', methods=['GET', 'POST'])
 def process_audio() -> str:
     # Check so audio file is included and valid
-    print(json.dumps(request.form, indent=2))
+    # print(json.dumps(request.form, indent=2))
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
