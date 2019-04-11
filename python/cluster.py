@@ -7,6 +7,12 @@ import numpy as np
 import random
 
 
+def run(data, n_components, n_neighbours, metric):
+    print(f'UMAP :: {n_components} components, {n_neighbours} neighbours, {metric}-metric... ', end='')
+    result = convert_range(umap.UMAP(n_components=n_components).fit_transform(data))
+    print('done!')
+    return result
+
 def get_cluster_data(data, n_components=3):
     print(f'Clustering started with {n_components} components.')
 

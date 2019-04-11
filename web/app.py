@@ -16,49 +16,45 @@ import json
 UPLOAD_FOLDER = 'static/uploads/'
 ALLOWED_EXTENSIONS = set(['wav', 'mp3'])
 
-app = Flask(__name__, template_folder='./templates')
-app.secret_key = 'hejhej00'
+app = Flask(__name__, template_folder='templates/')
+app.secret_key = 'barabing'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def parse_request_form(form):
+def parse_request(form):
+
+
+    print(json.dumps(form, indent=2))
+
     features = {}
     segmentation = {}
+    cluster_settings = {}
 
     # this will always be passed to audio processing
     segmentation['default'] = {
-        'size': float(form['radio1']),
-        'step': float(form['radio2'])
+        'size': float(form['segment_size']),
+        'step': float(form['step_size']),
+        'n_songs': form['n_songs'],
     }
 
-    # only pass more segmentation objects if subdivision is checked
+    # <<<<< REMOVE? >>>>>
     if 'sub' in form:
         segmentation['sub'] = {
             'size': float(form['radio1'])/2,
             'step': float(form['radio2'])/2
         }
 
-    # pass on compinent information
-    components = [3] if '2D' not in form else [2,3]
+    cluster_settings = {
+        'metric': ''.join(c.lower() for c in form['metric']),
+        'n_neighbours': int(form['n_neighbours']),
+        'components': [int(form['n_components'])] if form['n_components'] is not 'both' else [2,3]
+    }
 
-    if 'MFCC' in form:
-        print('using mfccs')
-        features['MFCC'] = {}
-        features['MFCC']['coefficients'] = form['mfcc_coefficients']
-        features['MFCC']['delta'] = True if 'mfcc_delta' in form else False
-        features['MFCC']['deltadelta'] = True if 'mfcc_deltadelta' in form else False
+    features['MFCC'] = {}
+    features['MFCC']['coefficients'] = float(form['mfccs'])
+    features['MFCC']['delta'] = True if 'mfcc_delta' in form else False # Always default?
+    features['MFCC']['deltadelta'] = True if 'mfcc_deltadelta' in form else False
 
-    if 'SPECTRAL' in form:
-        print('using spectral')
-        features['SPECTRAL'] = {}
-        features['SPECTRAL']['flux'] = True if 'flux' in form else False
-        features['SPECTRAL']['fluxCentroid'] = True if 'fluxCentroid' in form else False
-        features['SPECTRAL']['centroid'] = True if 'centroid' in form else False
-        features['SPECTRAL']['harmonicity'] = True if 'harmonicity' in form else False
-        features['SPECTRAL']['flatness'] = True if 'flatness' in form else False
-        features['SPECTRAL']['rolloff'] = True if 'rolloff' in form else False
-    print(segmentation)
-    print(features)
-    return segmentation, components, features
+    return segmentation, cluster_settings, features
 
 
 
@@ -81,33 +77,33 @@ def process_audio() -> str:
     # Check so audio file is included and valid
     # print(json.dumps(request.form, indent=2))
     if request.method == 'POST':
-        if 'file' not in request.files:
+        if '0' not in request.files:
             flash('No file part')
             return "<h3>No submitted file. Please go back and choose an audio file.</h3>"
         else:
-            file = request.files['file']
-            if file.filename == '':
-                flash('No selected file')
-                return "<h3>Something went wrong, possibly relating to the name of the file.</h3>"
-            if file and allowed_file(file.filename):
-                session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+            # create folder for this session
+            session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+            subprocess.call(['mkdir', UPLOAD_FOLDER + session_key])
+            print('mkdir ' +  UPLOAD_FOLDER + session_key)
+            # save all files in folder
+            for index, file in request.files.items():
+                print(file.filename)
+                if file.filename == '' or not allowed_file(file.filename):
+                    flash('No selected file')
+                    return "<h3>Something went wrong, possibly relating to the name of the file.</h3>"
+                # secure and store file
                 filename = secure_filename(file.filename)
-                subprocess.call(['mkdir', UPLOAD_FOLDER + session_key])
-                print('mkdir ' +  UPLOAD_FOLDER + session_key)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], session_key + "/" + filename))
                 print(file.filename + " saved")
-            else:
-                print("File extension not allowed")
-                return "<h3>File extension not allowed. Please use WAV or MP3.</h3>"
 
-    segmentation, components, features = parse_request_form(request.form)
-    if not features:
-        flash('No features selected')
-        return "<h3>You did not select any features. Try again.</h3>"
+    # parse and format the form data
+    segmentation, cluster_settings, features = parse_request(request.form)
 
-    audio_processing.main(session_key, segmentation, components, features)
+    # process audio according to passed data
+    audio_processing.main(session_key, segmentation, cluster_settings, features)
 
-    return redirect("/"+session_key)
+    # pass response with redirect url
+    return jsonify(dict(redirect='/' + session_key))
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/retrain', methods=['POST'])
@@ -177,6 +173,8 @@ def load_browser(session_key) -> str:
         else:
             sub_data = False
 
+
+
         return render_template('audioBrowser.html',
                                 data=data,
                                 sub=sub_data,
@@ -186,6 +184,15 @@ def load_browser(session_key) -> str:
 
     else:
         return "<h3>Something went wrong, the files for the this audio session does not exist</h3>"
+
+
+
+@app.route("/batch_upload", methods=["POST"])
+def upload() -> str:
+    print(request.files)
+    return ""
+
+
 
 if __name__ == '__main__':
     #app.run(debug=True)

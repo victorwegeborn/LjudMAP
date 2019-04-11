@@ -2,36 +2,21 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>TDA</title>
+        <title>LjudMAP</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
         <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/style.css') }}>
-        <script src="//code.jquery.com/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.4.0.min.js" integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>-->
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
-        <script type="text/javascript">
-            function showLoadingGif(){
-                $("#loading").show()
-                $("#content").hide()
-            }
-
-            function activateProcessButton(){
-                console.log("hej");
-                $("input[id=submitNewAudio]").prop("disabled", false);
-            }
-
-        </script>
     </head>
-    <body>
-        <div id="loading"></div>
-        <nav class="navbar navbar-expand navbar-dark bg-dark">
+    <body class="bg-dark">
+
+        <nav class="navbar navbar-expand navbar-dark bg-dark shadow" style="z-index: 2;">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="navbar-brand" href="#">TDA</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" style='color:white' href="/">Home</a>
+                    <a class="navbar-brand" href="#">LjudMAP</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" style='color:white' href="#">Documentation</a>
@@ -40,7 +25,7 @@
                     <a class="nav-link" style='color:white' href="https://github.com/victorwegeborn/Temporally-Disassembled-Audio">GitHub</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" style='color: white;' href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Examples
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -64,421 +49,147 @@
             </form>
         </nav>
 
-        <div class="container" id="content">
-            <div class="jumbotron">
-                <h1>Temporally Disassembled Audio</h1>
-                <h5>Explore your audio with unsupervised machine learning</h5>
-            </div>
-            <h5>Upload your audio (wav or mp3)</h5>
+
+        <div class="d-flex align-items-center flex-column" id='welcome'>
+            <div class="fadeBottom mt-auto p-2 h-75"></div>
+        </div>
+
+        <br>
+
+        <!-- Loading gif -->
+        <div id="loading" class="text-center"></div>
+
+        <div class="container" id="content" style="z-index: 2;">
 
             <!-- <form action = "visualizer" method="POST" enctype=multipart/form-data> -->
-            <form action = "process_audio" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <input id="uploadButton" type="file" name="file" onclick="activateProcessButton()">
-                </div>
-            <br>
+            <form action="process_audio" method="POST" enctype="multipart/form-data" id='mainForm' novalidate>
 
-            <!-- Segmentation card -->
-            <div class="card border-dark mb-3" id="settings_card">
-                <h5 class="card-header">
-                    Segmentation and Visualization
-                </h5>
-                <div class="card-body">
+                <div class="row">
+                    <div class="col-9">
+                        <div class="card text-left">
+                            <div class="card-header bg-light">
+                                Audio List
+                            </div>
+                            <div class="card-body py-0">
 
-                    <div id="sizeParameter">
-                        <p class="font-weight-bold">Segment size</p>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio1" value="25">
-                            <div class="state">
-                                <label>25ms</label>
+                                <table class="table table-sm small my-0">
+                                  <tbody id='fileDisplay'>
+
+                                  </tbody>
+                                </table>
+
                             </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio1" value="50">
-                            <div class="state">
-                                <label>50ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio1" value="100">
-                            <div class="state">
-                                <label>100ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio1" value="250">
-                            <div class="state">
-                                <label>250ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio1" value="500">
-                            <div class="state">
-                                <label>500ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio1" value="1000" checked>
-                            <div class="state">
-                                <label>1000ms</label>
+                            <div class="card-footer row text-muted px-4 pb-0">
+                                <p class="ml-3"><small>
+                                    Currently supports .wav and .mp3 only
+                                </small></p>
+                                <p class="ml-auto mr-3"><small id='fileCounter'>
+                                    0 files
+                                </small></p>
+                                <p><small id='sizeCounter'>
+                                    0 MB
+                                </small></p>
                             </div>
                         </div>
                     </div>
-                    <br>
-                    <div id="stepParameter">
-                        <p class="font-weight-bold">Step size</p>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="10">
-                            <div class="state">
-                                <label>10ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="25">
-                            <div class="state">
-                                <label>25ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="50">
-                            <div class="state">
-                                <label>50ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="100">
-                            <div class="state">
-                                <label>100ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="250">
-                            <div class="state">
-                                <label>250ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="500">
-                            <div class="state">
-                                <label>500ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="1000" checked>
-                            <div class="state">
-                                <label>1000ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="2500">
-                            <div class="state">
-                                <label>2500ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="5000">
-                            <div class="state">
-                                <label>5000ms</label>
-                            </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="radio2" value="10000">
-                            <div class="state">
-                                <label>10000ms</label>
-                            </div>
-                        </div>
-                    </div>
-                    <br>
-                    <p class="font-weight-bold">Cluster settings</p>
-                    <div class="pretty p-default p-round">
-                        <input class="form-check-input" type="checkbox" value="" name="sub" id="sub">
-                        <div class="state">
-                            <label>Subdivide segmentation</label>
-                        </div>
-                    </div>
 
-                    <div class="pretty p-default p-round">
-                        <input class="form-check-input" type="checkbox" value="" name="2D" id="sub">
-                        <div class="state">
-                            <label>2D cluster component</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <div class="col-3">
+                        <div class="card bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header text-center my-0 ">
+
+                                <!-- settings navigation -->
+                                <ul class="nav nav-tabs card-header-tabs" id="settings-tab" role="tablist">
+                                  <li class="nav-item w-50">
+                                    <a class="nav-link active" id="feature-tab" data-toggle="tab" href="#feature" role="tab" aria-controls="feature" aria-selected="true">features</a>
+                                  </li>
+                                  <li class="nav-item w-50">
+                                    <a class="nav-link" id="cluster-tab" data-toggle="tab" href="#cluster" role="tab" aria-controls="cluster" aria-selected="false">Cluster</a>
+                                  </li>
+                                </ul>
 
 
-
-            <div class="d-flex justify-content-center">
-            <p class="card-text "><small class="text-muted">Smaller resolutions takes longer to process. Adding a subdivision and 2D components also increases processing time.</small></p>
-            </div>
-            <hr>
-
-            <div id="featureParameter">
-                <p class="font-weight-bold">Features</p>
-
-                <!-- MFCC CARD -->
-                <div class="card border-dark mb-3" id="mfcc_card">
-                    <h5 class="card-header">
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="MFCC" id="mfccs" checked>
-                            <div class="state">
-                                <label>Mfcc</label>
                             </div>
-                        </div>
-                    </h5>
-                    <div class="card-body">
-                        <p class="card-text">Number of coefficients</p>
+                            <div class="card-body bg-white ">
+                                <div class="tab-content" id="settings-content">
+                                    <div class="tab-pane fade show active" id="feature" role="tabpanel" aria-labelledby="feature-tab">
 
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="2" >
-                            <div class="state">
-                                <label>2</label>
-                            </div>
-                        </div>
+                                        <!-- Segmentation size -->
+                                        <div class="form-group ">
+                                            <label class="small" for="segment">Segment size [ms]</label>
+                                            <input class="form-control form-control-sm" type="number" value="1000" id='segment' min="20" max="5000" required>
+                                            <div class="invalid-feedback small">
+                                                Uniform segment size must be between 50 ms to 5000 ms
+                                            </div>
+                                        </div>
 
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="3" >
-                            <div class="state">
-                                <label>3</label>
-                            </div>
-                        </div>
+                                        <!-- Step size -->
+                                        <div class="form-group ">
+                                            <label class="small" for="step">Step size [ms]</label>
+                                            <input class="form-control form-control-sm" type="number" value="1000" id='step' min="20" max="5000" required>
+                                            <div class="invalid-feedback">
+                                                Uniform step size must be between 50 ms to 5000 ms
+                                            </div>
+                                        </div>
 
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="4" >
-                            <div class="state">
-                                <label>4</label>
-                            </div>
-                        </div>
+                                        <!-- Number of MFCC's -->
+                                        <div class="form-group mb-0">
+                                            <label class="small" for="mfcss">MFCC's</label>
+                                            <input class="form-control form-control-sm" type="number" value="13" id='mfccs' min="0" max="20" required>
+                                            <div class="invalid-feedback">
+                                                Number of Mel-frequency cepstrums must be between 0 and 20
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="cluster" role="tabpanel" aria-labelledby="profile-tab">
 
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="5" >
-                            <div class="state">
-                                <label>5</label>
-                            </div>
-                        </div>
+                                        <!-- Number of components -->
+                                        <div class="form-group">
+                                            <label class="small" for="components">Components</label>
+                                            <select class="custom-select custom-select-sm small w-100" id="components" required>
+                                                <option>3</option>
+                                                <option>2</option>
+                                                <option>Both</option>
+                                            </select>
+                                        </div>
 
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="6" >
-                            <div class="state">
-                                <label>6</label>
-                            </div>
-                        </div>
+                                        <!-- METRIC SELECTION -->
+                                        <div class="form-group">
+                                            <label class="small" for="metric">Metric</label>
+                                            <select class="custom-select custom-select-sm small w-100" id="metric" required>
+                                                <option>Euclidean</option>
+                                                <option>Manhattan</option>
+                                                <option>Cosine</option>
+                                                <option>Correlation</option>
+                                            </select>
+                                        </div>
 
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="7" >
-                            <div class="state">
-                                <label>7</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="8" >
-                            <div class="state">
-                                <label>8</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="9" >
-                            <div class="state">
-                                <label>9</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="10" >
-                            <div class="state">
-                                <label>10</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="11" >
-                            <div class="state">
-                                <label>11</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="12" checked>
-                            <div class="state">
-                                <label>12</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="radio" name="mfcc_coefficients" value="13" >
-                            <div class="state">
-                                <label>13</label>
-                            </div>
-                        </div>
-
-                        <br>
-                        <br>
-                        <p class="card-text">Delta/Acceleration coefficients</p>
-
-                        <div class="pretty p-default p-round">
-                            <input type="checkbox" name="mfcc_delta" value="" checked>
-                            <div class="state">
-                                <label>Delta</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input type="checkbox" name="mfcc_deltadelta" value="" checked>
-                            <div class="state">
-                                <label>Acceleration (Delta-Delta)</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-                <!-- SPECTRAL CARD -->
-                <div class="card border-dark mb-3" id="spectral_card">
-                    <h5 class="card-header">
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="SPECTRAL" id="spectrals" checked>
-                            <div class="state">
-                                <label>Spectral</label>
-                            </div>
-                        </div>
-                    </h5>
-                    <div class="card-body">
-
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="flux" checked>
-                            <div class="state">
-                                <label>Flux</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="fluxCentroid" checked>
-                            <div class="state">
-                                <label>Flux Centroid</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="centroid" checked>
-                            <div class="state">
-                                <label>Centroid</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="harmonicity" checked>
-                            <div class="state">
-                                <label>Harmonicity</label>
-                            </div>
-                        </div>
-
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="flatness" checked>
-                            <div class="state">
-                                <label>Flatness</label>
-                            </div>
-                        </div>
-
-                        <!--
-                        <div class="pretty p-default p-round">
-                            <input class="form-check-input" type="checkbox" value="" name="rollOff" checked>
-                            <div class="state">
-                                <label>rollOff (0.8)</label>
-                            </div>
-                        </div>
-                        -->
-
-                        <!--
-                        <br>
-                        <br>
-                        <p class="card-text">Spectral band energy</p>
-
-                        <div class="row">
-                            <div class="col-sm-4">
-                            <div class="card border-dark mb-3">
-                                <div class="card-header">Low</div>
-                                <div class="card-body text-dark">
-                                    <h5 class="card-title">Dark card title</h5>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                        <!-- Number of neighbours -->
+                                        <div class="form-group">
+                                            <label class="small" for="neighbours">Neighbours</label>
+                                            <input class="form-control form-control-sm" type="number" value="15" id='neighbours' min="1" max="200" required>
+                                            <div class="invalid-feedback">
+                                                Number of neighbours must be between 1 and 200
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            </div>
-
-                            <div class="col-sm-4">
-                            <div class="card border-dark mb-3">
-                                <div class="card-header">Mid</div>
-                                <div class="card-body text-dark">
-                                    <h5 class="card-title">Dark card title</h5>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                </div>
-                            </div>
-                            </div>
-
-                            <div class="col-sm-4">
-                            <div class="card border-dark mb-3">
-                                <div class="card-header">High</div>
-                                <div class="card-body text-dark">
-                                    <h5 class="card-title">Dark card title</h5>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                </div>
-                            </div>
-                            </div>
                         </div>
-                        -->
 
+                        <div class="upload btn btn-info my-0">
+                            upload file(s)
+                            <input class="uploadButton w-100 h-100" id="uploadButton" type="file" name="file" multiple>
+                        </div>
+
+                        <input type="submit" id="submitNewAudio" class="btn btn-info w-50" value="analyse" disabled>
 
                     </div>
                 </div>
 
-            </div>
-            <br>
-            <input type="submit" id="submitNewAudio" class="btn btn-info" value="Process audio" onclick="showLoadingGif()">
-          </form>
-          <br>
-          <br>
+            </form>
         </div>
-        <script>
-            // Set defaults
-            var mfccs = true;
-            var spectr = true;
-
-            var mfcc_overlay = $('<div />').addClass('overlay')
-            var spectral_overlay = $('<div />').addClass('overlay')
-
-            $('#mfccs').on("click", function() {
-                var mfcc_card = $('#mfcc_card')
-                if (mfccs) {
-                    mfccs = false;
-                    mfcc_card.removeClass('border-dark')
-                    mfcc_card.append(mfcc_overlay)
-                    mfcc_card.find('.card-body').addClass('fadeContent')
-                } else {
-                    mfccs = true;
-                    mfcc_card.addClass('border-dark')
-                    mfcc_overlay.remove()
-                    mfcc_card.find('.card-body').removeClass('fadeContent')
-                }
-            })
-
-            $('#spectrals').on("click", function() {
-                var spectral_card = $('#spectral_card')
-                if (spectr) {
-                    spectr = false;
-                    spectral_card.removeClass('border-dark')
-                    spectral_card.append(spectral_overlay)
-                    spectral_card.find('.card-body').addClass('fadeContent')
-                } else {
-                    spectr = true;
-                    spectral_card.addClass('border-dark')
-                    spectral_overlay.remove()
-                    spectral_card.find('.card-body').removeClass('fadeContent')
-                }
-            })
 
 
-        </script>
+        <script src="{{ url_for('static', filename='js/Index.js') }}"></script>
     </body>
 </html>

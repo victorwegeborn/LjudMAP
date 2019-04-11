@@ -57,7 +57,7 @@ class Plot {
 
 
         /* state tracking */
-        this._current_algorithm = o.algorithm || 'tsne';
+        this._current_algorithm = 'umap';
         this._current_category = 'black';
         this._current_dim = o.dim || '3D';
         this._flatten = [1, 1, 1];

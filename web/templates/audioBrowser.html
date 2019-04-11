@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
 	<meta charset="UTF-8">
-    <title>TDA</title>
+    <title>LjudMAP</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
     <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/style.css') }}>
@@ -30,7 +30,7 @@
 				<nav class="navbar navbar-expand navbar-dark bg-dark w-100 shadow" style="z-index: 99;">
 			    	<ul class="navbar-nav mr-auto">
 						<li class="nav-item">
-		    			<a class="navbar-brand" href="#">TDA</a>
+		    			<a class="navbar-brand" href="#">LjudMAP</a>
 		                </li>
 		                <li class="nav-item">
 		                    <a class="nav-link" style='color:white' href="/">Home</a>
@@ -100,16 +100,17 @@
 						<small class="text-muted">Label points by holding <kbd>space</kbd> while hoovering over points.</small>
 					</div>
 					<hr>
-					<h6>Algorithm</h6>
+
+					<h6>Components</h6>
 		            <div id="buttonGroup2">
 						<div class="btn-group-vertical btn-block">
-							<button type="button" value="tsne" class="btn btn-light btn-sm">t-SNE</button>
-			                <button type="button" value="pca" class="btn btn-light btn-sm">PCA</button>
+							<!--<button type="button" value="tsne" class="btn btn-light btn-sm">t-SNE</button>-->
+			                <!--<button type="button" value="pca" class="btn btn-light btn-sm">PCA</button>-->
 			                <!--<button type="button" value="som" class="btn btn-block btn-dark btn-sm">SOM</button>-->
-			                <button type="button" value="umap" class="btn btn-light btn-sm">UMAP</button>
+			                <!--<button type="button" value="umap" class="btn btn-light btn-sm">UMAP</button>-->
 							<div class="btn-group">
-								<button type="button" value="2D" class="btn btn-light btn-sm" id='btn-2D'>2D</button>
-								<button type="button" value="3D" class="btn btn-light btn-sm active" id='btn-3D'>3D</button>
+								<button type="button" value="2D" class="btn btn-light btn-sm" id='btn-2D'>2</button>
+								<button type="button" value="3D" class="btn btn-light btn-sm active" id='btn-3D'>3</button>
 							</div>
 						</div>
 			        </div>

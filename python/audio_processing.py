@@ -25,7 +25,7 @@ def csv_to_data(filename):
     csv_file = pandas.read_csv(filename, sep=';', header=1, float_precision='round_trip')
     return minmax_scale(csv_file.values, axis=0)
 
-def main(session_key, segmentation, components, features):
+def main(session_key, segmentation, cluster_settings, features):
 
     # Get audiofilename
     audio_dir = "static/uploads/" + session_key + "/"
@@ -64,7 +64,6 @@ def main(session_key, segmentation, components, features):
 
     # compute all clusters given number of components and data
     for name, seg in segmentation.items():
-        print(seg)
         # Read file, and return formatted data
         result = csv_to_data(seg['path'])
         n_points = result.shape[0]
@@ -74,39 +73,34 @@ def main(session_key, segmentation, components, features):
         if name == 'default':
             waveform_data = waveform.getJson(output_dir, audio_path, seg['step'], n_points)
 
-        cluster_data = {}
-        for c in components:
-            cluster_data[f'{c}D'] = cluster.get_cluster_data(result, c)
-
-
+        # start clustering for each component
         data = []
-        last_start = 0;
-        #for i, _tsne, _pca, _som, _umap in cluster_data['3D']:
-        for i, _tsne, _pca, _umap in cluster_data['3D']:
-            last_start = int(i*seg['step']);
-            data.append({
-                'id': i,
-                '3D': {
-                    "tsne": _tsne.tolist(),
-                    "pca": _pca.tolist(),
-                    #"som": _som.tolist(),
-                    "umap": _umap.tolist(),
-                },
-                'start': last_start,
-                'active': 1,
-                'category': 'black'
-            })
+        first = True
+        for c in cluster_settings['components']:
+            result = cluster.run(result, c, cluster_settings['n_neighbours'], cluster_settings['metric'])
+            print(result.shape)
+            print(type(result))
+            for idx, row in enumerate(result):
+                # if this is the first of two components
+                if first:
+                    data.append({
+                        'id': idx,
+                        f'{c}D': {
+                            'umap': row.tolist()
+                            # tsne, som, pca also valid
+                        },
+                        'start': int(idx*seg['step']),
+                        'active': 1,
+                        'category': 'black'
+                    })
+                else:
+                    # add other component data to each object
+                    data[idx][f'{c}D'] = {
+                        'umap': row.tolist()
+                        # tsne, som, pca also valid
+                    }
+            first = False;
 
-
-        if '2D' in cluster_data:
-            #for i, _tsne, _pca, _som, _umap in cluster_data['2D']:
-            for i, _tsne, _pca, _umap in cluster_data['2D']:
-                data[i]['2D'] = {
-                    "tsne": _tsne.tolist(),
-                    "pca": _pca.tolist(),
-                    #"som": _som.tolist(),
-                    "umap": _umap.tolist(),
-                }
 
         # Write data to disk in json format
         with open(output_dir + f'{name}_' + "data.json", 'w') as output_file:
