@@ -61,12 +61,11 @@
 
         <div class="container" id="content" style="z-index: 2;">
 
-            <!-- <form action = "visualizer" method="POST" enctype=multipart/form-data> -->
             <form action="process_audio" method="POST" enctype="multipart/form-data" id='mainForm' novalidate>
 
                 <div class="row">
                     <div class="col-9">
-                        <div class="card text-left">
+                        <div class="card text-left rounded-0">
                             <div class="card-header bg-light">
                                 Audio List
                             </div>
@@ -94,7 +93,7 @@
                     </div>
 
                     <div class="col-3">
-                        <div class="card bg-light mb-3" style="max-width: 18rem;">
+                        <div class="card bg-light mb-3 rounded-0" style="max-width: 18rem;">
                             <div class="card-header text-center my-0 ">
 
                                 <!-- settings navigation -->
@@ -116,7 +115,7 @@
                                         <!-- Segmentation size -->
                                         <div class="form-group ">
                                             <label class="small" for="segment">Segment size [ms]</label>
-                                            <input class="form-control form-control-sm" type="number" value="1000" id='segment' min="20" max="5000" required>
+                                            <input class="form-control form-control-sm " type="number" value="1000" id='segment' min="20" max="5000" required>
                                             <div class="invalid-feedback small">
                                                 Uniform segment size must be between 50 ms to 5000 ms
                                             </div>
@@ -176,12 +175,12 @@
                             </div>
                         </div>
 
-                        <div class="upload btn btn-info my-0">
+                        <div class="upload btn btn-info my-0 rounded-0">
                             upload file(s)
                             <input class="uploadButton w-100 h-100" id="uploadButton" type="file" name="file" multiple>
                         </div>
 
-                        <input type="submit" id="submitNewAudio" class="btn btn-info w-50" value="analyse" disabled>
+                        <input type="submit" id="submitNewAudio" class="btn btn-info w-50 rounded-0" value="analyse" disabled>
 
                     </div>
                 </div>

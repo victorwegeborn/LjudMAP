@@ -37,8 +37,6 @@ class Plot {
         this._segment_step = o.meta.step_size;
         this._npoints = this._data.length;
 
-        /* set tooltip element string */
-        this._tooltip = o.tooltip;
 
         /* initialize view state */
         this._initial_view_state = o.initial_view_state || {
@@ -162,7 +160,7 @@ class Plot {
             onHover: info => {
                  this._local_mouse.x = info.x,
                  this._local_mouse.y = info.y;
-                 showToolTip(info.object, info.index, this._tooltip)
+                 updateTimeAndIndexDisplay(info.object, info.index)
              }
         });
 
@@ -344,7 +342,7 @@ class Plot {
 }
 
 
-
+/*
 function showToolTip(object, index, target) {
     const el = $(target);
     if (object) {
@@ -355,3 +353,4 @@ function showToolTip(object, index, target) {
         el.css('display', 'none')
     }
 }
+*/

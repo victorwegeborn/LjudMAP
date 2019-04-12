@@ -14,14 +14,20 @@ html, body {
 
 
 #sidebar {
-    overflow-y: scroll;
-    position: relative;
+    position: absolute;
     z-index: 1;
+}
+
+#timeIndexDisplayWrapper {
 }
 
 #welcome {
     height: 18em;
     background-image: url("/static/img/bg.png");
+}
+
+.meta {
+    font-family: 'Cutive Mono', monospace;
 }
 
 .fadeBottom {

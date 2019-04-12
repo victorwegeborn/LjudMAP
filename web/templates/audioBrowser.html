@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 	<script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
-
+	<link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
 
 
 	<!-- USED FOR DECK.GL -->
@@ -27,38 +27,66 @@
 
 			<!-- HEADER -->
 			<div class="row flex-shrink-0">
-				<nav class="navbar navbar-expand navbar-dark bg-dark w-100 shadow" style="z-index: 99;">
+				<nav class="navbar navbar-expand navbar-dark bg-dark w-100 shadow py-1" style="z-index: 99;">
 			    	<ul class="navbar-nav mr-auto">
 						<li class="nav-item">
 		    			<a class="navbar-brand" href="#">LjudMAP</a>
 		                </li>
-		                <li class="nav-item">
-		                    <a class="nav-link" style='color:white' href="/">Home</a>
-		                </li>
-		                <li class="nav-item">
-		                    <a class="nav-link" style='color:white' href="#">Documentation</a>
-		                </li>
-		                <li class="nav-item">
-		                    <a class="nav-link" style='color:white' href="https://github.com/victorwegeborn/Temporally-Disassembled-Audio">GitHub</a>
-		                </li>
+
+
+						<!-- DROW DOWN -->
+ 		                <li class="nav-item dropdown">
+ 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="clusterNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+ 		                        Clustering
+ 		                    </a>
+ 		                    <div class="dropdown-menu bg-dark px-3 text-white" aria-labelledby="clusterNavbarDropdown">
+ 								<div style="width: 10em;">
+
+
+									<p class="small mb-0">Re-train</p>
+
+									<div class="btn-group-vertical btn-block" id="buttonGroup5">
+								   		<button type="button" value="lab" class="btn btn-dark btn-sm">labeled</button>
+									</div>
+
+								   	<hr class="mb-1">
+
+								   	<p class="small mb-0">Export</p>
+								   	<div id="buttonGroup4" >
+									   	<button type="button" value="csv" class="btn btn-block btn-dark btn-sm">CSV</button>
+								   	</div>
+ 					            </div>
+ 							</div>
+ 		                </li>
+
+
+					   	<!-- AUDIO DROW DOWN -->
 		                <li class="nav-item dropdown">
-		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		                        Examples
+		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="audioNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		                        Audio
 		                    </a>
-		                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-								<h6 class="dropdown-header">Northlane - Rot (Only Drums)</h6>
-		                        <a class="dropdown-item" href="/1553692917264759">[1000 ms, 1000 ms] [2D + sub]</a>
-								<a class="dropdown-item" href="/1553693052387106">[500 ms, 250 ms] [2D + sub]</a>
-								<h6 class="dropdown-header">Stranger Moth</h6>
-		                        <a class="dropdown-item" href="/15536910341483772">[1000 ms, 1000 ms]</a>
-								<a class="dropdown-item" href="/1553691168377001">[1000 ms, 500 ms] [2D + sub]</a>
-								<a class="dropdown-item" href="/1553691711220479">[250 ms, 100 ms] [2D + sub]</a>
-								<h6 class="dropdown-header">Flute</h6>
-		                        <a class="dropdown-item" href="/15536941391405509">[1000 ms, 1000 ms] [2D]</a>
-								<a class="dropdown-item" href="/15536954027217221">[1000 ms, 1000 ms] [2D] Re-clustered</a>
+		                    <div class="dropdown-menu bg-dark px-3 text-white" aria-labelledby="audioNavbarDropdown">
+								<div id="audioSettings" style="width: 10em;">
+
+					                <p id="launchSliderText" class="small mb-0"></p>
+					                <div class="slidecontainer">
+					                    <input type="range" min="10" max="1000" value="250" step="10" class="form-control-range menu-slider" id="launchSlider">
+					                </div>
+					                <p id="fadeSliderText" class="small mb-0 mt-3"></p>
+					                <div class="slidecontainer">
+					                    <input type="range" min="0" max="500" value="250" step="10" class="form-control-range" id="fadeSlider">
+					                </div>
+
+									<div class="justify-content-center mt-2">
+										<small class="text-muted">Play segments by holding <kbd>shift</kbd> while hoovering over points.</small>
+									</div>
+
+					            </div>
 							</div>
 		                </li>
 		            </ul>
+
+
 		            <a class="nav-link" id="keyLink" style='color:white'>ID: {{session_key}}</a>
 		            <form class="form-inline my-2 my-lg-0" action="goByKey" method="POST" enctype=multipart/form-data>
 		                <input class="form-control mr-sm-2" name="id" type="search" placeholder="Enter id" aria-label="Search">
@@ -69,102 +97,21 @@
 
 			<!-- CONTENT -->
 			<div class="row flex-grow-1">
-				<div class="col-2 bg-dark text-white mh-100 px-5 py-3" id="sidebar" style="z-index: 4; overflow-y: scroll;">
-		            <h6>Label</h6>
+				<div class="bg-transparent text-white p-1 py-3" id="sidebar" style="width: 40px; z-index: 1;">
 	                <div>
-		               <div id="buttonGroup1">
-
-						<div class="btn-group-vertical btn-block">
-
-							<button type="button" value="black" class="btn-block btn btn-light btn-sm">None</button>
-
-							<div class="btn-group btn-group-sm">
-								<button type="button" value="blue" class="btn btn-primary btn-sm"><text style="font-size: 11px;">1</text></button>
-								<button type="button" value="green" class="btn btn-success btn-sm"><text style="font-size: 11px;">2</text></button>
-								<button type="button" value="yellow" class="btn btn-warning btn-sm"><text style="font-size: 11px;">3</text></button>
+		              	<div id="buttonGroup1">
+							<div class="btn-group-vertical btn-block mt-3" data-toggle="tooltip" title="Hold down space and hover over points to label" data-placement="right" data-delay='{ "show": 1000, "hide": 100 }'>
+								<button type="button" value="black"  class="btn btn-dark    btn-sm "><text style="font-size: 11px;">-</text></button>
+								<button type="button" value="blue"   class="btn btn-primary btn-sm rounded-0"><text style="font-size: 11px;">1</text></button>
+								<button type="button" value="green"  class="btn btn-success btn-sm rounded-0"><text style="font-size: 11px;">2</text></button>
+								<button type="button" value="yellow" class="btn btn-warning btn-sm rounded-0"><text style="font-size: 11px;">3</text></button>
+								<button type="button" value="red"    class="btn btn-danger  btn-sm rounded-0"><text style="font-size: 11px;">4</text></button>
+								<button type="button" value="purple" class="btn btn-cat1    btn-sm rounded-0"><text style="font-size: 11px;">5</text></button>
+								<button type="button" value="orange" class="btn btn-cat2    btn-sm rounded-0"><text style="font-size: 11px;">6</text></button>
+								<button type="button" value="teal"   class="btn btn-cat3    btn-sm rounded-0"><text style="font-size: 11px;">7</text></button>
+								<button type="button" value="brown"  class="btn btn-cat4    btn-sm "><text style="font-size: 11px;">8</text></button>
 							</div>
-
-							<div class="btn-group btn-group-sm">
-								<button type="button" value="red" class="btn btn-danger btn-sm"><text style="font-size: 11px;">4</text></button>
-								<button type="button" value="purple" class="btn btn-cat1 btn-sm"><text style="font-size: 11px;">5</text></button>
-								<button type="button" value="orange" class="btn btn-cat2 btn-sm"><text style="font-size: 11px;">6</text></button>
-							</div>
-
-							<div class="btn-group btn-group-sm">
-								<button type="button" value="teal" class="btn btn-cat3 btn-sm"><text style="font-size: 11px;">7</text></button>
-								<button type="button" value="brown" class="btn btn-cat4 btn-sm"><text style="font-size: 11px;">8</text></button>
-							</div>
-						</div>
-	                </div>
-					<div class="justify-content-center" style="margin-top: 3px;">
-						<small class="text-muted">Label points by holding <kbd>space</kbd> while hoovering over points.</small>
-					</div>
-					<hr>
-
-					<h6>Components</h6>
-		            <div id="buttonGroup2">
-						<div class="btn-group-vertical btn-block">
-							<!--<button type="button" value="tsne" class="btn btn-light btn-sm">t-SNE</button>-->
-			                <!--<button type="button" value="pca" class="btn btn-light btn-sm">PCA</button>-->
-			                <!--<button type="button" value="som" class="btn btn-block btn-dark btn-sm">SOM</button>-->
-			                <!--<button type="button" value="umap" class="btn btn-light btn-sm">UMAP</button>-->
-							<div class="btn-group">
-								<button type="button" value="2D" class="btn btn-light btn-sm" id='btn-2D'>2</button>
-								<button type="button" value="3D" class="btn btn-light btn-sm active" id='btn-3D'>3</button>
-							</div>
-						</div>
-			        </div>
-		            <hr>
-
-					<!--
-					<h6 id="layerText">Layer: 1</h6>
-						<input style="width: 100px;" type="range" step="1" class="form-control-range py-0" id="layerSlider">
-					<hr>
-					-->
-
-		                <h6>Cluster</h6>
-			            <div class="btn-group-vertical btn-block" id="buttonGroup5">
-		                	<button type="button" value="lab" class="btn btn-light btn-sm">labeled</button>
-							<!--<button type="button" value="inv" class="btn btn-light btn-sm"></button>-->
-			            </div>
-						<hr>
-		                <h6>Export</h6>
-		                <div id="buttonGroup4" >
-		                	<button type="button" value="csv" class="btn btn-block btn-light btn-sm">CSV</button>
-			            </div>
-			            <hr>
-
-		            </div>
-
-
-					<div id="audioSettings" class="top-buffer">
-		                <h4>Audio settings</h4>
-						<div class="justify-content-center" style="margin-top: 3px;">
-							<small class="text-muted">Play segments by holding <kbd>shift</kbd> while hoovering over points.</small>
-						</div>
-		                <h6 id="launchSliderText" class="top-buffer-sm"></h6>
-		                <div class="slidecontainer">
-		                    <input type="range" min="10" max="1000" value="250" step="10" class="form-control-range" id="launchSlider">
-		                </div>
-		                <h6 id="fadeSliderText" class="top-buffer-sm"></h6>
-		                <div class="slidecontainer">
-		                    <input type="range" min="0" max="500" value="250" step="10" class="form-control-range" id="fadeSlider">
-		                </div>
-						<!--
-					    <h6 id="gradientSliderText" class="top-buffer-sm"></h6>
-		                <div class="slidecontainer">
-		                    <input type="range" min="0" max="100" value="50" step="10" class="form-control-range" id="gradientSlider">
-		                </div>
-					-->
-		                <h6 id="paddingSliderText" class="top-buffer-sm"></h6>
-		                <div class="top-buffer text-center">
-		                    <img id="loading-sm" src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif">
-		                </div>
-						<h6>Median filter value</h6>
-		                <div id="medianFilterValueBox">
-		                	<input type="number" class="w-100" id="medianfilterValue" value=2>
-
-			            </div>
+	                	</div>
 		            </div>
 				</div>
 
@@ -174,18 +121,25 @@
 					<div class="d-flex flex-column h-100">
 						<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 my-0 bar flex-shrink-0 flex-grow-0" id="mapHeader">
 
-							<span class="badge badge-dark">Playback</span>
 							<div class="btn-group" id="buttonGroup6">
-								<button type="button" value="play" class="btn btn-dark btn-sm py-0 mt-1"><ion-icon class="playback" name="play"></ion-icon></button>
-								<button type="button" value="pause" class="btn btn-dark btn-sm py-0 mt-1"><ion-icon class="playback" name="pause"></ion-icon></button>
-								<button type="button" value="stop" class="btn btn-dark btn-sm py-0 mt-1"><ion-icon class="playback" name="square"></ion-icon></button>
+								<button type="button" value="play" class="btn btn-dark btn-sm py-0 my-auto rounded-0"><ion-icon class="playback text-light mt-1" name="play"></ion-icon></button>
+								<button type="button" value="pause" class="btn btn-dark btn-sm py-0 my-auto rounded-0"><ion-icon class="playback text-light mt-1" name="pause"></ion-icon></button>
+								<button type="button" value="stop" class="btn btn-dark btn-sm py-0 my-auto rounded-0"><ion-icon class="playback text-light mt-1" name="square"></ion-icon></button>
 							</div>
+
+							<span class="ml-4 badge badge-light rounded-0 meta" id="timeDisplay" style="width: 10em;">
+									00:00:00.000
+							</span>
+
+							<span class="badge badge-light ml-2 rounded-0 meta" id="indexDisplay" style="width: 10em;">
+									index: 00000
+							</span>
+
 							<div class="mr-auto"> </div>
 
 							<div class="btn-group">
 								<button type="button" value="refocus" class="btn btn-dark btn-sm py-0 mb-0" id="toggleMeta">Metadata</button>
 							</div>
-
 						</nav>
 
 						<div class="row my-0 py-0 mapCanvas flex-fill w-100" style="border-style: solid; border-width: 1px;" id="map">
@@ -208,43 +162,46 @@
 
 						</div>
 
-						<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 flex-shrink-0 flex-grow-0" id="mapFooter">
-							<button type="button" class="btn btn-dark btn-sm py-0 mb-1 cameraFocus" value="default">focus camera</button>
+						<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-1 flex-shrink-0 flex-grow-0" id="mapFooter">
+							<button type="button" class="btn btn-dark btn-sm py-0 my-auto cameraFocus rounded-0" value="default">focus camera</button>
 
-							<span class="badge badge-dark">flatten:</span>
-							<div class="btn-group" id="buttonGroupNav">
-								<button type="button" value="0" class="btn btn-dark btn-sm py-0 default">X</button>
-								<button type="button" value="1" class="btn btn-dark btn-sm py-0 default">Y</button>
-								<button type="button" value="2" class="btn btn-dark btn-sm py-0 default">Z</button>
+							<p class="ml-3 my-auto small text-white">Flatten:</p>
+							<div class="btn-group ml-2" id="buttonGroupNav">
+								<button type="button" value="0" class="btn btn-dark btn-sm py-0 default my-auto rounded-0">X</button>
+								<button type="button" value="1" class="btn btn-dark btn-sm py-0 default my-auto rounded-0">Y</button>
+								<button type="button" value="2" class="btn btn-dark btn-sm py-0 default my-auto rounded-0">Z</button>
 							</div>
 
+							<p class="my-auto ml-3 small text-white">Components:</p>
+							<div class="ml-2 btn-group" id="buttonGroup2">
+									<button type="button" value="2D" class="btn btn-dark py-0 btn-sm my-auto rounded-0" id='btn-2D'>2</button>
+									<button type="button" value="3D" class="btn btn-dark py-0 btn-sm active my-auto rounded-0" id='btn-3D'>3</button>
+				        	</div>
+							<!--
 							<span class="badge badge-dark">Scale:</span>
 			                <input style="width: 100px;" type="range" min="1" max="4" value="1" step="0.01" class="form-control-range py-0" id="scaleSlider">
 							<div class="mr-auto"> </div>
-
+							-->
 
 						</nav>
 
-						
+
 
 						<canvas class="w-100" style="height: 120px; border-style: solid; border-width: 1px;" id="pixiSequence">
 
 						</canvas>
+
+
 					</div>
 				</div>
+
 			</div>
 
 
 		<audio id="audioBar" controls controlsList="nodownload" style="display:none">
 	  		<source src="{{audioPath}}">
 		</audio>
-		<!-- <div class="row top-buffer-sm" id="row3">
-			<div class="col">
-				<audio id="audioBar"controls controlsList="nodownload">
-			  		<source src="{{audioPath}}">
-				</audio>
-			</div>
-		</div> -->
+
 	</div>
 	<script type="text/javascript">
 		// Define variables passed from app.py, they are used in js-file

@@ -13,7 +13,9 @@ var PLOT = null;
 var AUDIO = null;
 
 
+
 $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
 
     var map = $('#map');
 
@@ -310,6 +312,31 @@ $(document).ready(function() {
     }
 })
 
+
+var timeDisplay = $('#timeDisplay');
+var indexDisplay = $('#indexDisplay');
+function updateTimeAndIndexDisplay(object, index, target) {
+    if (object) {
+        timeDisplay.text(msToTime(object.start))
+        indexDisplay.text('index: ' + index)
+    } else {
+        timeDisplay.text(msToTime(0))
+        indexDisplay.text('index: 0')
+    }
+}
+
+/*
+function showToolTip(object, index, target) {
+    const el = $(target);
+    if (object) {
+        el.html('index: ' + index + '<br>time: ' + msToTime(object.start));
+        el.css('display', 'block')
+        el.css('height', '30')
+    } else {
+        el.css('display', 'none')
+    }
+}
+*/
 
 
 // Outside document.ready as it is used in html code

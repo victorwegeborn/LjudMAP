@@ -94,7 +94,7 @@ $('#pixiSequence').off("mousewheel").on("mousewheel", function (event) {
     _mousePos = null
 }).mouseleave(function(e) {
     _mousePos = null
-    showToolTip(null, 0, '#tooltip')
+    updateTimeAndIndexDisplay(null, 0)
 }).mousemove(function(e){
     if (_mousePos && !shift_down) {
         var dx = e.offsetX - _mousePos.x;
@@ -239,7 +239,7 @@ function _interactiveDefaultPlayheadSegment(o) {
     seg.hitArea = new PIXI.Rectangle(0, 0, o.width, seq_height + 2)
     seg.mouseover = function(e) {
 
-        showToolTip({start: o.start}, i, '#tooltip')
+        updateTimeAndIndexDisplay({start: o.start}, i)
 
         if(space_down) {
             data.data[i].category = PLOT.getCategory();
