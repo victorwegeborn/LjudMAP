@@ -8,14 +8,14 @@ var counter = 0;
 var element_id = 0;
 var totalFileSize = 0.0;
 
+var fileType = new RegExp('(.wav|.mp3)$');
 
 
 fileInput.on('change', function(ev) {
     for (var i = 0; i < fileInput[0].files.length; i++) {
         var file = fileInput[0].files[i];
-
         // prune other files than accepted
-        if (file.type === 'audio/wav' || file.type === 'audio/mp3') {
+        if (fileType.test(file.name)) {
 
             // skip files already added
             if (fileMap.has(file.name))

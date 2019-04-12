@@ -1,13 +1,15 @@
-[ 11.04.2019 - 20:59:04 ]
+[ 12.04.2019 - 11:55:06 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 11.04.2019 - 20:59:04 ]
-    (MSG) [2] in SMILExtract : config file is: static/data/1555009143778408/default_config.conf
-[ 11.04.2019 - 20:59:04 ]
+[ 12.04.2019 - 11:55:06 ]
+    (MSG) [2] in SMILExtract : config file is: static/data/1555062905989922/default_config.conf
+[ 12.04.2019 - 11:55:06 ]
     (MSG) [2] in cComponentManager : successfully registered 96 component types.
-[ 11.04.2019 - 20:59:04 ]
+[ 12.04.2019 - 11:55:06 ]
     (MSG) [2] in cComponentManager : successfully finished createInstances
                                  (9 component instances were finalised, 1 data memories were finalised)
-[ 11.04.2019 - 20:59:04 ]
+[ 12.04.2019 - 11:55:06 ]
     (MSG) [2] in cComponentManager : starting single thread processing loop
-[ 11.04.2019 - 20:59:08 ]
-    (MSG) [2] in cComponentManager : Processing finished! System ran for 244 ticks.
+[ 12.04.2019 - 11:55:06 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 4 ticks.
+[ 12.04.2019 - 11:55:06 ]
+    (ERROR) [1] in instance 'lldcsvsink' : No output was written! (Maybe the input was too short to extract features from, or the config is broken?)
