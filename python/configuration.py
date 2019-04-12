@@ -19,9 +19,9 @@ def _header(target_path, segmentation):
     with open(target_path, 'w') as f:
         for line in config:
             if line.startswith('FRAMESIZE'):
-                line = 'frameSize=' + str(segmentation['size']/1000) + '\n'
+                line = 'frameSize=' + str(segmentation['segment_size']/1000) + '\n'
             if line.startswith('FRAMESTEP'):
-                line = 'frameStep=' + str(segmentation['step']/1000) + '\n'
+                line = 'frameStep=' + str(segmentation['step_size']/1000) + '\n'
             f.write(line)
         f.write('\n')
 
@@ -183,8 +183,8 @@ def _analyze(file):
 
 if __name__ == '__main__':
     segmentation = {
-        'size': 1.000,
-        'step': 1.000
+        'segment_size': 1.000,
+        'step_size': 1.000
     }
 
     features = {

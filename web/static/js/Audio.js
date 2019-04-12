@@ -19,27 +19,22 @@ class Audio extends AudioContext {
         this._audio_path = o.audio_path;
 
         /* holds plots */
-        this._plots = o.plots;
+        this._plot = o.plot;
 
         this._set_sequence = o.f.set_sequence;
         this._reset_sequence = o.f.reset_sequence;
 
         // load audio on object creation
         this._audio_buffer;
-
         this._playing = false;
-
-        this._subs_per_default = subData ? data.meta.segment_size / subData.meta.segment_size : null;
 
         /* default starting positions of highlight indexes */
         this._sequential_playback_index = -1;
-        this._sub_sequential_playback_index = -1;
         this._sequence_index = 0;
 
         /* WAACLock related variables */
         this._clock = null;
         this._event = null;
-        this._sub_event = null;
         this._start_time = 0;
 
         this._source = null;
@@ -68,8 +63,7 @@ class Audio extends AudioContext {
     }
 
     /*  Play.
-        Instantiates source nodes and calls plot and sequence map for coloring
-        of subsequent segments.
+        Instantiates source nodes and calls plot and sequence map for coloring.
 
         @param T - List of objects with start (inclusive) and end (exclusive) times.
                    Passed times must be in ms
@@ -121,12 +115,7 @@ class Audio extends AudioContext {
                         this._event = null;
                     }
 
-                    if (this._sub_event) {
-                        this._sub_event.clear()
-                        this._sub_event = null;
-                    }
                     this._sequential_playback_index = -1;
-                    this._sub_sequential_playback_index = -1;
 
                     if (typeof callback === 'function') {
                         SEQUENCE_PLAYING_LOCKED = false;
@@ -156,33 +145,18 @@ class Audio extends AudioContext {
 
         // set markers at begining of segment
         this._set_sequence(this._sequential_playback_index)
-        this._plots[0].setHighlight(this._sequential_playback_index)
+        this._plot.setHighlight(this._sequential_playback_index)
 
         var step = data.meta.step_size/1000;
 
-        // set up event for default plot and sequence map
+        // set up event for plot and sequence map
         this._event = this._clock.callbackAtTime((e) => {
             this._sequential_playback_index++;
             this._set_sequence(this._sequential_playback_index)
-            this._plots[0].setHighlight(this._sequential_playback_index)
+            this._plot.setHighlight(this._sequential_playback_index)
         }, step + this.currentTime)
         .repeat(step)
         .tolerance({late: 100})
-
-        // now, set up the same if sub-data exists
-        if (subData) {
-            var step = subData.meta.step_size/1000;
-            this._sub_sequential_playback_index = index * this._subs_per_default;
-            this._plots[1].setHighlight(this._sub_sequential_playback_index);
-
-            // set up event for subplot
-            this._sub_event = this._clock.callbackAtTime(() => {
-                this._plots[1].setHighlight(this._sub_sequential_playback_index)
-                this._sub_sequential_playback_index++;
-            }, step + this.currentTime)
-            .repeat(step)
-            .tolerance({late: 100})
-        }
     }
 
     _instantiate_volume() {
@@ -223,8 +197,7 @@ class Audio extends AudioContext {
 
     _resetAll() {
         this._reset_sequence.call()
-        this._plots[0].resetHighlight()
-        if (subData) this._plots[1].resetHighlight()
+        this._plot.resetHighlight()
     }
 
 
@@ -276,7 +249,7 @@ class Audio extends AudioContext {
             var source = this._instantiate_source(this._instantiate_volume_fade(o.duration))
             source.start(0, o.start/1000, o.duration/1000)
             this._set_sequence(o.index)
-            this._plots[0].setHighlight(o.index)
+            this._plot.setHighlight(o.index)
         }
     }
 

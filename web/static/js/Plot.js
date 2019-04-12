@@ -226,15 +226,8 @@ class Plot {
 
     /*
         Color points based on mouse input
-        @param is the other plot
     */
-    categorize(other) {
-        // if ratio > 1 => other is sub
-        // if ratio < 1 => other is larger
-        // if ratio == null => no other plot exists
-        var ratio = null;
-        if (other) ratio = this._segment_size / other._segment_size;
-
+    categorize() {
 
         // pick points in this plot
         var pickedPoints = this.renderer.pickMultipleObjects({
@@ -246,33 +239,13 @@ class Plot {
 
 
         if (pickedPoints.length > 1) {
+            /* recolor all points with current category */
             for (let i = 0; i < pickedPoints.length; i++) {
                 pickedPoints[i].object.category = this._current_category;
-                var id = pickedPoints[i].object.id;
-
-
-                if (ratio) {
-                    // other is sub, update accordingly
-                    if (ratio > 1) {
-                        var index = id * ratio;
-                        for (var j = index; j < index + ratio; j++) {
-                            other._data[j].category = this._current_category;
-                        }
-                    }
-
-                    // other is default, update accordingly
-                    // TODO: blend colors
-                    if (ratio < 1) {
-                        other._data[Math.floor(id * ratio)].category = this._current_category;
-                    }
-                }
             }
 
             /* re-render canvas after update */
             this.updateColors()
-            if (other) {
-                other.updateColors()
-            }
         }
     }
 
@@ -284,6 +257,7 @@ class Plot {
             depth: 5,
         });
 
+        /* randomize points */
         var m = pointsInRadius.length, t, i;
         while (m) {
             // Pick a remaining element…

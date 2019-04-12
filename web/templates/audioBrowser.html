@@ -222,43 +222,10 @@
 			                <input style="width: 100px;" type="range" min="1" max="4" value="1" step="0.01" class="form-control-range py-0" id="scaleSlider">
 							<div class="mr-auto"> </div>
 
-							<div class="btn-group">
-								<button type="button" value="refocus" class="btn btn-dark btn-sm py-0 mb-0" id="activateSublayer">Show subdivision</button>
-							</div>
+
 						</nav>
 
-						<!-- subdivision plot -->
-						<div class="row my-0 py-0 mapCanvas flex-fill w-100" style="border-style: solid; border-width: 1px;" id="subMap" hidden>
-							<div id="subTooltip" class="badge badge-dark unSelectableText" ></div>
-
-							<div class="metaInfo" id="metaSub" style="max-width: 18rem; opacity: 0.5;">
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Segment size:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0 segmentSize">1000 ms</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Step size:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	segmentStep">1000 ms</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Datapoints</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0 dataPoints">808</small></p>
-							</div>
-						</div>
-
-						<div id="subMapFooter" hidden>
-							<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-0 flex-shrink-0 flex-grow-0">
-								<button type="button" class="btn btn-dark btn-sm py-0 mb-1 cameraFocus" value="sub">focus camera</button>
-
-								<span class="badge badge-dark">flatten:</span>
-								<div class="btn-group" id="buttonGroupNav">
-									<button type="button" value="0" class="btn btn-dark btn-sm py-0 sub">X</button>
-									<button type="button" value="1" class="btn btn-dark btn-sm py-0 sub">Y</button>
-									<button type="button" value="2" class="btn btn-dark btn-sm py-0 sub">Z</button>
-								</div>
-
-								<span class="badge badge-dark">Scale:</span>
-				                <input style="width: 100px;" type="range" min="1" max="4" value="1" step="0.01" class="form-control-range py-0" id="subScaleSlider">
-								<div class="mr-auto"> </div>
-
-							</nav>
-						</div>
-
+						
 
 						<canvas class="w-100" style="height: 120px; border-style: solid; border-width: 1px;" id="pixiSequence">
 
@@ -286,11 +253,9 @@
 		var stepSize = '{{stepSize}}';
 		var audioPath = '{{audioPath}}';
 		var sessionKey = '{{session_key}}';
-		var subData = {{sub | tojson}}
 		var data = {{data | tojson}};
 	</script>
 	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/WaveformData.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/Sequence.js')     }}"></script>
 	<script src="{{ url_for('static', filename='js/Plot.js')         }}"></script>
 	<script src="{{ url_for('static', filename='js/Main.js')         }}"></script>

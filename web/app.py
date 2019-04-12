@@ -20,41 +20,28 @@ app = Flask(__name__, template_folder='templates/')
 app.secret_key = 'barabing'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def parse_request(form):
+def parse_request_form(form):
 
-
-    print(json.dumps(form, indent=2))
-
-    features = {}
-    segmentation = {}
-    cluster_settings = {}
-
-    # this will always be passed to audio processing
-    segmentation['default'] = {
-        'size': float(form['segment_size']),
-        'step': float(form['step_size']),
+    # general settings for audio_processing
+    settings = {
+        'segment_size': float(form['segment_size']),
+        'step_size': float(form['step_size']),
         'n_songs': form['n_songs'],
-    }
-
-    # <<<<< REMOVE? >>>>>
-    if 'sub' in form:
-        segmentation['sub'] = {
-            'size': float(form['radio1'])/2,
-            'step': float(form['radio2'])/2
-        }
-
-    cluster_settings = {
         'metric': ''.join(c.lower() for c in form['metric']),
         'n_neighbours': int(form['n_neighbours']),
-        'components': [int(form['n_components'])] if form['n_components'] is not 'both' else [2,3]
+        'components': json.loads(request.form['components'])
     }
 
-    features['MFCC'] = {}
-    features['MFCC']['coefficients'] = float(form['mfccs'])
-    features['MFCC']['delta'] = True if 'mfcc_delta' in form else False # Always default?
-    features['MFCC']['deltadelta'] = True if 'mfcc_deltadelta' in form else False
+    print('Parsed settings:', json.dumps(settings, indent=2))
 
-    return segmentation, cluster_settings, features
+    features = {}
+    if 'mfccs' in form:
+        features['MFCC'] = {}
+        features['MFCC']['coefficients'] = float(form['mfccs'])
+        features['MFCC']['delta'] = True if 'mfcc_delta' in form else False # Always default?
+        features['MFCC']['deltadelta'] = True if 'mfcc_deltadelta' in form else False
+
+    return settings, features
 
 
 
@@ -97,10 +84,10 @@ def process_audio() -> str:
                 print(file.filename + " saved")
 
     # parse and format the form data
-    segmentation, cluster_settings, features = parse_request(request.form)
+    settings, features = parse_request_form(request.form)
 
     # process audio according to passed data
-    audio_processing.main(session_key, segmentation, cluster_settings, features)
+    audio_processing.main(session_key, settings, features)
 
     # pass response with redirect url
     return jsonify(dict(redirect='/' + session_key))
@@ -112,26 +99,10 @@ def retrain() -> str:
     if request.method == 'POST':
 
         # parse points
-        points = {}
-        points['default'] = json.loads(request.form['defaultPoints'])
-        if 'subPoints' in request.form:
-            points['sub'] = json.loads(request.form['subPoints'])
+        points = json.loads(request.form['points'])
 
-        # parse segmentation
-        segmentation = {}
-        segmentation['default'] = {
-            'size': float(request.form['defaultSize']),
-            'step': float(request.form['defaultStep'])
-        }
-        if 'subSize' in request.form:
-            segmentation['sub'] = {
-                'size': float(request.form['subSize']),
-                'step': float(request.form['subStep'])
-            }
-
-        # pass on component information
-        components = [2, 3] if '2D' in request.form else [3]
-
+        # parse meta data
+        settings, _ = parse_request_form(request.form)
 
         old_session_key = request.form['sessionKey']
         filename = request.form['audioPath'].split("/")[-1]
@@ -141,7 +112,7 @@ def retrain() -> str:
         subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
         subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
 
-        audio_processing.retrain(points, new_session_key, old_session_key, segmentation, components)
+        audio_processing.retrain(points, new_session_key, old_session_key, settings)
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
 
@@ -163,21 +134,14 @@ def load_browser(session_key) -> str:
     data_dir = "static/data/" + session_key + "/"
     print(data_dir)
     if os.path.isdir(data_dir):
-        if os.path.isfile(data_dir + "default_data.json"):
-            with open(data_dir + "default_data.json", "r") as f:
+        if os.path.isfile(data_dir + "data.json"):
+            with open(data_dir + "data.json", "r") as f:
                 data = json.load(f)
-
-        if os.path.isfile(data_dir + "sub_data.json"):
-            with open(data_dir + "sub_data.json", "r") as f:
-                sub_data = json.load(f)
-        else:
-            sub_data = False
 
 
 
         return render_template('audioBrowser.html',
                                 data=data,
-                                sub=sub_data,
                                 audioDuration=data['meta']["audio_duration"],
                                 audioPath="../" + data['meta']["audio_path"],
                                 session_key=session_key)

@@ -18,15 +18,12 @@ px: 0     w     2w                 (n-1)w   nw
 
 
 
-var seq_defaultOnly = true;
 
 // segment drawing globals
 var SEGMENT_SIZE = data.meta.segment_size;
 var LINE_SEGMENT = Math.floor(data.meta.step_size * 0.05)
 var SEGMENT_ALPHA = 0.6;
-var SUB_PER_DEFAULT_SEGMENT;
 var LINE_ALPHA = 0.8;
-var SUB_PER_SEG;
 var SEQUENCE_PLAYING_LOCKED = false;
 
 // initialize sequence map when doc is ready
@@ -34,10 +31,8 @@ var sequenceCanvas = $('#pixiSequence')
 var seq_width = $('#pixiSequence').width();
 var seq_height = $('#pixiSequence').height();
 
-var seq_defaultRects = new PIXI.Container();
-seq_defaultRects.interactiveChildren = false;
-var seq_subRects = new PIXI.Container();
-seq_subRects.interactiveChildren = false;
+var seq_segments = new PIXI.Container();
+seq_segments.interactiveChildren = false;
 var seq_lines = new PIXI.Container();
 seq_lines.interactiveChildren = false;
 var seq_container = new PIXI.Container(); // master container
@@ -74,12 +69,7 @@ var seq_app = new PIXI.Application({
 });
 
 // hookup pixi containers
-seq_container.addChild(seq_defaultRects);
-if (subData !== false) {
-    seq_defaultOnly = false;
-    seq_container.addChild(seq_subRects);
-    SUB_PER_DEFAULT_SEGMENT = data.meta.segment_size / subData.meta.segment_size;
-}
+seq_container.addChild(seq_segments);
 seq_container.addChild(seq_lines);
 seq_container.addChild(seq_highlight);
 seq_container.addChild(seq_playhead);
@@ -185,22 +175,17 @@ function drawWaveform() {
 function initSequence() {
 
     // segment height
-    var height = seq_defaultOnly ? seq_height + 2 : 0.5 * seq_height + 2;
+    var height = seq_height + 2;
 
     // default data segment textures
     seq_textures.data_segment = _constructTexture(data.meta.segment_size, height);
     seq_textures.line = _constructTexture(LINE_SEGMENT, height)
 
-    // construct subData segment textures
-    if (subData) {
-        seq_textures.subData_segment = _constructTexture(subData.meta.segment_size, height);
-        seq_textures.sub_line = _constructTexture(LINE_SEGMENT, height)
-    }
 
     // render sprite per data point
     for (var i = 0; i < data.data.length; i++) {
         // draw default segment
-        _constructSprite(seq_textures.data_segment, seq_defaultRects, {
+        _constructSprite(seq_textures.data_segment, seq_segments, {
             start: data.data[i].start,
             color: getSegmentColor(data.data[i].category)
         })
@@ -212,24 +197,6 @@ function initSequence() {
             alpha: LINE_ALPHA
         })
 
-
-        // draw subdata segments sprites
-        if (!seq_defaultOnly) {
-            for (var j = i*SUB_PER_DEFAULT_SEGMENT; j < i*SUB_PER_DEFAULT_SEGMENT + SUB_PER_DEFAULT_SEGMENT; j++) {
-                _constructSprite(seq_textures.subData_segment, seq_subRects, {
-                    start: subData.data[j].start,
-                    color: getSegmentColor(subData.data[j].category),
-                    offsetY: height,
-                });
-
-                _constructSprite(seq_textures.sub_line, seq_lines, {
-                    start: subData.data[j].start,
-                    color: getSegmentColor('black'),
-                    alpha: LINE_ALPHA,
-                    offsetY: height,
-                });
-            }
-        }
 
         _interactiveDefaultPlayheadSegment({
             index: i,
@@ -267,7 +234,6 @@ function _interactiveDefaultPlayheadSegment(o) {
     seg.alpha = 0;
     seg.x = o.start;
     seg.included = false;
-    seg.scale.y = subData ? 2 : 1;
 
     seg.interactive = true;
     seg.hitArea = new PIXI.Rectangle(0, 0, o.width, seq_height + 2)
@@ -276,15 +242,8 @@ function _interactiveDefaultPlayheadSegment(o) {
         showToolTip({start: o.start}, i, '#tooltip')
 
         if(space_down) {
-            data.data[i].category = PLOTS[0].getCategory();
-            PLOTS[0].updateColors();
-            if (subData) {
-                var index = i * SUB_PER_DEFAULT_SEGMENT;
-                for (var j = index; j < index + SUB_PER_DEFAULT_SEGMENT; j++) {
-                    subData.data[j].category = PLOTS[1].getCategory();
-                }
-                PLOTS[1].updateColors();
-            }
+            data.data[i].category = PLOT.getCategory();
+            PLOT.updateColors();
         }
 
         if (seq_is_highlighting && !this.included) {
@@ -401,14 +360,7 @@ function _updateSegment(container, o, i) {
 
 
 function colorSegmentByIndex(index) {
-    _updateSegment(seq_defaultRects, data.data, index)
-    // make sure to color subsegments if they exist
-    if (subData) {
-        var sub_index = index*SUB_PER_DEFAULT_SEGMENT;
-        for (var i = sub_index; i < sub_index + SUB_PER_DEFAULT_SEGMENT; i++) {
-            _updateSegment(seq_subRects, subData.data, i)
-        }
-    }
+    _updateSegment(seq_segments, data.data, index)
 }
 
 

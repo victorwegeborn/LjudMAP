@@ -1,5 +1,4 @@
-
-console.log(subData ? 'sub included' : 'no sub');
+console.log(data.meta)
 
 /* key codes */
 const SHIFT = 16;
@@ -10,18 +9,14 @@ var space_down = false;
 var shift_down = false;
 
 /* global objects */
-var PLOTS = null;
+var PLOT = null;
 var AUDIO = null;
 
 
 $(document).ready(function() {
 
     var map = $('#map');
-    var subMap = $('#subMap')
 
-    /* subdivision layer globals */
-    var sync_views = false;
-    var is_sublayer_active = false;
 
     /* Scale slider defaults */
     const min_scale = 1;
@@ -32,38 +27,27 @@ $(document).ready(function() {
 
     //////////////////////////// INITIALIZING ////////////////////////////
 
-    PLOTS = [new Plot({
+    PLOT = new Plot({
         id: 'default',
         data: data.data,
         meta: data.meta,
         canvas: 'map',
         tooltip: '#tooltip',
         colorSegment: colorSegmentByIndex,
-    })];
+    });
 
-    /* initialize subPLOTS if available */
-    if (subData)
-        PLOTS.push(new Plot({
-            id: 'sub',
-            data: subData.data,
-            meta: subData.meta,
-            canvas: 'subMap',
-            tooltip: '#subTooltip',
-        }));
-
-
+    /* initialize sequence */
     initSequence()
 
-    var audio_settings = {
+
+    AUDIO = new Audio({
         audio_path: audioPath,
-        plots: PLOTS,
+        plot: PLOT,
         f: {
             set_sequence: setSequencePlayheadAt,
             reset_sequence: resetSequencePlayhead
         }
-    }
-
-    AUDIO = new Audio(audio_settings);
+    });
     AUDIO.load()
 
     // enable switch between 2D and 3D clustering
@@ -73,12 +57,6 @@ $(document).ready(function() {
         $('#btn-2D').attr('disabled', true)
     }
 
-    // disable sublayer button if no sublayer
-    if (subData) {
-        $('#activateSublayer').on('click', toggleSubCanvas)
-    } else {
-        $('#activateSublayer').prop('disabled', true)
-    }
 
     // Populate meta info
     $('#metaDefault small').each(function() {
@@ -99,34 +77,8 @@ $(document).ready(function() {
         }
     })
 
-    // populate meta subdata
-    if (subData) {
-        $('#metaSub small').each(function() {
-            if ($(this).hasClass('segmentSize')) {
-                $(this).text(subData.meta.segment_size + ' ms')
-            }
-            else if ($(this).hasClass('segmentStep')) {
-                $(this).text(subData.meta.step_size + ' ms')
-            }
-            else if ($(this).hasClass('dataPoints')) {
-                $(this).text(subData.data.length)
-            }
-        })
-    }
 
     //////////////////////////// BUTTON EVENTS ////////////////////////////
-
-    function toggleSubCanvas() {
-        if ($(subMap).prop('hidden')) {
-            $('#activateSublayer').text('Hide subdivision')
-            $(subMap).prop('hidden', false)
-            $('#subMapFooter').prop('hidden', false)
-        } else {
-            $('#activateSublayer').text('Show subdivision')
-            $(subMap).prop('hidden', true)
-            $('#subMapFooter').prop('hidden', true)
-        }
-    }
 
 
     // Meta data info text toggle setup
@@ -150,35 +102,21 @@ $(document).ready(function() {
     // Button category selection
     $("#buttonGroup1 button").on("click", function() {
         var color = this.value;
-        $.each(PLOTS, function() {
-            this.changeCategory(color)
-        });
+        PLOT.changeCategory(color)
     });
 
 
     // Change algorithm
     $("#buttonGroup2 button").on("click", function() {
         if (this.value === '2D') {
-            $.each(PLOTS, function() {
-                this.changeDimensions('2D');
-            });
-
+            PLOT.changeDimensions('2D');
             $('#btn-3D').removeClass('active')
             $('#btn-2D').addClass('active')
         }
         else if(this.value === '3D') {
-            $.each(PLOTS, function() {
-                this.changeDimensions('3D');
-            });
-
+            PLOT.changeDimensions('3D');
             $('#btn-2D').removeClass('active')
             $('#btn-3D').addClass('active')
-        }
-        else {
-        var algo = this.value;
-            $.each(PLOTS, function() {
-                this.changeAlgorithm(algo)
-            });
         }
     });
 
@@ -186,29 +124,22 @@ $(document).ready(function() {
     // retrain buttons
     $("#buttonGroup5 button").on("click", function() { retrain(this.value) });
 
-
     // re-initialize camera on click
     $(".cameraFocus").on("click", function() {
-        if ($(this).val() == 'default') {
-            PLOTS[0].focusCamera(-1);
-        } else {
-            PLOTS[1].focusCamera(-1);
-        }
+        PLOT.focusCamera(-1);
     })
-
 
     // Axes flattening buttons
     $("#buttonGroupNav button").on("click", function() {
         const axis = this.value;
-        const plt = $(this).hasClass('default') ? 0 : 1;
-        if (PLOTS[plt].getFlatState(axis) === 1) {
+        if (PLOT.getFlatState(axis) === 1) {
             $(this).addClass('active');
-            PLOTS[plt].setFlatState(axis, 0)
-            PLOTS[plt].focusCamera(axis);
+            PLOT.setFlatState(axis, 0)
+            PLOT.focusCamera(axis);
         } else {
             $(this).removeClass('active');
-            PLOTS[plt].setFlatState(axis, 1)
-            PLOTS[plt].focusCamera(-1);
+            PLOT.setFlatState(axis, 1)
+            PLOT.focusCamera(-1);
         }
     });
 
@@ -253,7 +184,6 @@ $(document).ready(function() {
 
 
     var scaleSlider = $('#scaleSlider');
-    var subScaleSlider = $('#subScaleSlider');
 
     $(scaleSlider).attr({
         'min': min_scale,
@@ -261,18 +191,8 @@ $(document).ready(function() {
         'step': scale_step
     });
 
-    $(subScaleSlider).attr({
-        'min': min_scale,
-        'max': max_scale,
-        'step': scale_step
-    });
-
-    $(subScaleSlider).on('input', function() {
-        PLOTS[1].updateScale($(this).val());
-    });
-
     $(scaleSlider).on('input', function() {
-        PLOTS[0].updateScale($(this).val());
+        PLOT.updateScale($(this).val());
     });
 
     ////////////////////////////////////////////////////////////////////////
@@ -280,19 +200,10 @@ $(document).ready(function() {
 
     map.on("mousemove", function(ev) {
         if (space_down) {
-            PLOTS[0].categorize(PLOTS[1]);
+            PLOT.categorize();
         }
         else if (shift_down && !SEQUENCE_PLAYING_LOCKED) {
-            PLOTS[0].updateAudioList(AUDIO);
-        }
-    })
-
-    subMap.on('mousemove', function(ev) {
-        if (space_down) {
-            PLOTS[1].categorize(PLOTS[0]);
-        }
-        else if (shift_down && !SEQUENCE_PLAYING_LOCKED) {
-            PLOTS[1].updateAudioList(AUDIO);
+            PLOT.updateAudioList(AUDIO);
         }
     })
 
@@ -342,9 +253,7 @@ $(document).ready(function() {
                 return;
             }
 
-            $.each(PLOTS, function() {
-                this.changeCategory(c)
-            });
+            PLOT.changeCategory(c)
         }
     });
 
@@ -358,18 +267,9 @@ $(document).ready(function() {
 
 
         defaultValidPoints = [["id", "startTime(ms)", "label"]]
-        subValidPoints = subData ? [["id", "startTime(ms)", "label"]] : null;
         for (let i = 0; i < data.data.length; i++) {
             if (data.data[i].category != 'black') {
                 defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
-
-                // store subdata relative to default
-                if (subValidPoints) {
-                    var idx = data.data[i].start / subData.meta.step_size;
-                    for (var j = idx; j < idx + data.meta.segment_size / subData.meta.segment_size; j++) {
-                        subValidPoints.push([subData.data[j].start/subData.meta.step_size, subData.data[j].start, subData.data[j].category])
-                    }
-                }
             }
         }
 
@@ -379,25 +279,18 @@ $(document).ready(function() {
         }
 
         __data = {
-            "defaultPoints": JSON.stringify(defaultValidPoints),
+            "points": JSON.stringify(defaultValidPoints),
             "sessionKey": sessionKey,
             "audioPath": audioPath,
-            "defaultSize": data.meta.segment_size,
-            "defaultStep": data.meta.step_size,
+            "segment_size": data.meta.segment_size,
+            "step_size": data.meta.step_size,
+            "components": JSON.stringify(data.meta.components),
+            "n_neighbours": data.meta.n_neighbours,
+            "metric": data.meta.metric,
+            'n_songs': data.meta.n_songs
         }
-        if (subData) {
-            $.extend(__data, {
-                'subPoints': JSON.stringify(subValidPoints),
-                'subSize': subData.meta.segment_size,
-                'subStep': subData.meta.step_size
-            });
-        }
-        // ensure we compute 2D versions if we have them
-        if('2D' in data.data[0]) {
-            $.extend(__data, {
-                "2D": ""
-            });
-        }
+
+
         $.ajax({
             type: "POST",
             url: "/retrain",
