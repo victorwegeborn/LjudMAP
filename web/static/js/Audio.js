@@ -84,7 +84,6 @@ class Audio extends AudioContext {
             this._source = this._instantiate_source(this._instantiate_volume());
             this._playing = true;
 
-
             // play only one segment
             /*
             if (duration <= data.meta.segment_size/1000) {

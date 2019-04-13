@@ -44,8 +44,8 @@
             </ul>
 
             <form class="form-inline my-2 my-lg-0" action="goByKey" method="POST" enctype=multipart/form-data>
-                <input class="form-control mr-sm-2" name="id" type="search" placeholder="Enter id" aria-label="Search">
-                <button class="btn btn-outline my-sm-0" type="submit">Go</button>
+                <input class="form-control form-control-sm mr-sm-2" name="id" type="search" placeholder="Enter id" aria-label="Search">
+                <button class="btn-sm btn-outline my-sm-0" type="submit">Go</button>
             </form>
         </nav>
 
@@ -60,21 +60,20 @@
         <div id="loading" class="text-center"></div>
 
         <div class="container" id="content" style="z-index: 2;">
-
             <form action="process_audio" method="POST" enctype="multipart/form-data" id='mainForm' novalidate>
 
                 <div class="row">
                     <div class="col-9">
-                        <div class="card text-left rounded-0">
+                        <div class="card text-left rounded-0 mb-4">
                             <div class="card-header bg-light">
                                 Audio List
                             </div>
                             <div class="card-body py-0">
 
                                 <table class="table table-sm small my-0">
-                                  <tbody id='fileDisplay'>
+                                    <tbody id='fileDisplay'>
 
-                                  </tbody>
+                                    </tbody>
                                 </table>
 
                             </div>
@@ -98,13 +97,13 @@
 
                                 <!-- settings navigation -->
                                 <ul class="nav nav-tabs card-header-tabs" id="settings-tab" role="tablist">
-                                  <li class="nav-item w-50">
-                                    <a class="nav-link active" id="feature-tab" data-toggle="tab" href="#feature" role="tab" aria-controls="feature" aria-selected="true">features</a>
-                                  </li>
-                                  <li class="nav-item w-50">
-                                    <a class="nav-link" id="cluster-tab" data-toggle="tab" href="#cluster" role="tab" aria-controls="cluster" aria-selected="false">Cluster</a>
-                                  </li>
-                                </ul>
+                                   <li class="nav-item w-50">
+                                       <a class="nav-link active" id="feature-tab" data-toggle="tab" href="#feature" role="tab" aria-controls="feature" aria-selected="true">features</a>
+                                   </li>
+                                   <li class="nav-item w-50">
+                                       <a class="nav-link" id="cluster-tab" data-toggle="tab" href="#cluster" role="tab" aria-controls="cluster" aria-selected="false">Cluster</a>
+                                   </li>
+                               </ul>
 
 
                             </div>
@@ -181,13 +180,10 @@
                         </div>
 
                         <input type="submit" id="submitNewAudio" class="btn btn-info w-50 rounded-0" value="analyse" disabled>
-
                     </div>
                 </div>
-
             </form>
         </div>
-
 
         <script src="{{ url_for('static', filename='js/Index.js') }}"></script>
     </body>

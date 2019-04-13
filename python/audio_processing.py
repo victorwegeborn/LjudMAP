@@ -83,7 +83,7 @@ def main(session_key, settings, features):
                     },
                     'start': int(idx*settings['step_size']),
                     'active': 1,
-                    'category': 'black'
+                    'category': 0
                 })
             else:
                 # add other component data to each object
@@ -158,7 +158,7 @@ def retrain(valid_points, session_key, old_session_key, settings):
                     },
                     'start': starts[idx],
                     'active': 1,
-                    'category': colors[idx]
+                    'category': int(colors[idx])
                 })
             else:
                 # add other component data to each object

@@ -119,32 +119,29 @@
 							</div>
 						</nav>
 
-
-
 						<div class="row my-0 py-0 mapCanvas flex-fill w-100" style="border-style: solid; border-width: 1px;" id="map">
 							<text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text>
 							<div id="tooltip" class="badge badge-dark unSelectableText" ></div>
 
 
+							<!-- hovering label buttons -->
 							<div class="bg-transparent text-white p-1 py-1" id="sidebar" style="width: 40px; z-index: 1;">
 				                <div>
 					              	<div id="buttonGroup1">
-										<div class="btn-group-vertical btn-block mt-2 ml-2" data-toggle="tooltip" title="Hold down space and hover over points to label" data-placement="right" data-delay='{ "show": 1000, "hide": 100 }'>
-											<button type="button" value="black"  class="btn btn-dark    btn-sm "><text style="font-size: 11px;">-</text></button>
-											<button type="button" value="blue"   class="btn btn-primary btn-sm rounded-0"><text style="font-size: 11px;">1</text></button>
-											<button type="button" value="green"  class="btn btn-success btn-sm rounded-0"><text style="font-size: 11px;">2</text></button>
-											<button type="button" value="yellow" class="btn btn-warning btn-sm rounded-0"><text style="font-size: 11px;">3</text></button>
-											<button type="button" value="red"    class="btn btn-danger  btn-sm rounded-0"><text style="font-size: 11px;">4</text></button>
-											<button type="button" value="purple" class="btn btn-cat1    btn-sm rounded-0"><text style="font-size: 11px;">5</text></button>
-											<button type="button" value="orange" class="btn btn-cat2    btn-sm rounded-0"><text style="font-size: 11px;">6</text></button>
-											<button type="button" value="teal"   class="btn btn-cat3    btn-sm rounded-0"><text style="font-size: 11px;">7</text></button>
-											<button type="button" value="brown"  class="btn btn-cat4    btn-sm "><text style="font-size: 11px;">8</text></button>
+										<div class="btn-group-vertical btn-block mt-2 ml-2" data-toggle="tooltip" title="Label by holding down space while hovering over points" data-placement="right" data-delay='{ "show": 1000, "hide": 100 }'>
+											<button type="button" value="0" class="btn btn-dark    btn-sm "><text style="font-size: 11px;">-</text></button>
+											<button type="button" value="1" class="btn btn-primary btn-sm rounded-0"><text style="font-size: 11px;">1</text></button>
+											<button type="button" value="2" class="btn btn-success btn-sm rounded-0"><text style="font-size: 11px;">2</text></button>
+											<button type="button" value="3" class="btn btn-warning btn-sm rounded-0"><text style="font-size: 11px;">3</text></button>
+											<button type="button" value="4" class="btn btn-danger  btn-sm rounded-0"><text style="font-size: 11px;">4</text></button>
+											<button type="button" value="5" class="btn btn-cat1    btn-sm rounded-0"><text style="font-size: 11px;">5</text></button>
+											<button type="button" value="6" class="btn btn-cat2    btn-sm rounded-0"><text style="font-size: 11px;">6</text></button>
+											<button type="button" value="7" class="btn btn-cat3    btn-sm rounded-0"><text style="font-size: 11px;">7</text></button>
+											<button type="button" value="8" class="btn btn-cat4    btn-sm "><text style="font-size: 11px;">8</text></button>
 										</div>
 				                	</div>
 					            </div>
 							</div>
-
-
 
 							<div class="metaInfo" id="metaDefault" style="max-width: 18rem; opacity: 0.5;">
 	    							<p class="card-text my-0 py-0"><small class="text my-0 py-0">Filename:</small></p>
@@ -159,7 +156,6 @@
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Datapoints</small></p>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0 dataPoints">808</small></p>
 							</div>
-
 						</div>
 
 						<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-1 flex-shrink-0 flex-grow-0" id="mapFooter">
@@ -177,31 +173,19 @@
 									<button type="button" value="2D" class="btn btn-dark py-0 btn-sm my-auto rounded-0 " id='btn-2D'>2</button>
 									<button type="button" value="3D" class="btn btn-dark py-0 btn-sm active my-auto rounded-0 " id='btn-3D'>3</button>
 				        	</div>
-							<!--
-							<span class="badge badge-dark">Scale:</span>
-			                <input style="width: 100px;" type="range" min="1" max="4" value="1" step="0.01" class="form-control-range py-0" id="scaleSlider">
-							<div class="mr-auto"> </div>
-							-->
 
 						</nav>
-
-
 
 						<canvas class="w-100" style="height: 120px; border-style: solid; border-width: 1px;" id="pixiSequence">
 
 						</canvas>
-
-
 					</div>
 				</div>
-
 			</div>
-
 
 		<audio id="audioBar" controls controlsList="nodownload" style="display:none">
 	  		<source src="{{audioPath}}">
 		</audio>
-
 	</div>
 	<script type="text/javascript">
 		// Define variables passed from app.py, they are used in js-file
@@ -212,11 +196,10 @@
 		var sessionKey = '{{session_key}}';
 		var data = {{data | tojson}};
 	</script>
-	<script src="{{ url_for('static', filename='js/BufferLoader.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/Utils.js')        }}"></script>
 	<script src="{{ url_for('static', filename='js/Sequence.js')     }}"></script>
 	<script src="{{ url_for('static', filename='js/Plot.js')         }}"></script>
 	<script src="{{ url_for('static', filename='js/Main.js')         }}"></script>
 	<script src="{{ url_for('static', filename='js/WAAClock.js')     }}"></script>
 	<script src="{{ url_for('static', filename='js/Audio.js')        }}"></script>
-
 </body>

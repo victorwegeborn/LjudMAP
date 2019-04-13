@@ -150,7 +150,7 @@ function _zoom(dy, x){
 
 function drawWaveform() {
     var line = new PIXI.Graphics();
-    line.lineStyle(1, getSegmentColor('black'), 1);
+    line.lineStyle(1, '0x333a3f', 1);
     var zero = 0.5 * seq_height + 1
     var length = data.meta.waveform.data.length;
     var scale = Math.abs(data.meta.waveform.max - data.meta.waveform.min) / seq_height
@@ -242,7 +242,14 @@ function _interactiveDefaultPlayheadSegment(o) {
         updateTimeAndIndexDisplay({start: o.start}, i)
 
         if(space_down) {
-            data.data[i].category = PLOT.getCategory();
+            var current_category = data.data[i].category;
+            var new_category = PLOT.getCategory();
+            if (current_category !== new_category) {
+                // store new colors in history
+                history.add([i, current_category])
+                // color data point with new category
+                data.data[i].category = new_category
+            }
             PLOT.updateColors();
         }
 
@@ -375,17 +382,17 @@ function resetSequencePlayhead() {
 
 function getSegmentColor(c) {
     switch (c) {
-        case 'black' : return '0x333a3f'; break;
-        case 'blue'  : return '0x007dff'; break;
-        case 'green' : return '0x00a754'; break;
-        case 'yellow': return '0xffbf42'; break;
-        case 'red'   : return '0xe42f46'; break;
-        case 'purple': return '0x86007b'; break;
-        case 'orange': return '0xffa338'; break;
-        case 'teal'  : return '0x008180'; break;
-        case 'brown' : return '0xab262c'; break;
+        case 0 : return '0x333a3f'; break; // black
+        case 1 : return '0x007dff'; break; // blue
+        case 2 : return '0x00a754'; break; // green
+        case 3 : return '0xffbf42'; break; // yellow
+        case 4 : return '0xe42f46'; break; // red
+        case 5 : return '0x86007b'; break; // purple
+        case 6 : return '0xffa338'; break; // orange
+        case 7 : return '0x008180'; break; // teal
+        case 8 : return '0xab262c'; break; // brown
             default:
                 console.log('Point without valid category');
-                return '0x000000';
+                return '0xFFFFFF';
     }
 }

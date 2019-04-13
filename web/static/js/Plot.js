@@ -37,6 +37,7 @@ class Plot {
         this._segment_step = o.meta.step_size;
         this._npoints = this._data.length;
 
+        this._history = o.history;
 
         /* initialize view state */
         this._initial_view_state = o.initial_view_state || {
@@ -56,7 +57,7 @@ class Plot {
 
         /* state tracking */
         this._current_algorithm = 'umap';
-        this._current_category = 'black';
+        this._current_category = 0;
         this._current_dim = o.dim || '3D';
         this._flatten = [1, 1, 1];
         this._current_view_state = this._initial_view_state;
@@ -239,7 +240,15 @@ class Plot {
         if (pickedPoints.length > 1) {
             /* recolor all points with current category */
             for (let i = 0; i < pickedPoints.length; i++) {
-                pickedPoints[i].object.category = this._current_category;
+                var c = pickedPoints[i].object.category
+                var index = pickedPoints[i].object.id
+                if (c !== this._current_category) {
+                    // add previous point to historyt
+                    this._history.add([index, c])
+
+                    // set new color
+                    pickedPoints[i].object.category = this._current_category;
+                }
             }
 
             /* re-render canvas after update */
@@ -283,6 +292,7 @@ class Plot {
         this._current_algorithm = a;
         this._redraw()
     }
+    
     changeCategory(c) {
         if (this._current_category === c) return;
         this._current_category = c;
@@ -324,15 +334,15 @@ class Plot {
     _getColor(c) {
         var alpha = this._highlight_index > 0 ? 35 : 240;
         switch (c) {
-            case 'black' : return [ 51,  58,  63, alpha]; break;
-            case 'blue'  : return [  0, 125, 255, alpha]; break;
-            case 'green' : return [  0, 167,  84, alpha]; break;
-            case 'yellow': return [255, 191,  66, alpha]; break;
-            case 'red'   : return [228,  47,  70, alpha]; break;
-            case 'purple': return [134,   0, 123, alpha]; break;
-            case 'orange': return [255, 163,  56, alpha]; break;
-            case 'teal'  : return [  0, 129, 128, alpha]; break;
-            case 'brown' : return [171,  38,  44, alpha]; break;
+            case 0 : return [ 51,  58,  63, alpha]; break; // black
+            case 1 : return [  0, 125, 255, alpha]; break; // blue
+            case 2 : return [  0, 167,  84, alpha]; break; // green
+            case 3 : return [255, 191,  66, alpha]; break; // yellow
+            case 4 : return [228,  47,  70, alpha]; break; // red
+            case 5 : return [134,   0, 123, alpha]; break; // purple
+            case 6 : return [255, 163,  56, alpha]; break; // orange
+            case 7 : return [  0, 129, 128, alpha]; break; // teal
+            case 8 : return [171,  38,  44, alpha]; break; // brown
                 default:
                     console.log('Point without valid category');
                     return [255,255,255,255];

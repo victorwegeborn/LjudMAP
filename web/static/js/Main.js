@@ -12,7 +12,7 @@ var shift_down = false;
 var PLOT = null;
 var AUDIO = null;
 
-
+const history = new History();
 
 $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip();
@@ -36,6 +36,7 @@ $(document).ready(function() {
         canvas: 'map',
         tooltip: '#tooltip',
         colorSegment: colorSegmentByIndex,
+        history: history
     });
 
     /* initialize sequence */
@@ -103,8 +104,8 @@ $(document).ready(function() {
 
     // Button category selection
     $("#buttonGroup1 button").on("click", function() {
-        var color = this.value;
-        PLOT.changeCategory(color)
+        console.log(this.value)
+        PLOT.changeCategory(parseInt(this.value))
     });
 
 
@@ -219,11 +220,17 @@ $(document).ready(function() {
         else if (ev.keyCode == SHIFT) {
             shift_down = true;
         }
+        else if ((ev.metaKey || ev.ctrlKey) && ev.keyCode == 90) {
+            // undo
+            history.undo( PLOT, colorSegmentByIndex )
+        }
     });
 
     $(document).keyup(function(ev) {
         if (space_down) {
             space_down = false;
+            // make sure to update history
+            history.update()
         }
         else if (shift_down) {
             shift_down = false;
@@ -234,23 +241,23 @@ $(document).ready(function() {
         } else {
             var c;
             if (ev.keyCode == 48) {
-                c = "black";
+                c = 0; // black
             } else if (ev.keyCode == 49) {
-                c = "blue";
+                c = 1; // blue
             } else if (ev.keyCode == 50) {
-                c = "green";
+                c = 2; //Green
             } else if (ev.keyCode == 51) {
-                c = "yellow";
+                c = 3; // yellow
             } else if (ev.keyCode == 52) {
-                c = "red";
+                c = 4; // red
             } else if (ev.keyCode == 53) {
-                c = "purple";
+                c = 5; // purple
             } else if (ev.keyCode == 54) {
-                c = "orange";
+                c = 6; // orange
             } else if (ev.keyCode == 55) {
-                c = "teal";
+                c = 7; // teal
             } else if (ev.keyCode == 56) {
-                c = "brown";
+                c = 8; // brown
             } else {
                 return;
             }
@@ -264,13 +271,10 @@ $(document).ready(function() {
 
 
     function retrain (arg) {
-
         $("#loadText").show();
-
-
         defaultValidPoints = [["id", "startTime(ms)", "label"]]
         for (let i = 0; i < data.data.length; i++) {
-            if (data.data[i].category != 'black') {
+            if (data.data[i].category != 0) {
                 defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
             }
         }
@@ -337,29 +341,3 @@ function showToolTip(object, index, target) {
     }
 }
 */
-
-
-// Outside document.ready as it is used in html code
-function msToTime(ms) {
-        // Converts milliseconds to duration, min:sec:ms
-        var hours = Math.floor((ms / (60 * 60 * 1000)) % 60).toString();
-        var minutes = Math.floor((ms / (60 * 1000)) % 60).toString();
-        var seconds = Math.floor((ms / 1000) % 60).toString();
-        var milliseconds = (ms % 1000).toString();
-
-        if (hours.length == 1) {
-            hours = "0" + hours;
-        }
-        if (minutes.length == 1) {
-            minutes = "0" + minutes;
-        }
-        if (seconds.length == 1) {
-            seconds = "0" + seconds;
-        }
-        if (milliseconds.length == 1) {
-            milliseconds = "00" + milliseconds;
-        } else if (milliseconds.length == 2) {
-            milliseconds = "0" + milliseconds;
-        }
-        return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
-    }
