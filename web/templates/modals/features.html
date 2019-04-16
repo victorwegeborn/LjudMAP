@@ -1,0 +1,329 @@
+
+<div class="modal-body ">
+    <div class="card bg-dark rounded-0 w-100">
+        <div class="card-header text-center my-0">
+
+            <!-- settings navigation -->
+            <ul class="nav nav-tabs card-header-tabs analysisModal" id="features-tab" role="tablist">
+               <li class="nav-item">
+                   <a class="nav-link active small" id="mfcc-tab" data-toggle="tab" href="#mfcc-content" role="tab" aria-controls="mfcc-content" aria-selected="true">Mfcc's</a>
+               </li>
+               <li class="nav-item">
+                   <a class="nav-link small" id="spectral-tab" data-toggle="tab" href="#spectral-content" role="tab" aria-controls="spectral-content" aria-selected="false">Spectral</a>
+               </li>
+               <li class="nav-item">
+                   <a class="nav-link small" id="segmentation-tab" data-toggle="tab" href="#segmentation" role="tab" aria-controls="segmentation" aria-selected="true">Segmentation</a>
+               </li>
+               <li class="nav-item">
+                   <a class="nav-link small" id="cluster-tab" data-toggle="tab" href="#cluster" role="tab" aria-controls="cluster" aria-selected="true">Cluster</a>
+               </li>
+           </ul>
+
+
+        </div>
+        <div class="card-body bg-dark ">
+            <form id="feature-form" enctype="multipart/form-data" action="features" method="POST" novalidate>
+                <div class="tab-content" id="features-content">
+
+                    <!------ ::MFCCS:: ------>
+                    <div class="tab-pane fade show active" id="mfcc-content" role="tabpanel" aria-labelledby="mfcc-tab">
+
+
+                        <!-- coefficients -->
+                        <div class="m-0 p-0" id="mfcc-settings">
+                            <div class="form-group">
+                                <label class="small" for="coefficients">Number of coefficients</label>
+                                <input class="form-control form-control-sm mfccs" type="number" value="" id='coefficients' min="0" max="20" required>
+                                <div class="invalid-feedback">
+                                    Number of Mel-frequency cepstrums coefficients must be between 0 and 20
+                                </div>
+                            </div>
+
+                            <!-- Delta -->
+                            <div class="form-group">
+                                <label class="small" for="delta">Delta</label>
+                                <select class="custom-select custom-select-sm small w-100 mfccs" id="delta" required>
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+
+                            <!-- Number of delta -->
+                            <div class="form-group">
+                                <label class="small" for="delta-delta">Delta-Delta</label>
+                                <select class="custom-select custom-select-sm small w-100 mfccs" id="delta-delta" required>
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <div class="custom-control custom-checkbox mt-4">
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="mfccs" checked>
+                                <label class="custom-control-label small pt-1" for="mfccs">Include</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!------ ::Spectal:: ------>
+                    <div class="tab-pane fade" id="spectral-content" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="row m-0 p-0" id="spectral-settings">
+                            <div class="col-6">
+                                <!-- flux -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="flux">
+                                    <label class="custom-control-label small pt-1" for="flux">Flux</label>
+                                </div>
+
+                                <!-- flux centroid -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="flux-centroid">
+                                    <label class="custom-control-label small pt-1" for="flux-centroid">Flux Centroid [Hz]</label>
+                                </div>
+
+                                <!-- centroid -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="centroid">
+                                    <label class="custom-control-label small pt-1" for="centroid">Centroid</label>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <!-- Harmonicity -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="harmonicity">
+                                    <label class="custom-control-label small pt-1" for="harmonicity">Harmonicity</label>
+                                </div>
+
+                                <!-- Harmonicity -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="flatness">
+                                    <label class="custom-control-label small pt-1" for="flatness">Flatness</label>
+                                </div>
+
+                                <!-- Slopte (NOT IMPLEMENTED) -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="slope">
+                                    <label class="custom-control-label small pt-1" for="slope">Slope</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <div class="custom-control custom-checkbox mt-4">
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="spectrals" checked>
+                                <label class="custom-control-label small pt-1" for="spectrals">Include</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!------ ::SEGMENTATION:: ------>
+                    <div class="tab-pane fade" id="segmentation" role="tabpanel" aria-labelledby="profile-tab">
+
+                        <!-- Segmentation size -->
+                        <div class="form-group ">
+                            <label class="small" for="segment_size">Segment size [ms]</label>
+                            <input class="form-control form-control-sm " type="number" value="1000" id='segment_size' min="20" max="5000" required>
+                            <div class="invalid-feedback small">
+                                Uniform segment size must be between 20 ms to 5000 ms
+                            </div>
+                        </div>
+
+                        <!-- Step size -->
+                        <div class="form-group ">
+                            <label class="small" for="step_size">Step size [ms]</label>
+                            <input class="form-control form-control-sm" type="number" value="1000" id='step_size' min="20" max="5000" required>
+                            <div class="invalid-feedback">
+                                Uniform step size must be between 20 ms to 5000 ms
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!------ ::CLUSTER:: ------>
+                    <div class="tab-pane fade" id="cluster" role="tabpanel" aria-labelledby="profile-tab">
+
+                        <!-- Number of components -->
+                        <div class="form-group">
+                            <label class="small" for="components">Components</label>
+                            <select class="custom-select custom-select-sm small w-100" id="components" required>
+                                <option value="[3]">3</option>
+                                <option value="[2]">2</option>
+                                <option value="[2,3]">Both</option>
+                            </select>
+                        </div>
+
+                        <!-- METRIC SELECTION -->
+                        <div class="form-group">
+                            <label class="small" for="metric">Metric</label>
+                            <select class="custom-select custom-select-sm small w-100" id="metric" required>
+                                <option value="euclidean">Euclidean</option>
+                                <option value="manhattan">Manhattan</option>
+                                <option value="cosine">Cosine</option>
+                                <option value="correlation">Correlation</option>
+                            </select>
+                        </div>
+
+                        <!-- Number of neighbours -->
+                        <div class="form-group">
+                            <label class="small" for="n_neighbours">Neighbours</label>
+                            <input class="form-control form-control-sm" type="number" value="15" id='n_neighbours' min="1" max="200" required>
+                            <div class="invalid-feedback">
+                                Number of neighbours must be between 1 and 200
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal-footer py-2">
+    <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Cancel</button>
+    <button id="featuresSubmit" type="button" class="btn btn-info btn-sm">Cluster</button>
+</div>
+
+<script type="text/javascript">
+
+    $('#mfccs').on('click', function(ev) {
+        toggleTargets('mfcc')
+    })
+
+    $('#spectrals').on('click', function(ev) {
+        toggleTargets('spectral')
+    })
+
+    function toggleTargets(target) {
+        var inputs = $('#'+target+'-settings input,#'+target+'-settings select');
+
+        $.each(inputs, function() {
+            $('#'+target+'s').prop('checked') ? $(this).attr('disabled', false) : $(this).attr('disabled', true)
+        })
+
+        if ($(this).prop('required')) {
+            stateRemoveRequired();
+        }
+    }
+
+    $('#modal').on('hide.bs.modal', function(ev) {
+        console.log(ev)
+    })
+
+    function stateRemoveRequired() {
+        $('#mfccs').prop('required', false)
+        $('#spectrals').prop('required', false)
+        $('#feature-form').removeClass('was-validated')
+    }
+
+    $('#featuresSubmit').on('click', function(ev) {
+        ev.preventDefault()
+        $('#feature-form').submit()
+    })
+
+
+    $('#feature-form').on('submit', function(ev) {
+        ev.preventDefault()
+
+        /* make sure at least some features are selected */
+        var mfcc_state = $('#mfccs');
+        var spectral_state = $('#spectrals')
+        if (!mfcc_state.prop('checked') && !spectral_state.prop('checked')) {
+            mfcc_state.prop('required', true);
+            spectral_state.prop('required', true)
+            $('#feature-form').addClass('was-validated')
+            return;
+        }
+
+
+        /* validate all forms and pack data */
+        var formData = new FormData();
+        var request = new XMLHttpRequest();
+        var error = false;
+
+        $.each(ev.target, function() {
+            if (!this.checkValidity()) {
+                $('#feature-form').addClass('was-validated')
+                error = true;
+            } else {
+                if (($(this).hasClass('mfccs') && !mfcc_state) || ($(this).hasClass('spectrals') && !spectral_state)) {
+                    formData.set(this.id, false)
+                } else {
+                    if (this.type === 'checkbox') {
+                        formData.set(this.id, $(this).prop('checked'))
+                    }
+                    else {
+                        formData.set(this.id, $(this).val())
+                    }
+                }
+            }
+        })
+
+        if (error) {
+            console.log(error)
+            formData = null;
+            request = null;
+            return '';
+        }
+
+        $('#modal').modal('hide')
+        showLoadingScreen()
+
+
+        /* append non input field data TODO: add support for customizing */
+        formData.set('segmentation_mode', 'uniform')
+        formData.set('n_songs', data.meta.settings.n_songs)
+        formData.set('sessionKey', sessionKey)
+        formData.set('audioPath', audioPath)
+
+        /* send current labeling */
+        var labels = []
+        if ($('#segment_size').val() == data.meta.settings.segment_size) {
+            $.each(data.data, function(ev) {
+                labels.push(this.category)
+            })
+            formData.set('labels', JSON.stringify(labels));
+        }
+
+        /* send data to server */
+        request.open('POST', '/features')
+        request.send(formData);
+
+        //showLoadingGif();
+        request.onload = function(ev) {
+            if (request.status != 200) {
+                alert(`Error ${request.status}: ${request.statusText}`);
+            } else {
+                var response = JSON.parse(request.response)
+                window.location.href = response.redirect
+            }
+        };
+    })
+
+    /* set current values of all input fields */
+    $('#mfccs').prop('checked', data.meta.features.mfccs.included)
+    toggleTargets('mfcc') // toggle display on subset inputs
+    $('#coefficients').val(data.meta.features.mfccs.coefficients);
+    $('#delta').val(data.meta.features.mfccs.delta.toString())
+    $('#delta-delta').val(data.meta.features.mfccs['delta-delta'].toString())
+
+    $('#spectrals').prop('checked', data.meta.features.spectrals.included)
+    toggleTargets('spectral') // toggle display on subset inputs
+    $('#flux').prop('checked', data.meta.features.spectrals.flux);
+    $('#flux-centroid').prop('checked', data.meta.features.spectrals['flux-centroid']);
+    $('#centroid').prop('checked', data.meta.features.spectrals.centroid);
+    $('#harmonicity').prop('checked', data.meta.features.spectrals.harmonicity);
+    $('#flatness').prop('checked', data.meta.features.spectrals.flatness);
+    $('#slope').prop('checked', data.meta.features.spectrals.slope);
+
+    $('#segment').val(data.meta.settings.segment_size)
+    $('#step').val(data.meta.settings.step_size)
+
+    $('#components').val("[" + data.meta.settings.components.join() + "]")
+    $('#metric').val(data.meta.settings.metric)
+    $('#neighbours').val(data.meta.settings.n_neighbours)
+
+
+</script>

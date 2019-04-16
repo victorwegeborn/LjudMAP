@@ -1,4 +1,13 @@
-/////////////////////////////////////////////////////////////////////////////
+
+function showLoadingScreen() {
+    $('body').addClass('bg-dark')
+    $('#loadingScreen').show()
+    $("#loading").show()
+    $("#analysisContent").hide()
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -53,10 +62,14 @@ BufferLoader.prototype.load = function() {
 
 
 /////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
 
 
-
+/**
+ * Converts milliseconds to time format 00:00:00.000
+ *
+ * @param {int} ms - time in milliseconds
+ * @return {string} - string formated time
+ */
 function msToTime(ms) {
         // Converts milliseconds to duration, min:sec:ms
         var hours = Math.floor((ms / (60 * 60 * 1000)) % 60).toString();
@@ -82,14 +95,27 @@ function msToTime(ms) {
 }
 
 
+var timeDisplay = $('#timeDisplay');
+var indexDisplay = $('#indexDisplay');
+function updateTimeAndIndexDisplay(object, index, target) {
+    if (object) {
+        timeDisplay.text(msToTime(object.start))
+        indexDisplay.text('index: ' + index)
+    } else {
+        timeDisplay.text(msToTime(0))
+        indexDisplay.text('index: 0')
+    }
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
 
 
-/*
-    Small class to track coloring of points and enable undos.
-*/
+/**
+ * Small class to track coloring
+ * of points and enable undos.
+ */
 function History() {
     /* holds coloring history */
     this.history = [];
@@ -99,22 +125,43 @@ function History() {
 
     /* consumes lots of memory obviously */
     this.max_depth = 10;
+
+    $()
 }
 
-
+/**
+ * Add tracked points to history.
+ *
+ * @param {array} point - index and previous category stored as [id, category]
+ */
 History.prototype.add = function(point) {
     this.batch.push(point)
 }
 
+/**
+ * Moves batch of points into history list
+ * on event up for space bar.
+ * Limits stack size.
+ */
 History.prototype.update = function() {
     if (this.history.length == this.max_depth) {
         this.history.shift();
     }
 
-    this.history.push(this.batch)
-    this.batch = [];
+    if (this.batch.length > 0) {
+        this.history.push(this.batch)
+        this.batch = [];
+    }
 }
 
+/**
+ * Moves batch of points into history list
+ * on event up for space bar.
+ * Limits stack size.
+ *
+ * @param {object} plot - accesses update trigger for deck.gl
+ * @param {function} segment - updates colors of segments in sequence map
+ */
 History.prototype.undo = function(plot, segment) {
     // get latest coloring batch and recolor
     var hist = this.history.pop();

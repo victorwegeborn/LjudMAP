@@ -14,6 +14,7 @@ var AUDIO = null;
 
 const history = new History();
 
+
 $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip();
 
@@ -36,7 +37,8 @@ $(document).ready(function() {
         canvas: 'map',
         tooltip: '#tooltip',
         colorSegment: colorSegmentByIndex,
-        history: history
+        history: history,
+        dim: '3D' in data.data[0] ? '3D' : '2D'
     });
 
     /* initialize sequence */
@@ -58,6 +60,12 @@ $(document).ready(function() {
         $('#btn-2D').attr('disabled', false)
     } else {
         $('#btn-2D').attr('disabled', true)
+    }
+
+    if ('3D' in data.data[0]) {
+        $('#btn-3D').attr('disabled', false)
+    } else {
+        $('#btn-3D').attr('disabled', true)
     }
 
 
@@ -82,6 +90,41 @@ $(document).ready(function() {
 
 
     //////////////////////////// BUTTON EVENTS ////////////////////////////
+
+    /* Drop down menu handling */
+    var modal = $('#modal');
+    var modalContent = $('#modal .modal-content')
+    $('#menuWrapper .dropdown-item').on('click', function(ev) {
+        var t = this.dataset.target
+        if (t === 'open') {
+            showModal(t)
+        }
+        else if (t === 'features') {
+            showModal(t)
+        }
+        else if (t === 'export') {
+
+        }
+        else if (t === 'undo') {
+            history.undo( PLOT, colorSegmentByIndex )
+        }
+        else if (t === 'coagulate') {
+
+        }
+        else if (t === 'synthesize') {
+
+        }
+        else {
+            console.log(t + 'is not hooked up!')
+        }
+    })
+
+    function showModal(target) {
+        modalContent.load('/modal/' + target, function(html) {
+            modalContent.html(html);
+            modal.modal({show: true})
+        })
+    }
 
 
     // Meta data info text toggle setup
@@ -222,7 +265,10 @@ $(document).ready(function() {
         }
         else if ((ev.metaKey || ev.ctrlKey) && ev.keyCode == 90) {
             // undo
+            console.log('test')
+            console.log(history)
             history.undo( PLOT, colorSegmentByIndex )
+            console.log(history)
         }
     });
 
@@ -231,6 +277,7 @@ $(document).ready(function() {
             space_down = false;
             // make sure to update history
             history.update()
+            console.log(history)
         }
         else if (shift_down) {
             shift_down = false;
@@ -271,7 +318,10 @@ $(document).ready(function() {
 
 
     function retrain (arg) {
-        $("#loadText").show();
+
+        $('#content').hide()
+        $('#loading').show()
+
         defaultValidPoints = [["id", "startTime(ms)", "label"]]
         for (let i = 0; i < data.data.length; i++) {
             if (data.data[i].category != 0) {
@@ -281,7 +331,8 @@ $(document).ready(function() {
 
         if (defaultValidPoints.length == 0) {
             alert("Can't retrain, there are no labels")
-            $("#loadText").hide();
+            $('#loading').hide()
+            $('#content').show()
         }
 
         __data = {
@@ -315,29 +366,3 @@ $(document).ready(function() {
 
     }
 })
-
-
-var timeDisplay = $('#timeDisplay');
-var indexDisplay = $('#indexDisplay');
-function updateTimeAndIndexDisplay(object, index, target) {
-    if (object) {
-        timeDisplay.text(msToTime(object.start))
-        indexDisplay.text('index: ' + index)
-    } else {
-        timeDisplay.text(msToTime(0))
-        indexDisplay.text('index: 0')
-    }
-}
-
-/*
-function showToolTip(object, index, target) {
-    const el = $(target);
-    if (object) {
-        el.html('index: ' + index + '<br>time: ' + msToTime(object.start));
-        el.css('display', 'block')
-        el.css('height', '30')
-    } else {
-        el.css('display', 'none')
-    }
-}
-*/

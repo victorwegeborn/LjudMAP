@@ -21,6 +21,7 @@ app.secret_key = 'barabing'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def parse_request_form(form):
+    print(json.dumps(form, indent=2))
 
     # general settings for audio_processing
     settings = {
@@ -32,14 +33,42 @@ def parse_request_form(form):
         'components': json.loads(request.form['components'])
     }
 
-    print('Parsed settings:', json.dumps(settings, indent=2))
 
     features = {}
-    if 'mfccs' in form:
-        features['MFCC'] = {}
-        features['MFCC']['coefficients'] = float(form['mfccs'])
-        features['MFCC']['delta'] = True if 'mfcc_delta' in form else False # Always default?
-        features['MFCC']['deltadelta'] = True if 'mfcc_deltadelta' in form else False
+    features['mfccs'] = {}
+    features['mfccs']['included'] = json.loads(form['mfccs'])
+    if features['mfccs']['included']:
+        features['mfccs']['coefficients'] = int(form['coefficients'])
+        features['mfccs']['delta'] = True if json.loads(form['delta']) else False # Always default?
+        features['mfccs']['delta-delta'] = True if json.loads(form['delta-delta']) in form else False
+    else:
+        features['mfccs']['delta'] = False
+        features['mfccs']['delta-delta'] = False
+
+    features['spectrals'] = {}
+    if json.loads(form['spectrals']):
+        features['spectrals']['flux'] = json.loads(form['flux'])
+        features['spectrals']['flux-centroid'] =json.loads(form['flux-centroid'])
+        features['spectrals']['centroid'] = json.loads(form['centroid'])
+        features['spectrals']['harmonicity'] = json.loads(form['harmonicity'])
+        features['spectrals']['flatness'] = json.loads(form['flatness'])
+        features['spectrals']['slope'] = json.loads(form['slope'])
+    else:
+        features['spectrals']['flux'] = False
+        features['spectrals']['flux-centroid'] = False
+        features['spectrals']['centroid'] = False
+        features['spectrals']['harmonicity'] = False
+        features['spectrals']['flatness'] = False
+        features['spectrals']['slope'] = False
+    if True in features['spectrals'].values():
+        features['spectrals']['included'] = True
+    else:
+        features['spectrals']['included'] = False
+
+
+
+    print('Parsed settings:', json.dumps(settings, indent=2))
+    print('Parsed features:', json.dumps(features, indent=2))
 
     return settings, features
 
@@ -97,7 +126,6 @@ def process_audio() -> str:
 def retrain() -> str:
     print("INSIDE RETRAIN")
     if request.method == 'POST':
-
         # parse points
         points = json.loads(request.form['points'])
 
@@ -116,6 +144,33 @@ def retrain() -> str:
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
 
+# triggered when new set of features are requested
+@app.route('/features', methods=['POST'])
+def new_features() -> str:
+    print('New feature set')
+    if request.method == 'POST':
+        # parse meta data
+        settings, features = parse_request_form(request.form)
+
+        # get users current labeling
+        labels = None
+        if 'labels' in request.form and request.form is not None:
+            labels = json.loads(request.form['labels'])
+
+
+        # copy session key and create new key
+        old_session_key = request.form['sessionKey']
+        filename = request.form['audioPath'].split("/")[-1]
+        new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+
+        # make new dir for the new data
+        subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
+        subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
+
+        # process new features and send user to new plot
+        audio_processing.new_features(labels, new_session_key, old_session_key, settings, features)
+        return jsonify(dict(redirect='/' + new_session_key))
+    return ''
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/goByKey', methods=['POST'])
@@ -145,7 +200,6 @@ def load_browser(session_key) -> str:
                                 audioDuration=data['meta']["audio_duration"],
                                 audioPath="../" + data['meta']["audio_path"],
                                 session_key=session_key)
-
     else:
         return "<h3>Something went wrong, the files for the this audio session does not exist</h3>"
 
@@ -157,6 +211,17 @@ def upload() -> str:
     return ""
 
 
+@app.route('/modal/<string:target>', methods=['GET', 'POST'])
+def load_modal(target) -> str:
+    print(target)
+    modal_dir = "templates/modals/"
+    content = ""
+    if os.path.isfile(modal_dir + target + '.html'):
+        with open(modal_dir + target + '.html', "r") as f:
+            content = f.read();
+    else:
+        print('modal template not found!!')
+    return content
 
 if __name__ == '__main__':
     #app.run(debug=True)

@@ -1,0 +1,38 @@
+<div class="modal-header py-2">
+    <p class="modal-title">Open</p>
+</div>
+<div class="modal-body">
+    <form id="openForm" class="form-inline my-2 my-lg-0" action="goByKey" method="POST" enctype="multipart/form-data" novalidate>
+        <input pattern="[0-9]+" class="form-control form-control-sm w-100" name="id" type="search" placeholder="Enter session ID" aria-label="Search">
+    </form>
+</div>
+<div class="modal-footer py-2">
+    <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Cancel</button>
+    <button id="openFormBtn" type="button" class="btn btn-info btn-sm" disabled>Open</button>
+</div>
+
+<script type="text/javascript">
+    var btn = $('#openFormBtn');
+    var frm = $('#openForm');
+
+    frm.on('submit', function(ev) {
+        $.each(ev.target, function() {
+            if (!this.checkValidity()) {
+                frm.addClass('was-validated')
+                ev.preventDefault();
+            }
+        })
+    });
+
+    $('#openForm input').on('input', function() {
+        if (this.value.length > 0) {
+            btn.attr('disabled', false)
+        } else {
+            btn.attr('disabled', true)
+        }
+    });
+
+    btn.on('click', function() {
+        frm.submit();
+    });
+</script>

@@ -77,16 +77,18 @@
                                 </table>
 
                             </div>
-                            <div class="card-footer row text-muted px-4 pb-0">
-                                <p class="ml-3"><small>
-                                    Currently supports .wav and .mp3 only
-                                </small></p>
-                                <p class="ml-auto mr-3"><small id='fileCounter'>
-                                    0 files
-                                </small></p>
-                                <p><small id='sizeCounter'>
-                                    0 MB
-                                </small></p>
+                            <div class="card-footer text-muted pb-0">
+                                <div class="d-flex">
+                                    <p class=""><small>
+                                        Currently supports .wav and .mp3 only
+                                    </small></p>
+                                    <p class="ml-auto mr-3"><small id='fileCounter'>
+                                        0 files
+                                    </small></p>
+                                    <p><small id='sizeCounter'>
+                                        0 MB
+                                    </small></p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -131,8 +133,8 @@
 
                                         <!-- Number of MFCC's -->
                                         <div class="form-group mb-0">
-                                            <label class="small" for="mfcss">MFCC's</label>
-                                            <input class="form-control form-control-sm" type="number" value="13" id='mfccs' min="0" max="20" required>
+                                            <label class="small" for="coefficients">MFCC's</label>
+                                            <input class="form-control form-control-sm" type="number" value="13" id='coefficients' min="0" max="20" required>
                                             <div class="invalid-feedback">
                                                 Number of Mel-frequency cepstrums must be between 0 and 20
                                             </div>
@@ -144,9 +146,9 @@
                                         <div class="form-group">
                                             <label class="small" for="components">Components</label>
                                             <select class="custom-select custom-select-sm small w-100" id="components" required>
-                                                <option>3</option>
-                                                <option>2</option>
-                                                <option>Both</option>
+                                                <option value="[3]">3</option>
+                                                <option value="[2]">2</option>
+                                                <option value="[2,3]">Both</option>
                                             </select>
                                         </div>
 
@@ -154,10 +156,10 @@
                                         <div class="form-group">
                                             <label class="small" for="metric">Metric</label>
                                             <select class="custom-select custom-select-sm small w-100" id="metric" required>
-                                                <option>Euclidean</option>
-                                                <option>Manhattan</option>
-                                                <option>Cosine</option>
-                                                <option>Correlation</option>
+                                                <option value="euclidean">Euclidean</option>
+                                                <option value="manhattan">Manhattan</option>
+                                                <option value="Cosine"   >Cosine</option>
+                                                <option value="correlation">Correlation</option>
                                             </select>
                                         </div>
 

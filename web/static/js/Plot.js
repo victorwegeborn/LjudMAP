@@ -3,12 +3,7 @@ deck.log.priority = 1
 
 
 
-
-
-
 class Plot {
-
-
     /*
     @param o passes default settings for plot
         data - referense to JSON data object
@@ -292,7 +287,7 @@ class Plot {
         this._current_algorithm = a;
         this._redraw()
     }
-    
+
     changeCategory(c) {
         if (this._current_category === c) return;
         this._current_category = c;

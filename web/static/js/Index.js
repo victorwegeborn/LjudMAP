@@ -109,25 +109,24 @@ var send = function() {
         i++;
     };
 
-    var comp = [];
-    if ($('#components')[0].selectedOptions[0].value === 'Both') {
-        comp = '[2,3]';
-    }
-    else {
-        comp = '[' + $('#components')[0].selectedOptions[0].value + ']';
-    }
-
-
-
     // send all inputs to server
     formData.set('segmentation_mode', 'uniform')
     formData.set('segment_size', $('#segment').val())
     formData.set('step_size', $('#step').val())
-    formData.set('mfccs', $('#mfccs').val())
-    formData.set('components', comp)
+    formData.set('components', $('#components').val())
     formData.set('n_neighbours', $('#neighbours').val())
-    formData.set('metric', $('#metric')[0].selectedOptions[0].value)
+    formData.set('metric', $('#metric').val())
     formData.set('n_songs', i)
+
+    formData.set('coefficients', $('#coefficients').val())
+    formData.set('mfccs', true)
+    formData.set('delta', false)
+    formData.set('delta-delta', false)
+
+    /* default for other features */
+    formData.set('spectrals', false)
+
+
 
     request.open('POST', '/process_audio')
     request.send(formData);

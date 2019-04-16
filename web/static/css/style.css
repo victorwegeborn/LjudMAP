@@ -1,3 +1,11 @@
+:root {
+    --dark-color: rgb(51, 58, 63);
+    --dark-light-color: rgb(51,58,63);
+    --dark-color-header: rgb(49, 56, 61);
+    --dark-color-detail: rgb(43, 49, 53);
+}
+
+
 html, body {
   height: 100%;
 }
@@ -21,6 +29,32 @@ html, body {
 #timeIndexDisplayWrapper {
 }
 
+.dropdown-menu {
+    background: rgb(248, 249, 250)
+}
+
+.drop-highlight:hover {
+    background-color: rgb(225, 229, 233);
+    color: rgb(51, 58, 63);
+}
+
+.drop-highlight:active {
+    background-color: rgb(197, 201, 205);
+    color: rgb(51, 58, 63);
+}
+
+.drop-highlight-disabled, .drop-highlight-disabled:hover, .drop-highlight-disabled:active {
+    color: rgb(197, 201, 205);
+    background-color: white;
+}
+
+.btn:focus, .btn:active, .close {
+   outline: none !important;
+   box-shadow: none;
+}
+
+
+
 #welcome {
     height: 18em;
     background-image: url("/static/img/bg.png");
@@ -30,11 +64,29 @@ html, body {
     font-family: 'Cutive Mono', monospace;
 }
 
+.close {
+    color: #fff;
+    opacity: 1;
+    text-shadow: 0px 2px 2px #000000;
+}
+
 .fadeBottom {
     z-index: 2;
     pointer-events: none;
     background-image: linear-gradient(to bottom, rgba(51,58,63,0), rgba(51,58,63, 1) 90%);
     width: 100%;
+}
+
+.modal-content {
+    background-color: var(--dark-light-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--dark-color-detail);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--dark-color-detail);
 }
 
 
@@ -330,4 +382,21 @@ audio::-webkit-media-controls-timeline {
 .btn-cat4:hover,
 .btn-cat4:focus {
   background-color: brown;
+}
+
+
+/* Card nav bar tabs */
+
+.analysisModal.nav-tabs .nav-link.active, .nav-tabs .show > .nav-link {
+    color: white;
+    background-color: var(--dark-color);
+    border-color: var(--dark-color-detail) var(--dark-color-detail) var(--dark-color) var(--dark-color-detail);
+}
+
+.analysisModal.nav-tabs > .nav-link:hover {
+    border-color: var(--dark-color-detail) var(--dark-color-detail) var(--dark-color) var(--dark-color-detail);
+}
+
+.analysisModal.nav-tabs > li > a {
+    color: white;
 }

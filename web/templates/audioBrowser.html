@@ -21,29 +21,80 @@
 
 </head>
 <body>
-	<div id="loading"></div>
+
+	<!-- Dynamic Modal -->
+	<div class="modal fade" tabindex="-1" role="dialog" id='modal'>
+  		<div class="modal-dialog" role="document">
+    		<div class="modal-content text-white rounded-0">
+      			<!-- content loaded by js -->
+    		</div>
+  		</div>
+	</div>
+
+
 	<div id="floatingCircle"></div>
-		<div class="container-fluid h-100 d-flex flex-column" id="content">
+	<div class="container-fluid h-100 d-flex flex-column" id="content">
 
 			<!-- HEADER -->
 			<div class="row flex-shrink-0">
 				<nav class="navbar navbar-expand navbar-dark bg-dark w-100 shadow py-1" style="z-index: 99;">
-			    	<ul class="navbar-nav mr-auto">
+			    	<ul class="navbar-nav mr-auto" id="menuWrapper">
 						<li class="nav-item">
 		    			<a class="navbar-brand" href="#">LjudMAP</a>
 		                </li>
 
 
-						<!-- DROW DOWN -->
- 		                <li class="nav-item dropdown">
- 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="clusterNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
- 		                        Clustering
+						<!-- File Drop Down -->
+ 		                <li class="nav-item dropdown mt-auto small">
+ 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="fileNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+ 		                        File
  		                    </a>
- 		                    <div class="dropdown-menu bg-dark px-3 text-white" aria-labelledby="clusterNavbarDropdown">
+ 		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="fileNavbarDropdown">
+								<div data-target="open" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Open..</div>
+								<div class="dropdown-divider my-0"></div>
+								<div data-target="import" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Import Audio..</div>
+								<div data-target="export" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Export to CSV..</div>
+ 							</div>
+ 		                </li>
+
+						<!-- edit drop down -->
+						<li class="nav-item dropdown mt-auto small">
+ 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="editNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+ 		                        Edit
+ 		                    </a>
+ 		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="editNavbarDropdown">
+								<div data-target="undo" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Undo<text class="py-0 my-0 text-muted">cmd+z</text></div>
+								<div data-target="redo" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Redo<text class="py-0 my-0 text-muted">shift+cmd+z</text></div>
+								<div class="dropdown-divider my-0"></div>
+								<div data-target="features" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Features..</div>
+							</div>
+ 		                </li>
+
+						<!-- cluster drop down -->
+						<li class="nav-item dropdown mt-auto small">
+ 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="clusterNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+ 		                        Analysis
+ 		                    </a>
+ 		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="clusterNavbarDropdown">
+
+								<div class="dropdown-divider my-0"></div>
+								<div data-target="recluster" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Cluster labeled</div>
+ 							</div>
+ 		                </li>
+
+						<!-- Tools Drop Down -->
+ 		                <li class="nav-item dropdown mt-auto small">
+ 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="toolsNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+ 		                        Tools
+ 		                    </a>
+ 		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="toolsNavbarDropdown">
+								<div data-target="coagulate" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight-disabled px-2 w-100">Coagulate..</div>
+								<div data-target="synthesize" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight-disabled px-2 w-100">Concatinative Synthesis..</div>
+								<!--
  								<div style="width: 10em;">
 									<p class="small mb-0">Re-train</p>
 									<div class="btn-group-vertical btn-block" id="buttonGroup5">
-								   		<button type="button" value="lab" class="btn btn-light btn-sm ">labeled</button>
+								   		<button type="button" value="lab" class="btn btn-light btn-sm ">On labeled</button>
 									</div>
 								   	<hr class="mb-1">
 								   	<p class="small mb-0">Export</p>
@@ -51,12 +102,13 @@
 									   	<button type="button" value="csv" class="btn btn-light w-100 btn-sm">CSV</button>
 								   	</div>
  					            </div>
+								-->
  							</div>
  		                </li>
 
 
 					   	<!-- AUDIO DROW DOWN -->
-		                <li class="nav-item dropdown">
+		                <li class="nav-item dropdown mt-auto small">
 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="audioNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		                        Audio
 		                    </a>
@@ -80,18 +132,24 @@
 		            </ul>
 
 
-		            <a class="nav-link" id="keyLink" style='color:white'>ID: {{session_key}}</a>
-		            <form class="form-inline my-2 my-lg-0" action="goByKey" method="POST" enctype=multipart/form-data>
-		                <input class="form-control mr-sm-2" name="id" type="search" placeholder="Enter id" aria-label="Search">
-		                <button class="btn btn-outline my-sm-0" type="submit">Go</button>
-		            </form>
+		            <a class="nav-link small mt-auto mr-0" id="keyLink" style='color:white'>ID: {{session_key}}</a>
+
 		        </nav>
 			</div>
 
+			<!-- Loading gif -->
+			<div id="loadingScreen" style="display: none; width: 100%; position: fixed; left: 0;">
+				<div class="d-flex align-items-center flex-column" id='welcome'>
+					<div class="fadeBottom mt-auto p-2 h-75"></div>
+				</div>
+
+				<br>
+
+				<div id="loading" class="text-center"></div>
+			</div>
+
 			<!-- CONTENT -->
-			<div class="row flex-grow-1">
-
-
+			<div class="row flex-grow-1" id="analysisContent">
 
 				<!-- flexbox for multiple views -->
 				<div class="col mx-0 px-0">
@@ -109,7 +167,7 @@
 							</span>
 
 							<span class="badge badge-light ml-2 rounded-0 meta" id="indexDisplay" style="width: 10em;">
-									index: 00000
+									index: 0
 							</span>
 
 							<div class="mr-auto"> </div>
@@ -120,7 +178,6 @@
 						</nav>
 
 						<div class="row my-0 py-0 mapCanvas flex-fill w-100" style="border-style: solid; border-width: 1px;" id="map">
-							<text id="loadText" x="50%" y="50%" text-anchor="middle" opacity="0.8" fill="black" font-size="100px" font-family="Arial" dy=".2em" style="display:none">Loading..</text>
 							<div id="tooltip" class="badge badge-dark unSelectableText" ></div>
 
 
@@ -145,16 +202,16 @@
 
 							<div class="metaInfo" id="metaDefault" style="max-width: 18rem; opacity: 0.5;">
 	    							<p class="card-text my-0 py-0"><small class="text my-0 py-0">Filename:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	fileName">Pictor_Alpha.wav</small></p>
+									<p class="card-text my-0 py-0"><small class="text my-0 py-0	fileName"></small></p>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Duration:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	duration">00:03:23.880</small></p>
+									<p class="card-text my-0 py-0"><small class="text my-0 py-0	duration"></small></p>
 									<br>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Segment size:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	segmentSize">1000 ms</small></p>
+									<p class="card-text my-0 py-0"><small class="text my-0 py-0	segmentSize"></small></p>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Step size:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	segmentStep">1000 ms</small></p>
+									<p class="card-text my-0 py-0"><small class="text my-0 py-0	segmentStep"></small></p>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Datapoints</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0 dataPoints">808</small></p>
+									<p class="card-text my-0 py-0"><small class="text my-0 py-0 dataPoints"></small></p>
 							</div>
 						</div>
 
@@ -187,6 +244,9 @@
 	  		<source src="{{audioPath}}">
 		</audio>
 	</div>
+
+
+
 	<script type="text/javascript">
 		// Define variables passed from app.py, they are used in js-file
 		var audioDuration = '{{audioDuration}}';
@@ -195,6 +255,9 @@
 		var audioPath = '{{audioPath}}';
 		var sessionKey = '{{session_key}}';
 		var data = {{data | tojson}};
+
+		{% set meta = data.meta %}
+
 	</script>
 	<script src="{{ url_for('static', filename='js/Utils.js')        }}"></script>
 	<script src="{{ url_for('static', filename='js/Sequence.js')     }}"></script>

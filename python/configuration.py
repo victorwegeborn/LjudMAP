@@ -55,7 +55,7 @@ def _mfcc(target_path, mfcc):
         f.write('\n')
 
     # handle mfcc delta
-    if mfcc['delta'] or mfcc['deltadelta']:
+    if mfcc['delta'] or mfcc['delta-delta']:
         delta_path = os.path.join(script_dir, 'configuration/delta.conf')
         deltadelta_path = os.path.join(script_dir, 'configuration/deltadelta.conf')
         delta = []
@@ -71,7 +71,7 @@ def _mfcc(target_path, mfcc):
                 f.write(line)
             local_output += 'mfccD;'
 
-        if mfcc['deltadelta']:
+        if mfcc['delta-delta']:
             with open(deltadelta_path, 'r') as f:
                 for line in f:
                     deltadelta.append(line)
@@ -105,7 +105,7 @@ def _spectral(target_path, spectral):
                 line += '1\n' if spectral['flux'] else '0\n'
             if line == 'FLUXCENTROID\n':
                 line = 'fluxCentroid='
-                line += '1\n' if spectral['fluxCentroid'] else '0\n'
+                line += '1\n' if spectral['flux-centroid'] else '0\n'
             if line == 'CENTROID\n':
                 line = 'centroid='
                 line += '1\n' if spectral['centroid'] else '0\n'
@@ -115,8 +115,13 @@ def _spectral(target_path, spectral):
             if line == 'FLATNESS\n':
                 line = 'flatness='
                 line += '1\n' if spectral['flatness'] else '0\n'
+            #if line == 'ROLLOFF\n':
+            #    line = 'rolloff[0]=0.8\n' if spectral['rolloff'] else ''
             if line == 'ROLLOFF\n':
-                line = 'rolloff[0]=0.8\n' if spectral['rolloff'] else ''
+                line = ''
+            if line == 'SLOPE\n':
+                line = 'slope='
+                line += '1\n' if spectral['slope'] else '0\n'
             f.write(line)
         f.write('\n')
     return 'spec;'
@@ -129,12 +134,12 @@ def write_config(target_path, segmentation, features):
     _header(target_path, segmentation)
 
     # check for mfccs
-    if 'MFCC' in features:
-        output += _mfcc(target_path, features['MFCC'])
+    if 'coefficients' in features['mfccs']:
+        output += _mfcc(target_path, features['mfccs'])
 
     # check for spectrals
-    if 'SPECTRAL' in features:
-        output += _spectral(target_path, features['SPECTRAL'])
+    if True in features['spectrals'].values():
+        output += _spectral(target_path, features['spectrals'])
 
     # Always write footer
     _footer(target_path, output)
@@ -188,14 +193,14 @@ if __name__ == '__main__':
     }
 
     features = {
-        'MFCC': {
+        'mfccs': {
             'coefficients': 12,
             'delta': True,
-            'deltadelta': False
+            'delta-delta': False
         },
-        'SPECTRAL': {
+        'spectral': {
             'flux': False,
-            'fluxCentroid': False,
+            'flux-centroid': False,
             'centroid': True,
             'harmonicity': True,
             'flatness': True,

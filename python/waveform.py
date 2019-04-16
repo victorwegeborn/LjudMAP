@@ -4,6 +4,14 @@ import json
 import os
 import numpy
 
+def getComputedJson(waveform_path):
+    # read and return waveform data
+    with open(waveform_path, 'r') as f:
+        d = json.load(f)
+        d['max'] = int(numpy.amax(d['data']))
+        d['min'] = int(numpy.amin(d['data']))
+        return d
+
 def getJson(output_dir, audio_path, step_size, n_windows):
     # load audio data
     with wave.open(audio_path, 'r') as audio:
