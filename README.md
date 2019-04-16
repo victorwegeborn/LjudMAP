@@ -10,7 +10,7 @@ Get them here:
 
 Extract and install openSMILE in the repository directory. Ensure relative path to executable:
 ```
-/Temporally-Disassembled-Audio/opensmile-2.3.0/SMILExtract
+/LjudMAP/opensmile-2.3.0/SMILExtract
 ```
 
 Install environment
