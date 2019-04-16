@@ -94,12 +94,15 @@ $(document).ready(function() {
     /* Drop down menu handling */
     var modal = $('#modal');
     var modalContent = $('#modal .modal-content')
+    var modalDialog = $('.modal-dialog')
     $('#menuWrapper .dropdown-item').on('click', function(ev) {
         var t = this.dataset.target
         if (t === 'open') {
+            modalDialog.removeClass('modal-lg')
             showModal(t)
         }
         else if (t === 'features') {
+            modalDialog.addClass('modal-lg')
             showModal(t)
         }
         else if (t === 'export') {

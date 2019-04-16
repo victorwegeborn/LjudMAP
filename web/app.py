@@ -35,37 +35,54 @@ def parse_request_form(form):
 
 
     features = {}
-    features['mfccs'] = {}
-    features['mfccs']['included'] = json.loads(form['mfccs'])
-    if features['mfccs']['included']:
-        features['mfccs']['coefficients'] = int(form['coefficients'])
-        features['mfccs']['delta'] = True if json.loads(form['delta']) else False # Always default?
-        features['mfccs']['delta-delta'] = True if json.loads(form['delta-delta']) in form else False
+    mfccs_disabled = json.loads(form['mfccs-disabled'])
+    if not mfccs_disabled:
+        features['mfccs'] = {
+            'coefficients': int(form['coefficients']),
+            'delta': True if json.loads(form['delta']) else False,
+            'delta-delta': True if json.loads(form['delta-delta']) in form else False,
+        }
     else:
-        features['mfccs']['delta'] = False
-        features['mfccs']['delta-delta'] = False
+        features['mfccs'] = {
+            'delta': False,
+            'delta-delta': False,
+        }
 
-    features['spectrals'] = {}
-    if json.loads(form['spectrals']):
-        features['spectrals']['flux'] = json.loads(form['flux'])
-        features['spectrals']['flux-centroid'] =json.loads(form['flux-centroid'])
-        features['spectrals']['centroid'] = json.loads(form['centroid'])
-        features['spectrals']['harmonicity'] = json.loads(form['harmonicity'])
-        features['spectrals']['flatness'] = json.loads(form['flatness'])
-        features['spectrals']['slope'] = json.loads(form['slope'])
+
+    if not json.loads(form['spectrals-disabled']):
+        features['spectrals'] = {
+            'flux': json.loads(form['flux']),
+            'flux-centroid': json.loads(form['flux-centroid']),
+            'centroid': json.loads(form['centroid']),
+            'harmonicity': json.loads(form['harmonicity']),
+            'flatness': json.loads(form['flatness']),
+            'slope': json.loads(form['slope'])
+        }
     else:
-        features['spectrals']['flux'] = False
-        features['spectrals']['flux-centroid'] = False
-        features['spectrals']['centroid'] = False
-        features['spectrals']['harmonicity'] = False
-        features['spectrals']['flatness'] = False
-        features['spectrals']['slope'] = False
+        features['spectrals'] = {
+            'flux': False,
+            'flux-centroid': False,
+            'centroid': False,
+            'harmonicity': False,
+            'flatness': False,
+            'slope': False,
+        }
     if True in features['spectrals'].values():
-        features['spectrals']['included'] = True
+        features['spectrals']['disabled'] = False
     else:
-        features['spectrals']['included'] = False
+        features['spectrals']['disabled'] = True
 
-
+    signals = json.loads(form['signals-disabled'])
+    if not signals:
+        features['signals'] = {
+            'rms': json.loads(form['rms']),
+            'zcr': json.loads(form['zcr']),
+        }
+    else:
+        features['signals'] = {
+            'rms': False,
+            'zcr': False,
+        }
 
     print('Parsed settings:', json.dumps(settings, indent=2))
     print('Parsed features:', json.dumps(features, indent=2))

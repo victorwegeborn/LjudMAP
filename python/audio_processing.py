@@ -23,7 +23,7 @@ MASTER_CONF = 'ANALYSIS.conf'
 
 def csv_to_data(filename):
     csv_file = pandas.read_csv(filename, sep=';', header=1, float_precision='round_trip')
-    return minmax_scale(csv_file.values, axis=0)
+    return minmax_scale(X=csv_file.values)
 
 def main(session_key, settings, features):
 

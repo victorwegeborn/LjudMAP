@@ -125,8 +125,6 @@ function History() {
 
     /* consumes lots of memory obviously */
     this.max_depth = 10;
-
-    $()
 }
 
 /**

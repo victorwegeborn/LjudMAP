@@ -1,15 +1,18 @@
 
-<div class="modal-body ">
+<div class="modal-body">
     <div class="card bg-dark rounded-0 w-100">
         <div class="card-header text-center my-0">
 
             <!-- settings navigation -->
             <ul class="nav nav-tabs card-header-tabs analysisModal" id="features-tab" role="tablist">
                <li class="nav-item">
-                   <a class="nav-link active small" id="mfcc-tab" data-toggle="tab" href="#mfcc-content" role="tab" aria-controls="mfcc-content" aria-selected="true">Mfcc's</a>
+                   <a class="nav-link active small" id="mfcc-tab" data-toggle="tab" href="#mfcc-content" role="tab" aria-controls="mfcc-content" aria-selected="true">MFCCs</a>
                </li>
                <li class="nav-item">
                    <a class="nav-link small" id="spectral-tab" data-toggle="tab" href="#spectral-content" role="tab" aria-controls="spectral-content" aria-selected="false">Spectral</a>
+               </li>
+               <li class="nav-item">
+                   <a class="nav-link small" id="signal-tab" data-toggle="tab" href="#signal-content" role="tab" aria-controls="signal-content" aria-selected="false">Signal</a>
                </li>
                <li class="nav-item">
                    <a class="nav-link small" id="segmentation-tab" data-toggle="tab" href="#segmentation" role="tab" aria-controls="segmentation" aria-selected="true">Segmentation</a>
@@ -28,9 +31,8 @@
                     <!------ ::MFCCS:: ------>
                     <div class="tab-pane fade show active" id="mfcc-content" role="tabpanel" aria-labelledby="mfcc-tab">
 
-
                         <!-- coefficients -->
-                        <div class="m-0 p-0" id="mfcc-settings">
+                        <div class="m-0 p-0 w-50 mx-auto" id="mfcc-settings">
                             <div class="form-group">
                                 <label class="small" for="coefficients">Number of coefficients</label>
                                 <input class="form-control form-control-sm mfccs" type="number" value="" id='coefficients' min="0" max="20" required>
@@ -60,16 +62,16 @@
 
                         <div class="d-flex justify-content-end">
                             <div class="custom-control custom-checkbox mt-4">
-                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="mfccs" checked>
-                                <label class="custom-control-label small pt-1" for="mfccs">Include</label>
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="mfccs-disabled">
+                                <label class="custom-control-label small pt-1" for="mfccs-disabled">Disable</label>
                             </div>
                         </div>
 
                     </div>
 
                     <!------ ::Spectal:: ------>
-                    <div class="tab-pane fade" id="spectral-content" role="tabpanel" aria-labelledby="profile-tab">
-                        <div class="row m-0 p-0" id="spectral-settings">
+                    <div class="tab-pane fade" id="spectral-content" role="tabpanel" aria-labelledby="spectral-tab">
+                        <div class="row m-0 p-0 w-50 mx-auto" id="spectral-settings">
                             <div class="col-6">
                                 <!-- flux -->
                                 <div class="custom-control custom-checkbox">
@@ -113,30 +115,66 @@
 
                         <div class="d-flex justify-content-end">
                             <div class="custom-control custom-checkbox mt-4">
-                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="spectrals" checked>
-                                <label class="custom-control-label small pt-1" for="spectrals">Include</label>
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="spectrals-disabled">
+                                <label class="custom-control-label small pt-1" for="spectrals-disabled">Disable</label>
                             </div>
                         </div>
                     </div>
 
-                    <!------ ::SEGMENTATION:: ------>
-                    <div class="tab-pane fade" id="segmentation" role="tabpanel" aria-labelledby="profile-tab">
 
-                        <!-- Segmentation size -->
-                        <div class="form-group ">
-                            <label class="small" for="segment_size">Segment size [ms]</label>
-                            <input class="form-control form-control-sm " type="number" value="1000" id='segment_size' min="20" max="5000" required>
-                            <div class="invalid-feedback small">
-                                Uniform segment size must be between 20 ms to 5000 ms
+                    <!------ ::Signal:: ------>
+                    <div class="tab-pane fade" id="signal-content" role="tabpanel" aria-labelledby="signal-tab">
+                        <div class="row m-0 p-0 w-50 mx-auto" id="signal-settings">
+                            <div class="col-6">
+
+                                <!-- RMS energy -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm signals" id="rms">
+                                    <label class="custom-control-label small pt-1" for="rms">RMS Energy</label>
+                                </div>
+
+                                <!-- RMSenergy -->
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm signals" id="zcr">
+                                    <label class="custom-control-label small pt-1" for="zcr">Zero Crossing Rate</label>
+                                </div>
+
+                            </div>
+
+                            <div class="col-6">
+
                             </div>
                         </div>
 
-                        <!-- Step size -->
-                        <div class="form-group ">
-                            <label class="small" for="step_size">Step size [ms]</label>
-                            <input class="form-control form-control-sm" type="number" value="1000" id='step_size' min="20" max="5000" required>
-                            <div class="invalid-feedback">
-                                Uniform step size must be between 20 ms to 5000 ms
+                        <div class="d-flex justify-content-end">
+                            <div class="custom-control custom-checkbox mt-4">
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="signals-disabled">
+                                <label class="custom-control-label small pt-1" for="signals-disabled">Disable</label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!------ ::SEGMENTATION:: ------>
+                    <div class="tab-pane fade" id="segmentation" role="tabpanel" aria-labelledby="profile-tab">
+
+                        <div class="w-50 mx-auto">
+                            <!-- Segmentation size -->
+                            <div class="form-group ">
+                                <label class="small" for="segment_size">Segment size [ms]</label>
+                                <input class="form-control form-control-sm " type="number" value="1000" id='segment_size' min="20" max="5000" required>
+                                <div class="invalid-feedback small">
+                                    Uniform segment size must be between 20 ms to 5000 ms
+                                </div>
+                            </div>
+
+                            <!-- Step size -->
+                            <div class="form-group ">
+                                <label class="small" for="step_size">Step size [ms]</label>
+                                <input class="form-control form-control-sm" type="number" value="1000" id='step_size' min="20" max="5000" required>
+                                <div class="invalid-feedback">
+                                    Uniform step size must be between 20 ms to 5000 ms
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -144,37 +182,37 @@
 
                     <!------ ::CLUSTER:: ------>
                     <div class="tab-pane fade" id="cluster" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="w-50 mx-auto">
+                            <!-- Number of components -->
+                            <div class="form-group">
+                                <label class="small" for="components">Components</label>
+                                <select class="custom-select custom-select-sm small w-100" id="components" required>
+                                    <option value="[3]">3</option>
+                                    <option value="[2]">2</option>
+                                    <option value="[2,3]">Both</option>
+                                </select>
+                            </div>
 
-                        <!-- Number of components -->
-                        <div class="form-group">
-                            <label class="small" for="components">Components</label>
-                            <select class="custom-select custom-select-sm small w-100" id="components" required>
-                                <option value="[3]">3</option>
-                                <option value="[2]">2</option>
-                                <option value="[2,3]">Both</option>
-                            </select>
-                        </div>
+                            <!-- METRIC SELECTION -->
+                            <div class="form-group">
+                                <label class="small" for="metric">Metric</label>
+                                <select class="custom-select custom-select-sm small w-100" id="metric" required>
+                                    <option value="euclidean">Euclidean</option>
+                                    <option value="manhattan">Manhattan</option>
+                                    <option value="cosine">Cosine</option>
+                                    <option value="correlation">Correlation</option>
+                                </select>
+                            </div>
 
-                        <!-- METRIC SELECTION -->
-                        <div class="form-group">
-                            <label class="small" for="metric">Metric</label>
-                            <select class="custom-select custom-select-sm small w-100" id="metric" required>
-                                <option value="euclidean">Euclidean</option>
-                                <option value="manhattan">Manhattan</option>
-                                <option value="cosine">Cosine</option>
-                                <option value="correlation">Correlation</option>
-                            </select>
-                        </div>
-
-                        <!-- Number of neighbours -->
-                        <div class="form-group">
-                            <label class="small" for="n_neighbours">Neighbours</label>
-                            <input class="form-control form-control-sm" type="number" value="15" id='n_neighbours' min="1" max="200" required>
-                            <div class="invalid-feedback">
-                                Number of neighbours must be between 1 and 200
+                            <!-- Number of neighbours -->
+                            <div class="form-group">
+                                <label class="small" for="n_neighbours">Neighbours</label>
+                                <input class="form-control form-control-sm" type="number" value="15" id='n_neighbours' min="1" max="200" required>
+                                <div class="invalid-feedback">
+                                    Number of neighbours must be between 1 and 200
+                                </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </form>
@@ -188,33 +226,34 @@
 
 <script type="text/javascript">
 
-    $('#mfccs').on('click', function(ev) {
+    $('#mfccs-disabled').on('click', function(ev) {
         toggleTargets('mfcc')
     })
 
-    $('#spectrals').on('click', function(ev) {
+    $('#spectrals-disabled').on('click', function(ev) {
         toggleTargets('spectral')
     })
 
+    $('#signals-disabled').on('click', function(ev) {
+        toggleTargets('signal')
+    })
+
+
     function toggleTargets(target) {
         var inputs = $('#'+target+'-settings input,#'+target+'-settings select');
-
         $.each(inputs, function() {
-            $('#'+target+'s').prop('checked') ? $(this).attr('disabled', false) : $(this).attr('disabled', true)
+            $('#'+ target+ 's-disabled').prop('checked') ? $(this).attr('disabled', true) : $(this).attr('disabled', false)
         })
 
-        if ($(this).prop('required')) {
+        if ($('#' + target + 's-disabled').prop('required')) {
             stateRemoveRequired();
         }
     }
 
-    $('#modal').on('hide.bs.modal', function(ev) {
-        console.log(ev)
-    })
-
     function stateRemoveRequired() {
-        $('#mfccs').prop('required', false)
-        $('#spectrals').prop('required', false)
+        $('#mfccs-disabled').prop('required', false)
+        $('#spectrals-disabled').prop('required', false)
+        $('#signals-disabled').prop('required', false)
         $('#feature-form').removeClass('was-validated')
     }
 
@@ -228,12 +267,17 @@
         ev.preventDefault()
 
         /* make sure at least some features are selected */
-        var mfcc_state = $('#mfccs');
-        var spectral_state = $('#spectrals')
-        if (!mfcc_state.prop('checked') && !spectral_state.prop('checked')) {
-            mfcc_state.prop('required', true);
-            spectral_state.prop('required', true)
+        var mfcc_disabled = $('#mfccs-disabled');
+        var spectral_disabled = $('#spectrals-disabled')
+        var signal_disabled = $('#signals-disabled')
+        if (mfcc_disabled.prop('checked') && spectral_disabled.prop('checked') && signal_disabled.prop('checked')) {
+            mfcc_disabled.prop('required', true);
+            spectral_disabled.prop('required', true)
+            signal_disabled.prop('required', true)
             $('#feature-form').addClass('was-validated')
+            mfcc_disabled.prop('checked', false)
+            spectral_disabled.prop('checked', false)
+            signal_disabled.prop('checked', false)
             return;
         }
 
@@ -242,27 +286,70 @@
         var formData = new FormData();
         var request = new XMLHttpRequest();
         var error = false;
-
+        var atLeastOneFeature = false
         $.each(ev.target, function() {
             if (!this.checkValidity()) {
                 $('#feature-form').addClass('was-validated')
                 error = true;
             } else {
-                if (($(this).hasClass('mfccs') && !mfcc_state) || ($(this).hasClass('spectrals') && !spectral_state)) {
-                    formData.set(this.id, false)
-                } else {
+
+                /* Pack and check mfccs */
+                if ($(this).hasClass('mfccs')) {
+                    if (mfcc_disabled.prop('checked')) {
+                        formData.set(this.id, false)
+                    } else {
+                        if (this.type === 'checkbox') {
+                            formData.set(this.id)
+                        } else {
+                            formData.set(this.id, $(this).val())
+                            atLeastOneFeature = true;
+                        }
+                    }
+                }
+
+                /* Pack and check spectrals */
+                else if ($(this).hasClass('spectrals')) {
+                    if (spectral_disabled.prop('checked')) {
+                        formData.set(this.id, false)
+                    } else {
+                        var isSet = $(this).prop('checked');
+                        formData.set(this.id, isSet)
+                        if (isSet) {
+                            atLeastOneFeature = true;
+                        }
+                    }
+                }
+
+                /* Pack and check signals */
+                else if ($(this).hasClass('signals')) {
+                    if (signal_disabled.prop('checked')) {
+                        formData.set(this.id, false)
+                    } else {
+                        var isSet = $(this).prop('checked');
+                        formData.set(this.id, isSet)
+                        if (isSet) {
+                            atLeastOneFeature = true;
+                        }
+                    }
+                }
+
+                /* Non-feature specific */
+                else {
                     if (this.type === 'checkbox') {
                         formData.set(this.id, $(this).prop('checked'))
-                    }
-                    else {
+                    } else {
                         formData.set(this.id, $(this).val())
                     }
                 }
             }
         })
 
+        if (!atLeastOneFeature) {
+            alert('No features selected');
+            return;
+        }
+
         if (error) {
-            console.log(error)
             formData = null;
             request = null;
             return '';
@@ -303,14 +390,20 @@
     })
 
     /* set current values of all input fields */
-    $('#mfccs').prop('checked', data.meta.features.mfccs.included)
-    toggleTargets('mfcc') // toggle display on subset inputs
+    $('#mfccs-disabled').prop('checked', false)
+    //toggleTargets('mfcc') // toggle display on subset inputs
     $('#coefficients').val(data.meta.features.mfccs.coefficients);
     $('#delta').val(data.meta.features.mfccs.delta.toString())
     $('#delta-delta').val(data.meta.features.mfccs['delta-delta'].toString())
 
-    $('#spectrals').prop('checked', data.meta.features.spectrals.included)
-    toggleTargets('spectral') // toggle display on subset inputs
+
+    $('#signals-disabled').prop('checked', false)
+    //toggleTargets('signal')
+    $('#zcr').prop('checked', data.meta.features.signals.zcr)
+    $('#rms').prop('checked', data.meta.features.signals.rms)
+
+    $('#spectrals-disabled').prop('checked', false)
+    //toggleTargets('spectral') // toggle display on subset inputs
     $('#flux').prop('checked', data.meta.features.spectrals.flux);
     $('#flux-centroid').prop('checked', data.meta.features.spectrals['flux-centroid']);
     $('#centroid').prop('checked', data.meta.features.spectrals.centroid);
@@ -318,12 +411,12 @@
     $('#flatness').prop('checked', data.meta.features.spectrals.flatness);
     $('#slope').prop('checked', data.meta.features.spectrals.slope);
 
-    $('#segment').val(data.meta.settings.segment_size)
-    $('#step').val(data.meta.settings.step_size)
+    $('#segment_size').val(data.meta.settings.segment_size)
+    $('#step_size').val(data.meta.settings.step_size)
 
     $('#components').val("[" + data.meta.settings.components.join() + "]")
     $('#metric').val(data.meta.settings.metric)
-    $('#neighbours').val(data.meta.settings.n_neighbours)
+    $('#n_neighbours').val(data.meta.settings.n_neighbours)
 
 
 </script>

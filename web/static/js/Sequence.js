@@ -22,7 +22,7 @@ px: 0     w     2w                 (n-1)w   nw
 // segment drawing globals
 var SEGMENT_SIZE = data.meta.segment_size;
 var LINE_SEGMENT = Math.floor(data.meta.step_size * 0.05)
-var SEGMENT_ALPHA = 0.6;
+var SEGMENT_ALPHA = 0.8;
 var LINE_ALPHA = 0.8;
 var SEQUENCE_PLAYING_LOCKED = false;
 

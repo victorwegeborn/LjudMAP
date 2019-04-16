@@ -127,6 +127,37 @@ def _spectral(target_path, spectral):
     return 'spec;'
 
 
+def _energy(target_path):
+    file_path = os.path.join(script_dir, 'configuration/energy.conf')
+    config = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            config.append(line)
+
+    with open(target_path, 'a') as f:
+        for line in config:
+            ''' add input variables here '''
+            f.write(line)
+        f.write('\n')
+    return 'energy;'
+
+
+def _zcr(target_path):
+    file_path = os.path.join(script_dir, 'configuration/zcr.conf')
+    config = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            config.append(line)
+
+
+    with open(target_path, 'a') as f:
+        for line in config:
+            ''' add input variables here '''
+            f.write(line)
+        f.write('\n')
+    return 'mzcr;'
+
+
 def write_config(target_path, segmentation, features):
     output = 'reader.dmLevel='
 
@@ -138,8 +169,14 @@ def write_config(target_path, segmentation, features):
         output += _mfcc(target_path, features['mfccs'])
 
     # check for spectrals
-    if True in features['spectrals'].values():
+    if not features['spectrals']['disabled']:
         output += _spectral(target_path, features['spectrals'])
+
+    if features['signals']['rms']:
+        output += _energy(target_path)
+
+    if features['signals']['zcr']:
+        output += _zcr(target_path)
 
     # Always write footer
     _footer(target_path, output)

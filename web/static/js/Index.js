@@ -119,14 +119,13 @@ var send = function() {
     formData.set('n_songs', i)
 
     formData.set('coefficients', $('#coefficients').val())
-    formData.set('mfccs', true)
+    formData.set('mfccs-disabled', false)
     formData.set('delta', false)
     formData.set('delta-delta', false)
 
     /* default for other features */
-    formData.set('spectrals', false)
-
-
+    formData.set('spectrals-disabled', true)
+    formData.set('signals-disabled', true)
 
     request.open('POST', '/process_audio')
     request.send(formData);
