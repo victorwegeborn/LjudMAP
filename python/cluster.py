@@ -1,6 +1,3 @@
-from MulticoreTSNE import MulticoreTSNE as TSNE
-from sklearn.decomposition import PCA
-from minisom import MiniSom
 import umap
 from itertools import count
 import numpy as np
@@ -13,40 +10,6 @@ def run(data, n_components, n_neighbours, metric):
     print('done!')
     return result
 
-def get_cluster_data(data, n_components=3):
-    print(f'Clustering started with {n_components} components.')
-
-    # Run data through t-SNE
-    tsne = TSNE(n_components=n_components, perplexity=25)#, random_state=None)
-    Y1 = convert_range(tsne.fit_transform(data))
-    print("t-SNE done")
-
-    # Run data through PCA
-    pca = PCA(n_components=n_components)
-    Y2 = convert_range(pca.fit_transform(data))
-    print("PCA done")
-
-    '''
-    # Run data through SOM
-    som = False
-    if som:
-        som = MiniSom(25, 25, len(data[0]), sigma=0.01, learning_rate=0.6)
-        som.train_random(data, 100)
-        Y3 = convert_range(np.array([np.array(som.winner(i)) for i in range(len(data))]))
-        print("SOM done")
-    else:
-        Y3 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
-    '''
-
-    # Run data through UMAP
-    run_umap = True
-    if run_umap:
-        Y4 = convert_range(umap.UMAP(n_components=n_components).fit_transform(data))
-        print("UMAP done")
-    else:
-        Y4 = convert_range(np.array([np.array([random.randint(-50, 50), random.randint(-50, 50)]) for i in range(len(Y2))]))
-
-    return zip(count(), Y1, Y2, Y4)
 
 def convert_range(Y):
     new_range = (80 - (-80))

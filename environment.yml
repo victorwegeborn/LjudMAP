@@ -1,4 +1,4 @@
-name: TDA
+name: LjudMAP
 dependencies:
   - pip=19.0.1
   - python=3.6.8
@@ -10,8 +10,6 @@ dependencies:
     - flask==1.0.2
     - werkzeug==0.14.1
     - llvmlite==0.27.1
-    - minisom==2.1.4
-    - multicoretsne==0.1
     - numba==0.42.1
     - pydub==0.23.1
     - umap-learn==0.3.8
