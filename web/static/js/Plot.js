@@ -28,8 +28,8 @@ class Plot {
 
         /* set meta */
         if (!o.meta) throw 'pass meta data to plot';
-        this._segment_size = o.meta.segment_size;
-        this._segment_step = o.meta.step_size;
+        this._segment_size = o.meta.settings.segmentation.size;
+        this._segment_step = o.meta.settings.segmentation.step;
         this._npoints = this._data.length;
 
         this._history = o.history;

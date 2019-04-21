@@ -20,9 +20,97 @@ app = Flask(__name__, template_folder='templates/')
 app.secret_key = 'barabing'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def parse_request_form(form):
-    print(json.dumps(form, indent=2))
 
+
+'''
+
+{
+    settings: {
+        segmentation: {
+            mode: 'uniform' | 'coagulated' | 'beat',
+            size: int (ms) | null,
+            step: int (ms) | null
+        },
+        cluster: {
+            components: [2] | [3] | [2,3],
+            neighbours: int,
+            metric: string,
+            labels: null | [int]
+        }
+    },
+    features: {
+        mfccs: {
+            disabled: boolean,
+            coefficients: int,
+            delta: boolean,
+            deltadelta: boolean
+        },
+        spectrals: {
+            disabled: boolean,
+            flux: boolean,
+            flux_centroid: boolean,
+            centroid: boolean,
+            harmonicity: boolean,
+            flatness: boolean,
+            slope: boolean
+        },
+        signals: {
+            disabled: boolean
+            zcr: boolean,
+            rms: boolean
+        }
+    }
+}
+
+
+{
+    meta: {
+        audio: [
+            {
+                path: string,
+                duration: int
+            },
+            .
+            .
+            .
+            {
+                path: string,
+                duration: int
+            }
+        ],
+        sessions: {
+            current: int,
+            previous: null | [int]
+        },
+        waveform: null | {}
+    },
+}
+
+'''
+
+def parse_request(request):
+
+
+    settings = json.loads(request.form['settings'])
+    features = json.loads(request.form['features'])
+
+    print(json.dumps(settings, indent=2))
+    print(json.dumps(features, indent=2))
+
+    # ensure segmentation is unifrom, coagulated, or beat-based
+    if settings['segmentation']['mode'] == 'uniform':
+        settings['segmentation']['size'] = float(settings['segmentation']['size'])
+        settings['segmentation']['step'] = float(settings['segmentation']['step'])
+
+    # parse cluster settings
+    settings['cluster']['components'] = json.loads(settings['cluster']['components'])
+    settings['cluster']['neighbours'] = int(settings['cluster']['neighbours'])
+
+    # false or object
+    features['mfccs']['coefficients'] = int(features['mfccs']['coefficients'])
+
+
+    '''
     # general settings for audio_processing
     settings = {
         'segment_size': float(form['segment_size']),
@@ -84,8 +172,10 @@ def parse_request_form(form):
             'zcr': False,
         }
 
+    '''
     print('Parsed settings:', json.dumps(settings, indent=2))
     print('Parsed features:', json.dumps(features, indent=2))
+
 
     return settings, features
 
@@ -130,7 +220,7 @@ def process_audio() -> str:
                 print(file.filename + " saved")
 
     # parse and format the form data
-    settings, features = parse_request_form(request.form)
+    settings, features = parse_request(request)
 
     # process audio according to passed data
     audio_processing.main(session_key, settings, features)
@@ -147,7 +237,7 @@ def retrain() -> str:
         points = json.loads(request.form['points'])
 
         # parse meta data
-        settings, _ = parse_request_form(request.form)
+        settings, _ = parse_request_form(request)
 
         old_session_key = request.form['sessionKey']
         filename = request.form['audioPath'].split("/")[-1]
@@ -167,7 +257,7 @@ def new_features() -> str:
     print('New feature set')
     if request.method == 'POST':
         # parse meta data
-        settings, features = parse_request_form(request.form)
+        settings, features = parse_request(request)
 
         # get users current labeling
         labels = None

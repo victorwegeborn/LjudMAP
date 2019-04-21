@@ -65,13 +65,13 @@ def main(session_key, settings, features):
     waveform_data = None
 
     # construct wavedata
-    waveform_data = waveform.getJson(output_dir, audio_path, settings['step_size'], n_points)
+    waveform_data = waveform.getJson(output_dir, audio_path, settings['segmentation']['step'], n_points)
 
     # start clustering for each component
     data = []
     first = True
-    for c in settings['components']:
-        result = cluster.run(result, c, settings['n_neighbours'], settings['metric'])
+    for c in settings['cluster']['components']:
+        result = cluster.run(result, c, settings['cluster']['neighbours'], settings['cluster']['metric'])
         for idx, row in enumerate(result):
             # if this is the first of two components
             if first:
@@ -81,7 +81,7 @@ def main(session_key, settings, features):
                         'umap': row.tolist()
                         # tsne, som, pca also valid
                     },
-                    'start': int(idx*settings['step_size']),
+                    'start': int(idx*settings['segmentation']['step']),
                     'active': 1,
                     'category': 0
                 })
@@ -215,8 +215,8 @@ def new_features(labels, session_key, old_session_key, settings, features):
     # start clustering for each component
     data = []
     first = True
-    for c in settings['components']:
-        result = cluster.run(result, c, settings['n_neighbours'], settings['metric'])
+    for c in settings['cluster']['components']:
+        result = cluster.run(result, c, settings['cluster']['neighbours'], settings['cluster']['metric'])
         for idx, row in enumerate(result):
             # if this is the first of two components
             if first:
@@ -226,7 +226,7 @@ def new_features(labels, session_key, old_session_key, settings, features):
                         'umap': row.tolist()
                         # tsne, som, pca also valid
                     },
-                    'start': int(idx*settings['step_size']),
+                    'start': int(idx*settings['segmentation']['size']),
                     'active': 1,
                     'category': 0 if not labels else labels[idx]
                 })
@@ -249,8 +249,8 @@ def pack_and_store_data(output_dir, data, waveform_data, audio_duration, audio_p
             'meta': {
                 'audio_duration': audio_duration,
                 'audio_path': audio_path,
-                'segment_size': settings['segment_size'],
-                'step_size': settings['step_size'],
+                #'segment_size': settings['segment_size'],
+                #'step_size': settings['step_size'],
                 'waveform': waveform_data,
                 'features': features,
                 'settings': settings

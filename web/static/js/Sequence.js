@@ -20,8 +20,8 @@ px: 0     w     2w                 (n-1)w   nw
 
 
 // segment drawing globals
-var SEGMENT_SIZE = data.meta.segment_size;
-var LINE_SEGMENT = Math.floor(data.meta.step_size * 0.05)
+var SEGMENT_SIZE = data.meta.settings.segmentation.size;
+var LINE_SEGMENT = Math.floor(data.meta.settings.segmentation.step * 0.05)
 var SEGMENT_ALPHA = 0.8;
 var LINE_ALPHA = 0.8;
 var SEQUENCE_PLAYING_LOCKED = false;
@@ -41,9 +41,9 @@ var seq_playhead = new PIXI.Container();
 seq_playhead.interactiveChildren = false;
 var seq_waveform = new PIXI.Container();
 
-const N_PX = data.data[data.data.length-1].start + data.meta.segment_size;
+const N_PX = data.data[data.data.length-1].start + data.meta.settings.segmentation.size;
 const MIN_xSCALE = seq_width/N_PX;
-const MAX_xSCALE = seq_width/(30*data.meta.step_size);
+const MAX_xSCALE = seq_width/(30*data.meta.settings.segmentation.step);
 const SEQ_HIGHLIGHT_COLOR = '0xffffff';
 const SEQ_PLAYHEAD_COLOR = '0xff2800';
 
@@ -178,7 +178,7 @@ function initSequence() {
     var height = seq_height + 2;
 
     // default data segment textures
-    seq_textures.data_segment = _constructTexture(data.meta.segment_size, height);
+    seq_textures.data_segment = _constructTexture(data.meta.settings.segmentation.size, height);
     seq_textures.line = _constructTexture(LINE_SEGMENT, height)
 
 
@@ -201,7 +201,7 @@ function initSequence() {
         _interactiveDefaultPlayheadSegment({
             index: i,
             start: data.data[i].start,
-            width: data.meta.segment_size,
+            width: data.meta.settings.segmentation.size,
             texture: seq_textures.data_segment,
         })
     }
@@ -221,7 +221,7 @@ function initPlayhead() {
     var head = new PIXI.Graphics(true);
     head.beginFill(SEQ_PLAYHEAD_COLOR);
     head.lineAlignment = 0;
-    head.drawRect(0, 0, data.meta.step_size, 2*seq_height)
+    head.drawRect(0, 0, data.meta.settings.segmentation.step, 2*seq_height)
     head.endFill();
     head.alpha = 0.6;
     seq_playhead.addChild(new PIXI.Sprite.from(seq_app.renderer.generateTexture(head)));
@@ -283,8 +283,8 @@ function _interactiveDefaultPlayheadSegment(o) {
                 console.log(msToTime(start))
                 AUDIO.PLAY([{
                     start: start,
-                    duration: data.meta.segment_size,
-                    step: data.meta.step_size
+                    duration: data.meta.settings.segmentation.size,
+                    step: data.meta.settings.segmentation.step
                 }])
             }
         }
@@ -320,8 +320,8 @@ function playSequenceHighlights() {
 
         AUDIO.PLAY([{
             start: start,
-            duration: end - start + data.meta.segment_size,
-            step: data.meta.step_size
+            duration: end - start + data.meta.settings.segmentation.size,
+            step: data.meta.settings.segmentation.step
         }], resetSequenceHighlighting)
     }
 }
@@ -373,7 +373,7 @@ function colorSegmentByIndex(index) {
 
 
 function setSequencePlayheadAt(i) {
-    seq_playhead.position.x = i * data.meta.step_size
+    seq_playhead.position.x = i * data.meta.settings.segmentation.step
 }
 
 function resetSequencePlayhead() {

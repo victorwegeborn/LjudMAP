@@ -78,10 +78,10 @@ $(document).ready(function() {
             $(this).text(msToTime(audioDuration))
         }
         else if ($(this).hasClass('segmentSize')) {
-            $(this).text(data.meta.segment_size + ' ms')
+            $(this).text(data.meta.settings.segmentation.size + ' ms')
         }
         else if ($(this).hasClass('segmentStep')) {
-            $(this).text(data.meta.step_size + ' ms')
+            $(this).text(data.meta.settings.segmentation.step + ' ms')
         }
         else if ($(this).hasClass('dataPoints')) {
             $(this).text(data.data.length)
@@ -328,7 +328,7 @@ $(document).ready(function() {
         defaultValidPoints = [["id", "startTime(ms)", "label"]]
         for (let i = 0; i < data.data.length; i++) {
             if (data.data[i].category != 0) {
-                defaultValidPoints.push([data.data[i].start/data.meta.step_size, data.data[i].start, data.data[i].category])
+                defaultValidPoints.push([data.data[i].start/data.meta.settings.segmentation.size, data.data[i].start, data.data[i].category])
             }
         }
 
@@ -342,12 +342,12 @@ $(document).ready(function() {
             "points": JSON.stringify(defaultValidPoints),
             "sessionKey": sessionKey,
             "audioPath": audioPath,
-            "segment_size": data.meta.segment_size,
-            "step_size": data.meta.step_size,
-            "components": JSON.stringify(data.meta.components),
-            "n_neighbours": data.meta.n_neighbours,
-            "metric": data.meta.metric,
-            'n_songs': data.meta.n_songs
+            "segment_size": data.meta.settings.segmentation.size,
+            "step_size": data.meta.settings.segmentation.step,
+            "components": JSON.stringify(data.meta.settings.cluster.components),
+            "n_neighbours": data.meta.settings.cluster.neighbours,
+            "metric": data.meta.settings.cluster.metric,
+            //'n_songs': data.meta.n_songs
         }
 
 

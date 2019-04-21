@@ -44,6 +44,7 @@
 		                </li>
 
 
+
 						<!-- File Drop Down -->
  		                <li class="nav-item dropdown mt-auto small">
  		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="fileNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -256,8 +257,6 @@
 		var sessionKey = '{{session_key}}';
 		var data = {{data | tojson}};
 
-		{% set meta = data.meta %}
-
 	</script>
 	<script src="{{ url_for('static', filename='js/Utils.js')        }}"></script>
 	<script src="{{ url_for('static', filename='js/Sequence.js')     }}"></script>
@@ -265,4 +264,5 @@
 	<script src="{{ url_for('static', filename='js/Main.js')         }}"></script>
 	<script src="{{ url_for('static', filename='js/WAAClock.js')     }}"></script>
 	<script src="{{ url_for('static', filename='js/Audio.js')        }}"></script>
+	
 </body>

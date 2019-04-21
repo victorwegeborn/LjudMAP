@@ -40,8 +40,8 @@ class Audio extends AudioContext {
         this._source = null;
 
         /* audio settings */
-        this._fade = data.meta.segment_size/2;
-        this._launch_interval = data.meta.segment_size/2;
+        this._fade = data.meta.settings.segmentation.size/2;
+        this._launch_interval = data.meta.settings.segmentation.size/2;
 
         /* hoover playback trackers */
         this._stack = []
@@ -146,7 +146,7 @@ class Audio extends AudioContext {
         this._set_sequence(this._sequential_playback_index)
         this._plot.setHighlight(this._sequential_playback_index)
 
-        var step = data.meta.step_size/1000;
+        var step = data.meta.settings.segmentation.step/1000;
 
         // set up event for plot and sequence map
         this._event = this._clock.callbackAtTime((e) => {

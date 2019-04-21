@@ -19,9 +19,9 @@ def _header(target_path, segmentation):
     with open(target_path, 'w') as f:
         for line in config:
             if line.startswith('FRAMESIZE'):
-                line = 'frameSize=' + str(segmentation['segment_size']/1000) + '\n'
+                line = 'frameSize=' + str(segmentation['size']/1000) + '\n'
             if line.startswith('FRAMESTEP'):
-                line = 'frameStep=' + str(segmentation['step_size']/1000) + '\n'
+                line = 'frameStep=' + str(segmentation['step']/1000) + '\n'
             f.write(line)
         f.write('\n')
 
@@ -50,12 +50,12 @@ def _mfcc(target_path, mfcc):
     with open(target_path, 'a') as f:
         for line in config:
             if line.startswith('COEFFICIENT'):
-                line = 'nMfcc=' + str(mfcc['coefficients']) + '\n'
+                line = 'lastMfcc=' + str(mfcc['coefficients']) + '\n'
             f.write(line)
         f.write('\n')
 
     # handle mfcc delta
-    if mfcc['delta'] or mfcc['delta-delta']:
+    if mfcc['delta'] or mfcc['deltadelta']:
         delta_path = os.path.join(script_dir, 'configuration/delta.conf')
         deltadelta_path = os.path.join(script_dir, 'configuration/deltadelta.conf')
         delta = []
@@ -71,7 +71,7 @@ def _mfcc(target_path, mfcc):
                 f.write(line)
             local_output += 'mfccD;'
 
-        if mfcc['delta-delta']:
+        if mfcc['deltadelta']:
             with open(deltadelta_path, 'r') as f:
                 for line in f:
                     deltadelta.append(line)
@@ -105,7 +105,7 @@ def _spectral(target_path, spectral):
                 line += '1\n' if spectral['flux'] else '0\n'
             if line == 'FLUXCENTROID\n':
                 line = 'fluxCentroid='
-                line += '1\n' if spectral['flux-centroid'] else '0\n'
+                line += '1\n' if spectral['fluxcentroid'] else '0\n'
             if line == 'CENTROID\n':
                 line = 'centroid='
                 line += '1\n' if spectral['centroid'] else '0\n'
@@ -158,25 +158,26 @@ def _zcr(target_path):
     return 'mzcr;'
 
 
-def write_config(target_path, segmentation, features):
+def write_config(target_path, settings, features):
     output = 'reader.dmLevel='
 
     # Always write header
-    _header(target_path, segmentation)
+    _header(target_path, settings['segmentation'])
 
     # check for mfccs
-    if 'coefficients' in features['mfccs']:
+    if not features['mfccs']['disabled']:
         output += _mfcc(target_path, features['mfccs'])
 
     # check for spectrals
-    if not features['spectrals']['disabled']:
+    if not features['spectrals']['disabled'] and True in features['spectrals'].values():
         output += _spectral(target_path, features['spectrals'])
 
-    if features['signals']['rms']:
-        output += _energy(target_path)
+    if not features['signals']['disabled'] and True in features['signals'].values():
+        if features['signals']['rms']:
+            output += _energy(target_path)
 
-    if features['signals']['zcr']:
-        output += _zcr(target_path)
+        if features['signals']['zcr']:
+            output += _zcr(target_path)
 
     # Always write footer
     _footer(target_path, output)
@@ -233,7 +234,7 @@ if __name__ == '__main__':
         'mfccs': {
             'coefficients': 12,
             'delta': True,
-            'delta-delta': False
+            'deltadelta': False
         },
         'spectral': {
             'flux': False,

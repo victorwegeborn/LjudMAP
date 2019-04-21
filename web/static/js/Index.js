@@ -93,8 +93,7 @@ $(submitForm).on('submit', function(ev) {
 
 var send = function() {
     var formData = new FormData();
-    var request = new XMLHttpRequest();
-
+    showLoadingGif();
     // pack all files for send
     var i = 0;
     for (let [key, value] of fileMap) {
@@ -109,9 +108,58 @@ var send = function() {
         i++;
     };
 
+    formData.set('settings', JSON.stringify({
+        segmentation: {
+            mode: 'uniform',
+            size: $('#size').val(),
+            step: $('#step').val()
+        },
+        cluster: {
+            components: $('#components').val(),
+            neighbours: $('#neighbours').val(),
+            metric: $('#metric').val()
+        }
+    }));
+
+    formData.set('features', JSON.stringify({
+        mfccs: {
+            disabled: false,
+            coefficients: $('#coefficients').val(),
+            delta: false,
+            deltadelta: false
+        },
+        spectrals: {
+            disabled: false,
+            flux: false,
+            fluxcentroid: false,
+            centroid: false,
+            harmonicity: false,
+            flatness: false,
+            slope: false
+        },
+        signals: {
+            disabled: false,
+            rms: false,
+            zcr: false
+        }
+    }));
+
+
+    $.ajax({
+        url: '/process_audio',
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: formData,
+        success: function(data) {
+            window.location.href = data.redirect;
+        }
+    });
+
+    /*
     // send all inputs to server
     formData.set('segmentation_mode', 'uniform')
-    formData.set('segment_size', $('#segment').val())
+    formData.set('segment_size', $('#size').val())
     formData.set('step_size', $('#step').val())
     formData.set('components', $('#components').val())
     formData.set('n_neighbours', $('#neighbours').val())
@@ -123,7 +171,7 @@ var send = function() {
     formData.set('delta', false)
     formData.set('delta-delta', false)
 
-    /* default for other features */
+    // default for other features
     formData.set('spectrals-disabled', true)
     formData.set('signals-disabled', true)
 
@@ -139,6 +187,7 @@ var send = function() {
             window.location.href = response.redirect
         }
     };
+    */
 }
 
 ////// Utils

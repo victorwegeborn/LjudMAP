@@ -32,38 +32,37 @@
                     <div class="tab-pane fade show active" id="mfcc-content" role="tabpanel" aria-labelledby="mfcc-tab">
 
                         <!-- coefficients -->
-                        <div class="m-0 p-0 w-50 mx-auto" id="mfcc-settings">
+                        <div class="m-0 p-0 w-50 mx-auto" id="mfccs-settings">
                             <div class="form-group">
                                 <label class="small" for="coefficients">Number of coefficients</label>
-                                <input class="form-control form-control-sm mfccs" type="number" value="" id='coefficients' min="0" max="20" required>
+                                <input class="form-control form-control-sm mfccs" type="number" value="" placeholder="15" id='coefficients' min="0" max="20" required>
                                 <div class="invalid-feedback">
                                     Number of Mel-frequency cepstrums coefficients must be between 0 and 20
                                 </div>
                             </div>
 
-                            <!-- Delta -->
-                            <div class="form-group">
-                                <label class="small" for="delta">Delta</label>
-                                <select class="custom-select custom-select-sm small w-100 mfccs" id="delta" required>
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-                                </select>
-                            </div>
-
-                            <!-- Number of delta -->
-                            <div class="form-group">
-                                <label class="small" for="delta-delta">Delta-Delta</label>
-                                <select class="custom-select custom-select-sm small w-100 mfccs" id="delta-delta" required>
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-                                </select>
+                            <div class="row">
+                                <div class="col-6">
+                                    <!-- Delta -->
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input custom-control-input-sm mfccs" id="delta">
+                                        <label class="custom-control-label small pt-1" for="delta">Delta</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <!-- Number of delta -->
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input custom-control-input-sm mfccs" id="deltadelta">
+                                        <label class="custom-control-label small pt-1" for="deltadelta">Delta-Delta</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-end">
                             <div class="custom-control custom-checkbox mt-4">
-                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="mfccs-disabled">
-                                <label class="custom-control-label small pt-1" for="mfccs-disabled">Disable</label>
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="mfccs">
+                                <label class="custom-control-label small pt-1" for="mfccs">Disabled</label>
                             </div>
                         </div>
 
@@ -71,7 +70,8 @@
 
                     <!------ ::Spectal:: ------>
                     <div class="tab-pane fade" id="spectral-content" role="tabpanel" aria-labelledby="spectral-tab">
-                        <div class="row m-0 p-0 w-50 mx-auto" id="spectral-settings">
+
+                        <div class="row m-0 p-0 w-50 mx-auto" id="spectrals-settings">
                             <div class="col-6">
                                 <!-- flux -->
                                 <div class="custom-control custom-checkbox">
@@ -81,8 +81,8 @@
 
                                 <!-- flux centroid -->
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="flux-centroid">
-                                    <label class="custom-control-label small pt-1" for="flux-centroid">Flux Centroid [Hz]</label>
+                                    <input type="checkbox" class="custom-control-input custom-control-input-sm spectrals" id="fluxcentroid">
+                                    <label class="custom-control-label small pt-1" for="fluxcentroid">Flux Centroid [Hz]</label>
                                 </div>
 
                                 <!-- centroid -->
@@ -115,8 +115,8 @@
 
                         <div class="d-flex justify-content-end">
                             <div class="custom-control custom-checkbox mt-4">
-                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="spectrals-disabled">
-                                <label class="custom-control-label small pt-1" for="spectrals-disabled">Disable</label>
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="spectrals">
+                                <label class="custom-control-label small pt-1" for="spectrals">Disabled</label>
                             </div>
                         </div>
                     </div>
@@ -124,7 +124,7 @@
 
                     <!------ ::Signal:: ------>
                     <div class="tab-pane fade" id="signal-content" role="tabpanel" aria-labelledby="signal-tab">
-                        <div class="row m-0 p-0 w-50 mx-auto" id="signal-settings">
+                        <div class="row m-0 p-0 w-50 mx-auto" id="signals-settings">
                             <div class="col-6">
 
                                 <!-- RMS energy -->
@@ -148,8 +148,8 @@
 
                         <div class="d-flex justify-content-end">
                             <div class="custom-control custom-checkbox mt-4">
-                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="signals-disabled">
-                                <label class="custom-control-label small pt-1" for="signals-disabled">Disable</label>
+                                <input type="checkbox" class="custom-control-input custom-control-input-sm" id="signals">
+                                <label class="custom-control-label small pt-1" for="signals">Disabled</label>
                             </div>
                         </div>
                     </div>
@@ -161,8 +161,8 @@
                         <div class="w-50 mx-auto">
                             <!-- Segmentation size -->
                             <div class="form-group ">
-                                <label class="small" for="segment_size">Segment size [ms]</label>
-                                <input class="form-control form-control-sm " type="number" value="1000" id='segment_size' min="20" max="5000" required>
+                                <label class="small" for="size">Segment size [ms]</label>
+                                <input class="form-control form-control-sm " type="number" value="1000" id='size' min="20" max="5000" required>
                                 <div class="invalid-feedback small">
                                     Uniform segment size must be between 20 ms to 5000 ms
                                 </div>
@@ -170,12 +170,14 @@
 
                             <!-- Step size -->
                             <div class="form-group ">
-                                <label class="small" for="step_size">Step size [ms]</label>
-                                <input class="form-control form-control-sm" type="number" value="1000" id='step_size' min="20" max="5000" required>
+                                <label class="small" for="step">Step size [ms]</label>
+                                <input class="form-control form-control-sm" type="number" value="1000" id='step' min="20" max="5000" required>
                                 <div class="invalid-feedback">
                                     Uniform step size must be between 20 ms to 5000 ms
                                 </div>
                             </div>
+
+                            <p class="small text-muted">Labels are preserved only if the segmentation remains the same</p>
                         </div>
                     </div>
 
@@ -206,8 +208,8 @@
 
                             <!-- Number of neighbours -->
                             <div class="form-group">
-                                <label class="small" for="n_neighbours">Neighbours</label>
-                                <input class="form-control form-control-sm" type="number" value="15" id='n_neighbours' min="1" max="200" required>
+                                <label class="small" for="neighbours">Neighbours</label>
+                                <input class="form-control form-control-sm" type="number" value="15" id='neighbours' min="1" max="200" required>
                                 <div class="invalid-feedback">
                                     Number of neighbours must be between 1 and 200
                                 </div>
@@ -225,157 +227,186 @@
 </div>
 
 <script type="text/javascript">
+    // set features as propagated from app.py
+    $.each(data.meta.features, function(target, value) {
+        // get disable button
+        var btn = $('#' + target);
 
-    $('#mfccs-disabled').on('click', function(ev) {
-        toggleTargets('mfcc')
-    })
-
-    $('#spectrals-disabled').on('click', function(ev) {
-        toggleTargets('spectral')
-    })
-
-    $('#signals-disabled').on('click', function(ev) {
-        toggleTargets('signal')
-    })
-
-
-    function toggleTargets(target) {
-        var inputs = $('#'+target+'-settings input,#'+target+'-settings select');
-        $.each(inputs, function() {
-            $('#'+ target+ 's-disabled').prop('checked') ? $(this).attr('disabled', true) : $(this).attr('disabled', false)
-        })
-
-        if ($('#' + target + 's-disabled').prop('required')) {
-            stateRemoveRequired();
+        // Set all subsequent features as disabled
+        if (value.disabled) {
+            btn.prop('checked', true)
+            toggleDisabled(target)
         }
+
+        // Set disable button behaviour
+        btn.on('click', function(ev) {
+            toggleDisabled(ev.target.id)
+        });
+
+
+        // propagate settings settings
+        $.each(value, function(feature, value) {
+            if ($.type(value) === "boolean" && value === true) {
+                $('#' + feature).prop('checked', true)
+            } else {
+                $('#' + feature).val(value.toString())
+            }
+        })
+    });
+
+    // set all settings accordingly
+    $.each(data.meta.settings, function(setting, o) {
+        // cluster / segmentation
+        $.each(o, function(target, value) {
+            // components are passed as array, and thus needs special handeling
+            if (target === 'components') {
+                $('#' + target).val("[" + value.join() + "]")
+            } else {
+                $('#' + target).val(value.toString())
+            }
+        })
+    })
+
+
+    function toggleDisabled(t) {
+
+
+        var inputs = $('#' + t + '-settings input, #' + t + '-settings select');
+        $.each(inputs, function() {
+            $('#' + t).prop('checked') ? $(this).attr('disabled', true) : $(this).attr('disabled', false)
+        })
     }
 
-    function stateRemoveRequired() {
-        $('#mfccs-disabled').prop('required', false)
-        $('#spectrals-disabled').prop('required', false)
-        $('#signals-disabled').prop('required', false)
+    function removeRequired() {
+        $('#mfccs').prop('required', false)
+        $('#spectrals').prop('required', false)
+        $('#signals').prop('required', false)
         $('#feature-form').removeClass('was-validated')
     }
-
-    $('#featuresSubmit').on('click', function(ev) {
-        ev.preventDefault()
-        $('#feature-form').submit()
-    })
-
 
     $('#feature-form').on('submit', function(ev) {
         ev.preventDefault()
 
-        /* make sure at least some features are selected */
-        var mfcc_disabled = $('#mfccs-disabled');
-        var spectral_disabled = $('#spectrals-disabled')
-        var signal_disabled = $('#signals-disabled')
-        if (mfcc_disabled.prop('checked') && spectral_disabled.prop('checked') && signal_disabled.prop('checked')) {
-            mfcc_disabled.prop('required', true);
-            spectral_disabled.prop('required', true)
-            signal_disabled.prop('required', true)
+
+        // make sure not all disable buttons are activated
+        var btns = [$('#mfccs'),
+                    $('#spectrals'),
+                    $('#signals')]
+
+        if (btns[0].prop('checked') && btns[1].prop('checked') && btns[2].prop('checked')) {
+            // require and uncheck all buttons to highlight error
+            $.each(btns, function() {
+                this.prop('required', true);
+                this.prop('checked', false);
+            });
+            // show error
             $('#feature-form').addClass('was-validated')
-            mfcc_disabled.prop('checked', false)
-            spectral_disabled.prop('checked', false)
-            signal_disabled.prop('checked', false)
+
+            // remove required after some time
+            setTimeout(function() {
+                $.each(btns, function() {
+                    this.prop('required', false);
+                });
+                $('#feature-form').removeClass('was-validated')
+            }, 1000); // 1s
             return;
         }
 
 
-        /* validate all forms and pack data */
+        // validate all forms and pack data
         var formData = new FormData();
         var request = new XMLHttpRequest();
-        var error = false;
         var atLeastOneFeature = false
+        var features = {
+            mfccs: {
+                disabled: btns[0].prop('checked')
+            },
+            spectrals: {
+                disabled: btns[1].prop('checked')
+            },
+            signals: {
+                disabled: btns[2].prop('checked')
+            }
+        }
+
+        formData.set('settings', JSON.stringify({
+                segmentation: {
+                    mode: 'uniform', // TODO: implement beat-based segmentation
+                    size: $('#size').val(),
+                    step: $('#step').val()
+                },
+                cluster: {
+                    components: $('#components').val(),
+                    neighbours: $('#neighbours').val(),
+                    metric: $('#metric').val()
+                }
+            })
+        );
+
+
         $.each(ev.target, function() {
             if (!this.checkValidity()) {
                 $('#feature-form').addClass('was-validated')
-                error = true;
+                return;
             } else {
-
-                /* Pack and check mfccs */
+                // check mfccs
                 if ($(this).hasClass('mfccs')) {
-                    if (mfcc_disabled.prop('checked')) {
-                        formData.set(this.id, false)
+                    // if components are set we have at least one
+                    if (this.type !== 'checkbox') {
+                        atLeastOneFeature = true;
+                        features.mfccs[this.id] = $(this).val();
                     } else {
-                        if (this.type === 'checkbox') {
-                            formData.set(this.id)
-                        } else {
-                            formData.set(this.id, $(this).val())
-                            atLeastOneFeature = true;
-                        }
+                        features.mfccs[this.id] = $(this).prop('checked');
                     }
                 }
 
-                /* Pack and check spectrals */
+                // Pack and check spectrals
                 else if ($(this).hasClass('spectrals')) {
-                    if (spectral_disabled.prop('checked')) {
-                        formData.set(this.id, false)
-                    } else {
-                        var isSet = $(this).prop('checked');
-                        formData.set(this.id, isSet)
-                        if (isSet) {
-                            atLeastOneFeature = true;
-                        }
+                    var bool = $(this).prop('checked');
+                    features.spectrals[this.id] = bool;
+                    if (bool) {
+                        atLeastOneFeature = true;
                     }
                 }
 
-                /* Pack and check signals */
+                // Pack and check signals
                 else if ($(this).hasClass('signals')) {
-                    if (signal_disabled.prop('checked')) {
-                        formData.set(this.id, false)
-                    } else {
-                        var isSet = $(this).prop('checked');
-                        formData.set(this.id, isSet)
-                        if (isSet) {
-                            atLeastOneFeature = true;
-                        }
-                    }
-                }
-
-                /* Non-feature specific */
-                else {
-                    if (this.type === 'checkbox') {
-                        formData.set(this.id, $(this).prop('checked'))
-                    } else {
-                        formData.set(this.id, $(this).val())
+                    var bool = $(this).prop('checked');
+                    features.signals[this.id] = bool;
+                    if (bool) {
+                        atLeastOneFeature = true;
                     }
                 }
             }
         })
 
+
+
         if (!atLeastOneFeature) {
             alert('No features selected');
             return;
-        }
-
-        if (error) {
-            formData = null;
-            request = null;
-            return '';
+        } else {
+            formData.set('features', JSON.stringify(features));
         }
 
         $('#modal').modal('hide')
         showLoadingScreen()
 
-
-        /* append non input field data TODO: add support for customizing */
-        formData.set('segmentation_mode', 'uniform')
-        formData.set('n_songs', data.meta.settings.n_songs)
+        // append non input field data TODO: add support for customizing
         formData.set('sessionKey', sessionKey)
         formData.set('audioPath', audioPath)
 
-        /* send current labeling */
+        // send current labeling
         var labels = []
-        if ($('#segment_size').val() == data.meta.settings.segment_size) {
+        if ($('#size').val() === data.meta.settings.segmentation.size && $('#step').val() === data.meta.settings.segmentation.step) {
             $.each(data.data, function(ev) {
                 labels.push(this.category)
             })
             formData.set('labels', JSON.stringify(labels));
         }
 
-        /* send data to server */
-        request.open('POST', '/features')
+        // send data to server
+        request.open('POST', '/features');
         request.send(formData);
 
         //showLoadingGif();
@@ -387,36 +418,10 @@
                 window.location.href = response.redirect
             }
         };
-    })
+    });
 
-    /* set current values of all input fields */
-    $('#mfccs-disabled').prop('checked', false)
-    //toggleTargets('mfcc') // toggle display on subset inputs
-    $('#coefficients').val(data.meta.features.mfccs.coefficients);
-    $('#delta').val(data.meta.features.mfccs.delta.toString())
-    $('#delta-delta').val(data.meta.features.mfccs['delta-delta'].toString())
-
-
-    $('#signals-disabled').prop('checked', false)
-    //toggleTargets('signal')
-    $('#zcr').prop('checked', data.meta.features.signals.zcr)
-    $('#rms').prop('checked', data.meta.features.signals.rms)
-
-    $('#spectrals-disabled').prop('checked', false)
-    //toggleTargets('spectral') // toggle display on subset inputs
-    $('#flux').prop('checked', data.meta.features.spectrals.flux);
-    $('#flux-centroid').prop('checked', data.meta.features.spectrals['flux-centroid']);
-    $('#centroid').prop('checked', data.meta.features.spectrals.centroid);
-    $('#harmonicity').prop('checked', data.meta.features.spectrals.harmonicity);
-    $('#flatness').prop('checked', data.meta.features.spectrals.flatness);
-    $('#slope').prop('checked', data.meta.features.spectrals.slope);
-
-    $('#segment_size').val(data.meta.settings.segment_size)
-    $('#step_size').val(data.meta.settings.step_size)
-
-    $('#components').val("[" + data.meta.settings.components.join() + "]")
-    $('#metric').val(data.meta.settings.metric)
-    $('#n_neighbours').val(data.meta.settings.n_neighbours)
-
+    $('#featuresSubmit').on('click', function(ev) {
+        $('#feature-form').submit()
+    });
 
 </script>
