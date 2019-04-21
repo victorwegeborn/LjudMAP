@@ -1,4 +1,5 @@
 console.log(data.meta)
+console.log(data.data)
 
 /* key codes */
 const SHIFT = 16;

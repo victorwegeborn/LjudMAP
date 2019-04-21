@@ -89,13 +89,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 '''
 
 def parse_request(request):
-
-
     settings = json.loads(request.form['settings'])
     features = json.loads(request.form['features'])
-
-    print(json.dumps(settings, indent=2))
-    print(json.dumps(features, indent=2))
 
     # ensure segmentation is unifrom, coagulated, or beat-based
     if settings['segmentation']['mode'] == 'uniform':
@@ -109,73 +104,8 @@ def parse_request(request):
     # false or object
     features['mfccs']['coefficients'] = int(features['mfccs']['coefficients'])
 
-
-    '''
-    # general settings for audio_processing
-    settings = {
-        'segment_size': float(form['segment_size']),
-        'step_size': float(form['step_size']),
-        'n_songs': form['n_songs'],
-        'metric': ''.join(c.lower() for c in form['metric']),
-        'n_neighbours': int(form['n_neighbours']),
-        'components': json.loads(request.form['components'])
-    }
-
-
-    features = {}
-    mfccs_disabled = json.loads(form['mfccs-disabled'])
-    if not mfccs_disabled:
-        features['mfccs'] = {
-            'coefficients': int(form['coefficients']),
-            'delta': True if json.loads(form['delta']) else False,
-            'delta-delta': True if json.loads(form['delta-delta']) in form else False,
-        }
-    else:
-        features['mfccs'] = {
-            'delta': False,
-            'delta-delta': False,
-        }
-
-
-    if not json.loads(form['spectrals-disabled']):
-        features['spectrals'] = {
-            'flux': json.loads(form['flux']),
-            'flux-centroid': json.loads(form['flux-centroid']),
-            'centroid': json.loads(form['centroid']),
-            'harmonicity': json.loads(form['harmonicity']),
-            'flatness': json.loads(form['flatness']),
-            'slope': json.loads(form['slope'])
-        }
-    else:
-        features['spectrals'] = {
-            'flux': False,
-            'flux-centroid': False,
-            'centroid': False,
-            'harmonicity': False,
-            'flatness': False,
-            'slope': False,
-        }
-    if True in features['spectrals'].values():
-        features['spectrals']['disabled'] = False
-    else:
-        features['spectrals']['disabled'] = True
-
-    signals = json.loads(form['signals-disabled'])
-    if not signals:
-        features['signals'] = {
-            'rms': json.loads(form['rms']),
-            'zcr': json.loads(form['zcr']),
-        }
-    else:
-        features['signals'] = {
-            'rms': False,
-            'zcr': False,
-        }
-
-    '''
     print('Parsed settings:', json.dumps(settings, indent=2))
     print('Parsed features:', json.dumps(features, indent=2))
-
 
     return settings, features
 

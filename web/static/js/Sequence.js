@@ -21,9 +21,9 @@ px: 0     w     2w                 (n-1)w   nw
 
 // segment drawing globals
 var SEGMENT_SIZE = data.meta.settings.segmentation.size;
-var LINE_SEGMENT = Math.floor(data.meta.settings.segmentation.step * 0.05)
+var LINE_SEGMENT = Math.floor(data.meta.settings.segmentation.step * 0.03)
 var SEGMENT_ALPHA = 0.8;
-var LINE_ALPHA = 0.8;
+var LINE_ALPHA = 0.4;
 var SEQUENCE_PLAYING_LOCKED = false;
 
 // initialize sequence map when doc is ready
@@ -193,7 +193,7 @@ function initSequence() {
         // draw default segment line
         _constructSprite(seq_textures.line, seq_lines, {
             start: data.data[i].start,
-            color: getSegmentColor(data.data[i].category),
+            color: '0x000000',
             alpha: LINE_ALPHA
         })
 
@@ -221,7 +221,7 @@ function initPlayhead() {
     var head = new PIXI.Graphics(true);
     head.beginFill(SEQ_PLAYHEAD_COLOR);
     head.lineAlignment = 0;
-    head.drawRect(0, 0, data.meta.settings.segmentation.step, 2*seq_height)
+    head.drawRect(0, 0, data.meta.settings.segmentation.size, 2*seq_height)
     head.endFill();
     head.alpha = 0.6;
     seq_playhead.addChild(new PIXI.Sprite.from(seq_app.renderer.generateTexture(head)));

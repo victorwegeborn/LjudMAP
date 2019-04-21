@@ -226,7 +226,7 @@ def new_features(labels, session_key, old_session_key, settings, features):
                         'umap': row.tolist()
                         # tsne, som, pca also valid
                     },
-                    'start': int(idx*settings['segmentation']['size']),
+                    'start': int(idx*settings['segmentation']['step']),
                     'active': 1,
                     'category': 0 if not labels else labels[idx]
                 })
