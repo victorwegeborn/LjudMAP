@@ -2,7 +2,7 @@
     <p class="modal-title">Open Recent</p>
 </div>
 <div class="modal-body py-0">
-    <div class="row w-100" style="height: 200px;">
+    <div class="row w-100">
         <div class="col-3 h-100" style='overflow-y: scroll;'>
             <ul class="list-group" id='recent-sessions'>
 
@@ -11,15 +11,18 @@
 
         <div class="col-9">
             <div class="row">
-                <div class="col-6" style='overflow-y: scroll; height: 200px;' id='recent-data-left' ></div>
-                <div class="col-6" style='overflow-y: scroll; height: 200px;' id='recent-data-right'></div>
+                <div class="col-6" style='' id='recent-data-left' ></div>
+                <div class="col-6" style='' id='recent-data-right'></div>
+            </div>
+            <div class="col-12">
+                <p id='recent-time' class="text-muted small text-right">ddtt</p>
             </div>
         </div>
     </div>
 </div>
 <div class="modal-footer py-2">
     <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Cancel</button>
-    <button id="openFormBtn" type="button" class="btn btn-info btn-sm" disabled>Open</button>
+    <button id="open-recent-btn" type="button" class="btn btn-info btn-sm">Open</button>
 </div>
 
 <script type="text/javascript">
@@ -27,19 +30,19 @@
 
     var first_element = true
     for (var i = 0; i < data.meta.sessions.previous.length; i++) {
-
+        var sess = data.meta.sessions.previous[i][0]
         if (first_element) {
-            var el = '<li data-session="' + data.meta.sessions.previous[i] + '" class="list-group-item list-group-item-action bg-dark small mt-3 pl-3 py-2 active">' + data.meta.sessions.previous[i] + '</li>';
-            loadAndShowMeta(data.meta.sessions.previous[i])
+            var el = '<li data-session="' + sess + '" class="list-group-item list-group-item-action bg-dark small mt-3 pl-3 py-2 active">' + sess + '</li>';
+            loadAndShowMeta(sess)
             first_element = false
         } else {
-            var el = '<li data-session="' + data.meta.sessions.previous[i] + '" class="list-group-item list-group-item-action bg-dark small pl-3 py-2">' + data.meta.sessions.previous[i] + '</li>';
+            var el = '<li data-session="' + sess + '" class="list-group-item list-group-item-action bg-dark small pl-3 py-2">' + sess + '</li>';
         }
 
         $('#recent-sessions').append(el)
         $('#recent-sessions > li:last-child').on('click', function(ev) {
             if (!$(this).hasClass('active')) {
-                $('#recent-sessions > li,active').removeClass('active');
+                $('#recent-sessions > li.active').removeClass('active');
                 $(this).addClass('active');
                 loadAndShowMeta(ev.target.dataset.session)
             }
@@ -50,14 +53,20 @@
 
     $('#recent-sessions:last-child').addClass('mb-3')
 
-    function loadAndShowMeta(id) {
+    function loadAndShowMeta(sess) {
         var object = {};
-        console.log(id)
+        var id = sess;
         $.ajax({
             type: "POST",
             url: "/recent/" + id,
             dataType: 'json',
             success: function(data, textStatus) {
+
+                console.log(data)
+
+                // set time and date
+                $('#recent-time').html('Created on ' + data.time[1] + ' ' + data.time[2])
+
                 // clear data if present
                 var left = $('#recent-data-left');
                 var right = $('#recent-data-right')
@@ -72,7 +81,6 @@
                         left.append('<p class="small text-white my-0 ml-4">' + key + ': ' + val + '</p>')
                     })
                 })
-                $('#recent-data-left:last-child').removeClass('my-0').addClass('mt-0').addClass('mb-3')
 
                 // draw settings to left
                 right.append('<p class="small text-white mt-3 mb-0">Settings</p>')
@@ -82,33 +90,34 @@
                         right.append('<p class="small text-white my-0 ml-4">' + key + ': ' + val + '</p>')
                     })
                 })
-                $('#recent-data-left:last-child').removeClass('my-0').addClass('mt-0').addClass('mb-3')
+
             }
         })
     }
 
 
-    var btn = $('#openFormBtn');
-    var frm = $('#openForm');
-
-    frm.on('submit', function(ev) {
-        $.each(ev.target, function() {
-            if (!this.checkValidity()) {
-                frm.addClass('was-validated')
-                ev.preventDefault();
-            }
-        })
-    });
-
-    $('#openForm input').on('input', function() {
-        if (this.value.length > 0) {
-            btn.attr('disabled', false)
-        } else {
-            btn.attr('disabled', true)
-        }
-    });
+    var btn = $('#open-recent-btn');
 
     btn.on('click', function() {
-        frm.submit();
+        // get current active session
+        var session = $('#recent-sessions > li.active').data('session');
+        var formData = new FormData();
+        formData.set('id', JSON.stringify(session))
+        $.ajax({
+            type: 'POST',
+            url: '/goByKey',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data, textStatus) {
+                if (data.redirect) {
+                    // data.redirect contains the string URL to redirect to
+                    window.location.href = data.redirect;
+                }
+                else {
+                    console.log("Check ajax request, went to else-statement there");
+                }
+            }
+        })
     });
 </script>

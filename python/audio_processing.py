@@ -29,11 +29,11 @@ def csv_to_data(filename):
 def main(sessions, settings, features):
 
     # Get audiofilename
-    audio_dir = "static/uploads/" + sessions['current'] + "/"
+    audio_dir = "static/uploads/" + sessions['current'][0] + "/"
     audio_path, audio_name, audio_duration = handle_audio(audio_dir)
 
     # Create dir for ouput and set filenames
-    output_dir = "static/data/" + sessions['current'] + "/"
+    output_dir = "static/data/" + sessions['current'][0] + "/"
     subprocess.call(["mkdir", output_dir])
 
     # configure openSMILE file names
@@ -95,11 +95,11 @@ def retrain(valid_points, session_key, old_session_key, settings):
 
 def new_features(labels, sessions, settings, features):
     # Get audiofilename
-    audio_dir = "static/uploads/" + sessions['current'] + "/"
+    audio_dir = "static/uploads/" + sessions['current'][0] + "/"
     audio_path, audio_name, audio_duration = handle_audio(audio_dir)
 
     # Create dir for ouput and set filenames
-    output_dir = "static/data/" + sessions['current'] + "/"
+    output_dir = "static/data/" + sessions['current'][0] + "/"
     subprocess.call(["mkdir", output_dir])
 
     # configure openSMILE file names
@@ -116,8 +116,8 @@ def new_features(labels, sessions, settings, features):
     result = csv_to_data(output_path)
 
     # copy old waveform data and import
-    old_waveform_path = "static/data/" + sessions['previous'][0] + "/wavedata.json"
-    new_waveform_path = "static/data/" + sessions['current'] + "/wavedata.json"
+    old_waveform_path = "static/data/" + sessions['previous'][0][0] + "/wavedata.json"
+    new_waveform_path = "static/data/" + sessions['current'][0] + "/wavedata.json"
     subprocess.call(['cp', old_waveform_path, new_waveform_path])
     waveform_data = waveform.getComputedJson(new_waveform_path)
 

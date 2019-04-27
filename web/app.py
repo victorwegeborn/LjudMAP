@@ -102,14 +102,16 @@ def parse_request(request):
 
 def handle_sessions(sessions=None):
     new_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+    _date = str(time.strftime("%x"))
+    _time = str(time.strftime("%X"))
     if sessions:
         sessions = json.loads(sessions)
-        sessions['previous'].append(sessions['current'])
-        sessions['current'] = new_key
+        sessions['previous'].insert(0, sessions['current'])
+        sessions['current'] = [new_key, _date, _time]
         return sessions
     else:
         return {
-            'current': new_key,
+            'current': [new_key, _date, _time],
             'previous': []
         }
 
@@ -138,9 +140,9 @@ def process_audio() -> str:
         else:
             # create folder for this session
             sessions = handle_sessions()
-            print(sessions)
-            subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current']])
-            print('mkdir ' +  UPLOAD_FOLDER + sessions['current'])
+            print(sessions['current'][0])
+            subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current'][0]])
+            print('mkdir ' +  UPLOAD_FOLDER + sessions['current'][0])
             # save all files in folder
             for index, file in request.files.items():
                 print(file.filename)
@@ -149,7 +151,7 @@ def process_audio() -> str:
                     return "<h3>Something went wrong, possibly relating to the name of the file.</h3>"
                 # secure and store file
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], sessions['current'] + "/" + filename))
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], sessions['current'][0] + "/" + filename))
                 print(file.filename + " saved")
 
     # parse and format the form data
@@ -159,7 +161,7 @@ def process_audio() -> str:
     audio_processing.main(sessions, settings, features)
 
     # pass response with redirect url
-    return jsonify(dict(redirect='/' + sessions['current']))
+    return jsonify(dict(redirect='/' + sessions['current'][0]))
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/retrain', methods=['POST'])
@@ -178,11 +180,11 @@ def retrain() -> str:
         # get audio path
         filename = request.form['audioPath'].split("/")[-1]
 
-        subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current']])
-        subprocess.call(['cp', UPLOAD_FOLDER + sessions['previous'][0] + "/" + filename, UPLOAD_FOLDER + sessions['current'] + "/" + filename])
+        subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current'][0]])
+        subprocess.call(['cp', UPLOAD_FOLDER + sessions['previous'][0][0] + "/" + filename, UPLOAD_FOLDER + sessions['current'][0] + "/" + filename])
 
         audio_processing.retrain(points, sessions, settings)
-        return jsonify(dict(redirect='/' + sessions['current']))
+        return jsonify(dict(redirect='/' + sessions['current'][0]))
     return ''
 
 # triggered when new set of features are requested
@@ -204,15 +206,15 @@ def new_features() -> str:
         filename = request.form['audioPath'].split("/")[-1]
 
         # make new dir for the new data
-        subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current']])
-        subprocess.call(['cp', UPLOAD_FOLDER + sessions['previous'][0] + "/" + filename, UPLOAD_FOLDER + sessions['current'] + "/" + filename])
+        subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current'][0]])
+        subprocess.call(['cp', UPLOAD_FOLDER + sessions['previous'][0][0] + "/" + filename, UPLOAD_FOLDER + sessions['current'][0] + "/" + filename])
 
         # process new features and send user to new plot
         audio_processing.new_features(labels, sessions, settings, features)
-        return jsonify(dict(redirect='/' + sessions['current']))
+        return jsonify(dict(redirect='/' + sessions['current'][0]))
     return ''
 
-
+'''
 # Performs coagulation. Only available when one song has been uploaded!!
 @app.route('/coagulate', methods=['POST'])
 def run_coagulate() -> str:
@@ -232,6 +234,7 @@ def run_coagulate() -> str:
         audio_processing.coagulate(new_session_key, old_session_key, settings, features)
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
+'''
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/goByKey', methods=['POST'])
@@ -240,7 +243,7 @@ def goByKey() -> str:
         session_key = request.form['id']
         data_dir = "static/data/" + session_key + "/"
         if os.path.isdir(data_dir):
-            return redirect("/"+session_key)
+            return jsonify(dict(redirect="/"+session_key))
         else:
             return "<h3>Not a valid key.</h3>"
 
@@ -275,7 +278,8 @@ def serve_previous_meta_data(id) -> str:
                 data = json.load(f)
         return jsonify({
             'features': data['meta']['features'],
-            'settings': data['meta']['settings']
+            'settings': data['meta']['settings'],
+            'time': data['meta']['sessions']['current']
         })
     else:
         return ''
