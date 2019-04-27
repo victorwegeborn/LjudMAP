@@ -18,10 +18,20 @@ def _header(target_path, segmentation):
 
     with open(target_path, 'w') as f:
         for line in config:
-            if line.startswith('FRAMESIZE'):
-                line = 'frameSize=' + str(segmentation['size']/1000) + '\n'
-            if line.startswith('FRAMESTEP'):
-                line = 'frameStep=' + str(segmentation['step']/1000) + '\n'
+            if segmentation['mode'] == 'uniform':
+                if line.startswith(';FRAMESIZE'):
+                    line = 'frameSize=' + str(segmentation['size']/1000) + '\n'
+                if line.startswith(';FRAMESTEP'):
+                    line = 'frameStep=' + str(segmentation['step']/1000) + '\n'
+                if line.startswith(';MODE'):
+                    line = 'frameMode=fixed'
+            elif segmentation['mode'] == 'coagulated':
+                if line.startswith(';FRAMESIZE'):
+                    line = 'frameSize=0\n'
+                if line.startswith(';FRAMESTEP'):
+                    line = 'frameStep=0\n'
+                if line.startswith(';MODE'):
+                    line = 'frameMode = full\n'
             f.write(line)
         f.write('\n')
 
@@ -183,74 +193,12 @@ def write_config(target_path, settings, features):
     _footer(target_path, output)
 
 
-def _analyze(file):
-    csv_file = pandas.read_csv(file, sep=';', float_precision='round_trip')
-
-    data = csv_file.values
-    #data = minmax_scale(data, axis=0)
-    frames = data.shape[0]
-    features = data.shape[1]
-
-    columns = csv_file.columns
-
-    print('----- ANALYSIS -----')
-    print(f'n frames: {frames}')
-    print(f'n features: {features}')
-    print(columns)
-    print()
-
-
-    mean = np.mean(data, axis=0)
-    var = np.var(data, axis=0)
-
-    mean_max = np.where(mean == np.amax(mean))
-    mean_min = np.where(mean == np.amin(mean))
-
-    var_max = np.where(var == np.amax(var))
-    var_min = np.where(var == np.amin(var))
-
-    print()
-    print('Mean:', mean)
-    print('Mean max:', np.amax(mean), 'feature:', columns[mean_max[0]][0])
-    print('Mean min:', np.amin(mean), 'feature:', columns[mean_min[0]][0])
-    print('Mean (mean):', np.mean(mean))
-    print('Mean (var):', np.var(mean))
-    print()
-    print('Variance:', var)
-    print('Variance max:', np.amax(var), 'feature:', columns[var_max[0]][0])
-    print('Variance min:', np.amin(var), 'feature:', columns[var_min[0]][0])
-    print('Variance (mean):', np.mean(var))
-    print('Variance (var):', np.var(var))
-
 
 
 if __name__ == '__main__':
-    segmentation = {
-        'segment_size': 1.000,
-        'step_size': 1.000
-    }
-
-    features = {
-        'mfccs': {
-            'coefficients': 12,
-            'delta': True,
-            'deltadelta': False
-        },
-        'spectral': {
-            'flux': False,
-            'flux-centroid': False,
-            'centroid': True,
-            'harmonicity': True,
-            'flatness': True,
-            'rolloff': False}
-    }
-
     test_path = 'configuration/testing/'
-    test_config = test_path + 'out.conf'
+    test_config = test_path + 'test.conf'
     test_audio =  test_path + 'test.wav'
+    test_list = test_path + 'list.txt'
     test_csv = test_path + 'test.csv'
-
-    write_config(test_config, segmentation, features)
-
-    subprocess.call(['../opensmile-2.3.0/SMILExtract', "-C", test_config, "-I", test_audio, "-csvoutput", test_csv])
-    _analyze(test_csv)
+    subprocess.call(['../opensmile-2.3.0/SMILExtract', "-loglevel", "9", "-C", test_config, "-L", test_list, "-I", test_audio, "-csvoutput", test_csv])

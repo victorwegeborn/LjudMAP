@@ -1,0 +1,167 @@
+<div class="modal-header py-2">
+    <p class="modal-title">Coagulate</p>
+</div>
+<div class="modal-body">
+
+    <div class="tab-pane fade show active" id="mfcc-content" role="tabpanel" aria-labelledby="mfcc-tab">
+
+        <!-- coefficients -->
+        <div class="m-0 p-0 w-50 mx-auto" id="coagulation">
+            <form id="coagulation-form" enctype="multipart/form-data" action="coagulate" method="POST" novalidate>
+                <div class="form-group">
+                    <label class="small" for="threshold">Coagulation threshold</label>
+                    <input class="form-control form-control-sm" type="number" value="" placeholder="" id='threshold' min="0.000001" max="1000000" step="any" required>
+                    <div class="invalid-feedback">
+                        Valid range: (10e-6, 10e+6]
+                    </div>
+                </div>
+            </form>
+            <!--
+            <div class="form-group">
+                <label class="small" for="metric">Metric</label>
+                <select class="custom-select custom-select-sm small w-100" id="metric" required>
+                    <option value="euclidean">Euclidean</option>
+                    <option value="[2]">2</option>
+                    <option value="[2,3]">Both</option>
+                </select>
+            </div>
+            -->
+
+            <label class="small" for="coefficients">Exclude label(s)</label>
+            <div class="btn-group btn-block w-100 d-flex" id="exclude">
+                <button type="button" value="0" class="btn btn-dark    btn-sm flex-fill"><text style="font-size: 11px;">-</text></button>
+                <button type="button" value="1" class="btn btn-primary btn-sm flex-fill rounded-0"><text style="font-size: 11px;">1</text></button>
+                <button type="button" value="2" class="btn btn-success btn-sm flex-fill rounded-0"><text style="font-size: 11px;">2</text></button>
+                <button type="button" value="3" class="btn btn-warning btn-sm flex-fill rounded-0"><text style="font-size: 11px;">3</text></button>
+                <button type="button" value="4" class="btn btn-danger  btn-sm flex-fill rounded-0"><text style="font-size: 11px;">4</text></button>
+                <button type="button" value="5" class="btn btn-cat1    btn-sm flex-fill rounded-0"><text style="font-size: 11px;">5</text></button>
+                <button type="button" value="6" class="btn btn-cat2    btn-sm flex-fill rounded-0"><text style="font-size: 11px;">6</text></button>
+                <button type="button" value="7" class="btn btn-cat3    btn-sm flex-fill rounded-0"><text style="font-size: 11px;">7</text></button>
+                <button type="button" value="8" class="btn btn-cat4    btn-sm flex-fill"><text style="font-size: 11px;">8</text></button>
+            </div>
+
+            <div class="btn-group btn-block w-100 d-flex">
+                <button id="reset" type="button" value="" class="btn btn-dark btn-sm flex-fill"><text style="font-size: 11px;">Reset exclusion</text></button>
+            </div>
+        </div>
+        <p class="text-muted small text-center mt-4 mb-0">Exclude labeled points by clicking the corresponding label button above. <br>
+            This will exclude points from the coagulation process. <br>
+             All points are included by default.
+        </p>
+    </div>
+
+
+</div>
+<div class="modal-footer py-2">
+    <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Cancel</button>
+    <button id="coagulation-submit" type="button" class="btn btn-info btn-sm">Coagulate</button>
+</div>
+
+<script type="text/javascript">
+
+    var btn = $('#coagulation-submit');
+    var frm = $('#coagulation-form');
+    var tracker = [];
+
+    // setup events and track labels
+    $('#exclude button').each(function(ev) {
+        tracker.push(true)
+        $(this).on('click', function(ev) {
+            var i = $(this).val();
+            if (tracker[i]) { // is included
+                $(this).html('<text style="font-size: 11px;">x</text>');
+                $(this).prop('disabled', true);
+                tracker[i] = false;
+            }
+        })
+    });
+
+    $('#reset').on('click', function(ev) {
+        $('#exclude button').each(function() {
+            var i = $(this).val();
+            i == 0 ? $(this).html('<text style="font-size: 11px;">-</text>') : $(this).html('<text style="font-size: 11px;">'+i+'</text>');
+            $(this).prop('disabled', false);
+            tracker[i] = true;
+        })
+    });
+
+
+
+    frm.on('submit', function(ev) {
+        ev.preventDefault();
+
+        // check so there exists at least one label
+        var error = true;
+        for (var i = 0; i < tracker.length; i++) {
+            if (tracker[i]) {
+                error = false;
+                break;
+            }
+        }
+
+        if (error) {
+            alert('At least one label must be included in the coagulation.')
+            return;
+        }
+
+        $.each(ev.target, function() {
+            if (!this.checkValidity()) {
+                frm.addClass('was-validated')
+                return;
+            }
+        })
+
+        // pack values and send for coagulate
+        var formData = new FormData();
+        var request = new XMLHttpRequest();
+
+        // ugly deepcopy of settings object
+        var settings = JSON.parse(JSON.stringify(data.meta.settings))
+
+        // setup segmentation for coagulation
+        $.each(settings.segmentation, function(key, val) {
+            if (key == 'mode') {
+                settings.segmentation[key] = 'coagulated'
+            }
+        });
+
+        // pack data and labels
+        coag_data = []
+        $.each(data.data, function(i, val) {
+            coag_data.push([val.start, val.category]);
+        })
+
+        // append tracker and labels to segmentation
+        settings.segmentation.threshold = $('#threshold').val()
+        settings.segmentation.tracker = tracker;
+        settings.segmentation.data = coag_data;
+        settings.segmentation.target = '3' // MAKE USER CHANGEABLE
+
+        // make cluster components compatable
+        settings.cluster.components = '[' + settings.cluster.components.toString() + ']';
+
+        // keep current feature set and append data
+        formData.set('features', JSON.stringify(data.meta.features))
+        formData.set('settings', JSON.stringify(settings))
+
+        // append non input field data TODO: add support for customizing
+        formData.set('sessionKey', sessionKey)
+        formData.set('audioPath', audioPath)
+
+        $.ajax({
+            url: '/coagulate',
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function(data) {
+                window.location.href = data.redirect;
+            }
+        });
+
+    });
+
+    btn.on('click', function() {
+        frm.submit();
+    });
+</script>

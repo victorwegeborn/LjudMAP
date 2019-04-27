@@ -3,6 +3,14 @@
     --dark-light-color: rgb(51,58,63);
     --dark-color-header: rgb(49, 56, 61);
     --dark-color-detail: rgb(43, 49, 53);
+    --purple: rgb(134, 0, 123);
+    --purple-hover: rgb(73, 4, 67);
+    --orange: rgb(255, 163, 56);
+    --orange-hover: rgb(143, 93, 36);
+    --teal: rgb(0, 129, 128);
+    --teal-hover:  rgb(3, 68, 67);
+    --brown: rgb(160,82,45);
+    --brown-hover: rgb(117, 61, 35);
 }
 
 
@@ -349,39 +357,43 @@ audio::-webkit-media-controls-timeline {
 }
 
 .btn-cat1 {
-  background-color: purple;
+  background-color: var(--purple);
   color: white !important;
 }
 .btn-cat1:hover,
-.btn-cat1:focus {
-  background-color: purple;
+.btn-cat1:focus,
+.btn-cat1:disabled {
+  background-color: var(--purple-hover);
 }
 
 .btn-cat2 {
-  background-color: orange;
+  background-color: var(--orange);;
   color: white !important;
 }
 .btn-cat2:hover,
-.btn-cat2:focus {
-  background-color: orange;
+.btn-cat2:focus,
+.btn-cat2:disabled {
+  background-color: var(--orange-hover);
 }
 
 .btn-cat3 {
-  background-color: teal;
+  background-color: var(--teal);
   color: white !important;
 }
 .btn-cat3:hover,
-.btn-cat3:focus {
-  background-color: teal;
+.btn-cat3:focus,
+.btn-cat3:disabled {
+  background-color: var(--teal-hover);
 }
 
 .btn-cat4 {
-  background-color: brown;
+  background-color: var(--brown);
   color: white !important;
 }
 .btn-cat4:hover,
-.btn-cat4:focus {
-  background-color: brown;
+.btn-cat4:focus,
+.btn-cat4:disabled {
+  background-color: var(--brown-hover);
 }
 
 

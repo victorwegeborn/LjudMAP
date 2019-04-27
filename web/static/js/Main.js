@@ -113,7 +113,8 @@ $(document).ready(function() {
             history.undo( PLOT, colorSegmentByIndex )
         }
         else if (t === 'coagulate') {
-
+            modalDialog.removeClass('modal-lg')
+            showModal(t)
         }
         else if (t === 'synthesize') {
 
@@ -125,9 +126,9 @@ $(document).ready(function() {
 
     function showModal(target) {
         modalContent.load('/modal/' + target, function(html) {
-            modalContent.html(html);
             modal.modal({show: true})
         })
+
     }
 
 

@@ -18,8 +18,8 @@ px: 0     w     2w                 (n-1)w   nw
 
 
 
-
 // segment drawing globals
+var TEXTURE_WIDTH = 1000; // ms
 var SEGMENT_SIZE = data.meta.settings.segmentation.size;
 var LINE_SEGMENT = Math.floor(data.meta.settings.segmentation.step * 0.03)
 var SEGMENT_ALPHA = 0.8;
@@ -41,9 +41,9 @@ var seq_playhead = new PIXI.Container();
 seq_playhead.interactiveChildren = false;
 var seq_waveform = new PIXI.Container();
 
-const N_PX = data.data[data.data.length-1].start + data.meta.settings.segmentation.size;
+const N_PX = data.data[data.data.length-1].start + data.data[data.data.length-1].length;
 const MIN_xSCALE = seq_width/N_PX;
-const MAX_xSCALE = seq_width/(30*data.meta.settings.segmentation.step);
+const MAX_xSCALE = seq_width/(30*TEXTURE_WIDTH);
 const SEQ_HIGHLIGHT_COLOR = '0xffffff';
 const SEQ_PLAYHEAD_COLOR = '0xff2800';
 
@@ -178,30 +178,29 @@ function initSequence() {
     var height = seq_height + 2;
 
     // default data segment textures
-    seq_textures.data_segment = _constructTexture(data.meta.settings.segmentation.size, height);
+    seq_textures.data_segment = _constructTexture(TEXTURE_WIDTH, height);
     seq_textures.line = _constructTexture(LINE_SEGMENT, height)
 
 
     // render sprite per data point
     for (var i = 0; i < data.data.length; i++) {
-        // draw default segment
         _constructSprite(seq_textures.data_segment, seq_segments, {
             start: data.data[i].start,
+            length: data.data[i].length,
             color: getSegmentColor(data.data[i].category)
         })
 
-        // draw default segment line
         _constructSprite(seq_textures.line, seq_lines, {
             start: data.data[i].start,
+            length: TEXTURE_WIDTH,
             color: '0x000000',
             alpha: LINE_ALPHA
         })
 
-
         _interactiveDefaultPlayheadSegment({
             index: i,
             start: data.data[i].start,
-            width: data.meta.settings.segmentation.size,
+            width: data.data[i].length,
             texture: seq_textures.data_segment,
         })
     }
@@ -221,7 +220,7 @@ function initPlayhead() {
     var head = new PIXI.Graphics(true);
     head.beginFill(SEQ_PLAYHEAD_COLOR);
     head.lineAlignment = 0;
-    head.drawRect(0, 0, data.meta.settings.segmentation.size, 2*seq_height)
+    head.drawRect(0, 0, TEXTURE_WIDTH, 2*seq_height)
     head.endFill();
     head.alpha = 0.6;
     seq_playhead.addChild(new PIXI.Sprite.from(seq_app.renderer.generateTexture(head)));
@@ -232,11 +231,12 @@ function _interactiveDefaultPlayheadSegment(o) {
     var seg = new PIXI.Sprite.from(o.texture)
     var i = o.index
     seg.alpha = 0;
+    seg.scale.x *= o.width / TEXTURE_WIDTH;
     seg.x = o.start;
     seg.included = false;
 
     seg.interactive = true;
-    seg.hitArea = new PIXI.Rectangle(0, 0, o.width, seq_height + 2)
+    seg.hitArea = new PIXI.Rectangle(0, 0, seg.width, seg.height)
     seg.mouseover = function(e) {
 
         updateTimeAndIndexDisplay({start: o.start}, i)
@@ -354,6 +354,7 @@ function _constructSprite(texture, container, settings) {
     var sprite = new PIXI.Sprite.from(texture)
     sprite.y = settings.offsetY || 0;
     sprite.tint = settings.color;
+    sprite.scale.x *= settings.length / TEXTURE_WIDTH;
     sprite.alpha = settings.alpha || SEGMENT_ALPHA;
     sprite.position.x = settings.start;
     container.addChild(sprite)

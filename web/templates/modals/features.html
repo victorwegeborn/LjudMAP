@@ -410,7 +410,6 @@
         request.open('POST', '/features');
         request.send(formData);
 
-        //showLoadingGif();
         request.onload = function(ev) {
             if (request.status != 200) {
                 alert(`Error ${request.status}: ${request.statusText}`);

@@ -1,13 +1,69 @@
-[ 21.04.2019 - 22:41:56 ]
+[ 27.04.2019 - 12:42:06 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 21.04.2019 - 22:41:56 ]
-    (MSG) [2] in SMILExtract : config file is: static/data/15558829146713421/config.conf
-[ 21.04.2019 - 22:41:56 ]
+[ 27.04.2019 - 12:42:06 ]
+    (MSG) [2] in SMILExtract : config file is: static/data/1556361725554349/config.conf
+[ 27.04.2019 - 12:42:06 ]
     (MSG) [2] in cComponentManager : successfully registered 96 component types.
-[ 21.04.2019 - 22:41:56 ]
+==> LEVEL 'wave'  +++  Buffersize(frames) = 529200  +++  nReaders = 1
+     Period(in seconds) = 0.000023 	 frameSize(in seconds) = 0.000023 (last: 0.000000)
+     BlocksizeRead(frames) = 441000 	 BlocksizeWrite(frames) = 44100
+     Number of elements: 1 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0.       : pcm
+==> LEVEL 'frames'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 5.000000 (last: 0.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 220500 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 220499. : pcm[0-220499]  (220500)
+==> LEVEL 'winframes'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 5.000000 (last: 0.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 220500 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 220499. : pcm[0-220499]  (220500)
+==> LEVEL 'fft'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 0.743039 (last: 5.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 32768 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 32767. : pcm[0-32767]  (32768)
+==> LEVEL 'fftmag'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 0.743039 (last: 5.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 16385 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 16384. : pcm_fftMag[0-16384]  (16385)
+==> LEVEL 'melspec'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 0.743039 (last: 5.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 26 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 25. : pcm_fftMag[0-25]  (26)
+==> LEVEL 'mfcc'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 0.743039 (last: 5.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 14 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 13. : pcm_fftMag_mfcc[0-13]  (14)
+==> LEVEL 'lld'  +++  Buffersize(frames) = 3  +++  nReaders = 1
+     Period(in seconds) = 5.000000 	 frameSize(in seconds) = 0.743039 (last: 5.000000)
+     BlocksizeRead(frames) = 1 	 BlocksizeWrite(frames) = 1
+     Number of elements: 14 	 Number of fields: 1
+     type = float   noHang = 1   isRingbuffer(isRb) = 1   growDyn = 0
+     Fields: index (range) : fieldname[array indicies]  (# elements)
+       0. - 13. : pcm_fftMag_mfcc[0-13]  (14)
+[ 27.04.2019 - 12:42:06 ]
     (MSG) [2] in cComponentManager : successfully finished createInstances
-                                 (12 component instances were finalised, 1 data memories were finalised)
-[ 21.04.2019 - 22:41:56 ]
+                                 (9 component instances were finalised, 1 data memories were finalised)
+[ 27.04.2019 - 12:42:06 ]
     (MSG) [2] in cComponentManager : starting single thread processing loop
-[ 21.04.2019 - 22:41:59 ]
+[ 27.04.2019 - 12:42:11 ]
     (MSG) [2] in cComponentManager : Processing finished! System ran for 455 ticks.

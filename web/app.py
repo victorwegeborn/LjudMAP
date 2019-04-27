@@ -89,6 +89,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 '''
 
 def parse_request(request):
+
     settings = json.loads(request.form['settings'])
     features = json.loads(request.form['features'])
 
@@ -96,12 +97,14 @@ def parse_request(request):
     if settings['segmentation']['mode'] == 'uniform':
         settings['segmentation']['size'] = float(settings['segmentation']['size'])
         settings['segmentation']['step'] = float(settings['segmentation']['step'])
+    if settings['segmentation']['mode'] == 'coagulated':
+        settings['segmentation']['threshold'] = float(settings['segmentation']['threshold'])
 
     # parse cluster settings
     settings['cluster']['components'] = json.loads(settings['cluster']['components'])
     settings['cluster']['neighbours'] = int(settings['cluster']['neighbours'])
 
-    # false or object
+    # coefficients
     features['mfccs']['coefficients'] = int(features['mfccs']['coefficients'])
 
     print('Parsed settings:', json.dumps(settings, indent=2))
@@ -141,7 +144,7 @@ def process_audio() -> str:
             # save all files in folder
             for index, file in request.files.items():
                 print(file.filename)
-                if file.filename == '' or not allowed_file(file.filename):
+                if file.filename == '' and not allowed_file(file.filename):
                     flash('No selected file')
                     return "<h3>Something went wrong, possibly relating to the name of the file.</h3>"
                 # secure and store file
@@ -184,7 +187,6 @@ def retrain() -> str:
 # triggered when new set of features are requested
 @app.route('/features', methods=['POST'])
 def new_features() -> str:
-    print('New feature set')
     if request.method == 'POST':
         # parse meta data
         settings, features = parse_request(request)
@@ -206,6 +208,27 @@ def new_features() -> str:
 
         # process new features and send user to new plot
         audio_processing.new_features(labels, new_session_key, old_session_key, settings, features)
+        return jsonify(dict(redirect='/' + new_session_key))
+    return ''
+
+
+# Performs coagulation. Only available when one song has been uploaded!!
+@app.route('/coagulate', methods=['POST'])
+def run_coagulate() -> str:
+    if request.method == 'POST':
+        # parse meta data
+        settings, features = parse_request(request)
+
+        # copy session key and create new key
+        old_session_key = request.form['sessionKey']
+        filename = request.form['audioPath'].split("/")[-1]
+        new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+
+        # make new dir for the new data
+        subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
+        subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
+
+        audio_processing.coagulate(new_session_key, old_session_key, settings, features)
         return jsonify(dict(redirect='/' + new_session_key))
     return ''
 
