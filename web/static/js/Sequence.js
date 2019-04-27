@@ -220,7 +220,7 @@ function initPlayhead() {
     var head = new PIXI.Graphics(true);
     head.beginFill(SEQ_PLAYHEAD_COLOR);
     head.lineAlignment = 0;
-    head.drawRect(0, 0, TEXTURE_WIDTH, 2*seq_height)
+    head.drawRect(0, 0, data.data[0].length, 2*seq_height)
     head.endFill();
     head.alpha = 0.6;
     seq_playhead.addChild(new PIXI.Sprite.from(seq_app.renderer.generateTexture(head)));
@@ -232,11 +232,13 @@ function _interactiveDefaultPlayheadSegment(o) {
     var i = o.index
     seg.alpha = 0;
     seg.scale.x *= o.width / TEXTURE_WIDTH;
+    console.log(seg.width)
     seg.x = o.start;
     seg.included = false;
 
+
     seg.interactive = true;
-    seg.hitArea = new PIXI.Rectangle(0, 0, seg.width, seg.height)
+    seg.hitArea = new PIXI.Rectangle(0, 0, seg.width*(TEXTURE_WIDTH / o.width), seg.height)
     seg.mouseover = function(e) {
 
         updateTimeAndIndexDisplay({start: o.start}, i)
