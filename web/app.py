@@ -25,6 +25,17 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 '''
 
 {
+    sessions: {
+        current: string,
+        previous: [
+            string,
+            string,
+              .
+              .
+              .
+            string
+        ]
+    },
     settings: {
         segmentation: {
             mode: 'uniform' | 'coagulated' | 'beat',
@@ -63,29 +74,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 }
 
 
-{
-    meta: {
-        audio: [
-            {
-                path: string,
-                duration: int
-            },
-            .
-            .
-            .
-            {
-                path: string,
-                duration: int
-            }
-        ],
-        sessions: {
-            current: int,
-            previous: null | [int]
-        },
-        waveform: null | {}
-    },
-}
-
 '''
 
 def parse_request(request):
@@ -112,7 +100,18 @@ def parse_request(request):
 
     return settings, features
 
-
+def handle_sessions(sessions=None):
+    new_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+    if sessions:
+        sessions = json.loads(sessions)
+        sessions['previous'].append(sessions['current'])
+        sessions['current'] = new_key
+        return sessions
+    else:
+        return {
+            'current': new_key,
+            'previous': []
+        }
 
 
 # Checks so file is allowed
@@ -138,9 +137,10 @@ def process_audio() -> str:
             return "<h3>No submitted file. Please go back and choose an audio file.</h3>"
         else:
             # create folder for this session
-            session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
-            subprocess.call(['mkdir', UPLOAD_FOLDER + session_key])
-            print('mkdir ' +  UPLOAD_FOLDER + session_key)
+            sessions = handle_sessions()
+            print(sessions)
+            subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current']])
+            print('mkdir ' +  UPLOAD_FOLDER + sessions['current'])
             # save all files in folder
             for index, file in request.files.items():
                 print(file.filename)
@@ -149,17 +149,17 @@ def process_audio() -> str:
                     return "<h3>Something went wrong, possibly relating to the name of the file.</h3>"
                 # secure and store file
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], session_key + "/" + filename))
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], sessions['current'] + "/" + filename))
                 print(file.filename + " saved")
 
     # parse and format the form data
     settings, features = parse_request(request)
 
     # process audio according to passed data
-    audio_processing.main(session_key, settings, features)
+    audio_processing.main(sessions, settings, features)
 
     # pass response with redirect url
-    return jsonify(dict(redirect='/' + session_key))
+    return jsonify(dict(redirect='/' + sessions['current']))
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/retrain', methods=['POST'])
@@ -172,16 +172,17 @@ def retrain() -> str:
         # parse meta data
         settings, _ = parse_request_form(request)
 
-        old_session_key = request.form['sessionKey']
+        # get session tree
+        sessions = handle_sessions(request.form['sessions'])
+
+        # get audio path
         filename = request.form['audioPath'].split("/")[-1]
 
-        new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+        subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current']])
+        subprocess.call(['cp', UPLOAD_FOLDER + sessions['previous'][0] + "/" + filename, UPLOAD_FOLDER + sessions['current'] + "/" + filename])
 
-        subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
-        subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
-
-        audio_processing.retrain(points, new_session_key, old_session_key, settings)
-        return jsonify(dict(redirect='/' + new_session_key))
+        audio_processing.retrain(points, sessions, settings)
+        return jsonify(dict(redirect='/' + sessions['current']))
     return ''
 
 # triggered when new set of features are requested
@@ -198,17 +199,17 @@ def new_features() -> str:
 
 
         # copy session key and create new key
-        old_session_key = request.form['sessionKey']
+        sessions = handle_sessions(request.form['sessions'])
+
         filename = request.form['audioPath'].split("/")[-1]
-        new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
 
         # make new dir for the new data
-        subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
-        subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
+        subprocess.call(['mkdir', UPLOAD_FOLDER + sessions['current']])
+        subprocess.call(['cp', UPLOAD_FOLDER + sessions['previous'][0] + "/" + filename, UPLOAD_FOLDER + sessions['current'] + "/" + filename])
 
         # process new features and send user to new plot
-        audio_processing.new_features(labels, new_session_key, old_session_key, settings, features)
-        return jsonify(dict(redirect='/' + new_session_key))
+        audio_processing.new_features(labels, sessions, settings, features)
+        return jsonify(dict(redirect='/' + sessions['current']))
     return ''
 
 
@@ -243,6 +244,7 @@ def goByKey() -> str:
         else:
             return "<h3>Not a valid key.</h3>"
 
+
 # Loads audio browser by session_key
 @app.route('/<string:session_key>', methods=['GET', 'POST'])
 def load_browser(session_key) -> str:
@@ -263,6 +265,20 @@ def load_browser(session_key) -> str:
     else:
         return "<h3>Something went wrong, the files for the this audio session does not exist</h3>"
 
+
+@app.route("/recent/<string:id>", methods=['GET', 'POST'])
+def serve_previous_meta_data(id) -> str:
+    data_dir = "static/data/" + id + "/"
+    if os.path.isdir(data_dir):
+        if os.path.isfile(data_dir + "data.json"):
+            with open(data_dir + "data.json", "r") as f:
+                data = json.load(f)
+        return jsonify({
+            'features': data['meta']['features'],
+            'settings': data['meta']['settings']
+        })
+    else:
+        return ''
 
 
 @app.route("/batch_upload", methods=["POST"])

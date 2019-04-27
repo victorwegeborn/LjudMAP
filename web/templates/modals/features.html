@@ -394,7 +394,7 @@
         showLoadingScreen()
 
         // append non input field data TODO: add support for customizing
-        formData.set('sessionKey', sessionKey)
+        formData.set('sessions', JSON.stringify(data.meta.sessions))
         formData.set('audioPath', audioPath)
 
         // send current labeling

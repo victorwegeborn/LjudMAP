@@ -92,6 +92,11 @@ $(document).ready(function() {
 
     //////////////////////////// BUTTON EVENTS ////////////////////////////
 
+    // special settings for each drop down menu
+    if (data.meta.sessions.previous.length == 0) {
+        $('#open-recent-dropwdown').addClass('drop-highlight-disabled')
+    }
+
     /* Drop down menu handling */
     var modal = $('#modal');
     var modalContent = $('#modal .modal-content')
@@ -100,6 +105,10 @@ $(document).ready(function() {
         var t = this.dataset.target
         if (t === 'open') {
             modalDialog.removeClass('modal-lg')
+            showModal(t)
+        }
+        else if (t === 'recent') {
+            modalDialog.addClass('modal-lg')
             showModal(t)
         }
         else if (t === 'features') {

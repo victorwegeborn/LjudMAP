@@ -26,14 +26,14 @@ def csv_to_data(filename):
     csv_file = pandas.read_csv(filename, sep=';', header=1, float_precision='round_trip')
     return minmax_scale(X=csv_file.values)
 
-def main(session_key, settings, features):
+def main(sessions, settings, features):
 
     # Get audiofilename
-    audio_dir = "static/uploads/" + session_key + "/"
+    audio_dir = "static/uploads/" + sessions['current'] + "/"
     audio_path, audio_name, audio_duration = handle_audio(audio_dir)
 
     # Create dir for ouput and set filenames
-    output_dir = "static/data/" + session_key + "/"
+    output_dir = "static/data/" + sessions['current'] + "/"
     subprocess.call(["mkdir", output_dir])
 
     # configure openSMILE file names
@@ -55,7 +55,7 @@ def main(session_key, settings, features):
     waveform_data = waveform.getJson(output_dir, audio_path, settings['segmentation']['step'], n_points)
 
     data = cluster_and_pack_data(result, output_dir, settings)
-    store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features)
+    store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features, sessions)
 
 
 '''
@@ -93,13 +93,13 @@ def retrain(valid_points, session_key, old_session_key, settings):
     store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features)
 '''
 
-def new_features(labels, session_key, old_session_key, settings, features):
+def new_features(labels, sessions, settings, features):
     # Get audiofilename
-    audio_dir = "static/uploads/" + session_key + "/"
+    audio_dir = "static/uploads/" + sessions['current'] + "/"
     audio_path, audio_name, audio_duration = handle_audio(audio_dir)
 
     # Create dir for ouput and set filenames
-    output_dir = "static/data/" + session_key + "/"
+    output_dir = "static/data/" + sessions['current'] + "/"
     subprocess.call(["mkdir", output_dir])
 
     # configure openSMILE file names
@@ -116,13 +116,13 @@ def new_features(labels, session_key, old_session_key, settings, features):
     result = csv_to_data(output_path)
 
     # copy old waveform data and import
-    old_waveform_path = "static/data/" + old_session_key + "/wavedata.json"
-    new_waveform_path = "static/data/" + session_key + "/wavedata.json"
+    old_waveform_path = "static/data/" + sessions['previous'][0] + "/wavedata.json"
+    new_waveform_path = "static/data/" + sessions['current'] + "/wavedata.json"
     subprocess.call(['cp', old_waveform_path, new_waveform_path])
     waveform_data = waveform.getComputedJson(new_waveform_path)
 
     data = cluster_and_pack_data(result, output_dir, settings, labels)
-    store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features)
+    store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features, sessions)
 
 ''' COAGUTION NOT WORKING YET
 def coagulate(session_key, old_session_key, settings, features):
@@ -223,7 +223,7 @@ def cluster_and_pack_data(feature_data, output_dir, settings, labels=None, start
         first = False;
     return data
 
-def store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features):
+def store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features, sessions):
     # Write data to disk in json format
     with open(output_dir + "data.json", 'w') as output_file:
         jsonObj = {
@@ -234,7 +234,8 @@ def store_data(output_dir, data, waveform_data, audio_duration, audio_path, sett
                 #'step_size': settings['step_size'],
                 'waveform': waveform_data,
                 'features': features,
-                'settings': settings
+                'settings': settings,
+                'sessions': sessions
             },
             'data': data,
         }

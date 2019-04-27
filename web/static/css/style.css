@@ -412,3 +412,16 @@ audio::-webkit-media-controls-timeline {
 .analysisModal.nav-tabs > li > a {
     color: white;
 }
+
+
+.list-group-item-action:active {
+    border-color: var(--dark-color-detail) var(--dark-color-detail) var(--dark-color) var(--dark-color-detail);
+}
+
+.list-group-item-action:hover {
+    color: white;
+}
+
+.list-group-item-action {
+    color: rgb(133, 133, 133);
+}
