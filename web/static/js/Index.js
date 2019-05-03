@@ -99,10 +99,12 @@ var send = function() {
     for (let [key, value] of fileMap) {
 
         /* TEMP: blocking more than one file. Remove later */
+        /*
         if (i > 0) {
             alert("Cannot handle more than one file atm... :'(. Passing first in list!")
             break;
         }
+        */
 
         formData.append(i ,value);
         i++;

@@ -16,13 +16,19 @@ class Audio extends AudioContext {
         super();
 
         /* audio path to load */
-        this._audio_path = o.audio_path;
+        this._audio = o.audio;
+
+        /* track audio loading state */
+        this._audio_loaded = [];
+
+        for (var i = 0; i < this._audio.files.length; i++) {
+            this._audio_loaded.push(false)
+        }
 
         /* holds plots */
         this._plot = o.plot;
 
-        this._set_sequence = o.f.set_sequence;
-        this._reset_sequence = o.f.reset_sequence;
+        this._sequence = o.sequence;
 
         // load audio on object creation
         this._audio_buffer;
@@ -77,25 +83,17 @@ class Audio extends AudioContext {
         // extract and remove first time
         if (!this._playing) {
             var t = T.shift();
-            const length = T.length;
+            const length = T.length | 0;
+            const song_id = t.song_id;
             const start = t.start / 1000;
             const duration = t.duration / 1000;
-            const index = t.start / t.step;
-            this._source = this._instantiate_source(this._instantiate_volume());
+            const index = t.index;
+            this._source = this._instantiate_source(this._instantiate_volume(), song_id);
             this._playing = true;
 
-            // play only one segment
-            /*
-            if (duration <= data.meta.segment_size/1000) {
-                this._set_sequence(index)
-                this._plots[0].setHighlight(index)
-            } else {
-                // set UI update events
-                this._initialize_events(index, start)
-            }*/
 
             // setup UI events
-            this._initialize_events(index, start)
+            this._initialize_events(index)
 
             // fire up source
             this._source.start(0, start, duration);
@@ -103,8 +101,8 @@ class Audio extends AudioContext {
                 if (length > 0) {
                     // play the next segment by calling Play recursivly
                     this._playing = false;
-                    this.PLAY(t)
-                    return;
+                    this.PLAY(T, callback)
+
                 } else {
                     this._playing = false;
                     this._resetAll()
@@ -117,7 +115,6 @@ class Audio extends AudioContext {
                     this._sequential_playback_index = -1;
 
                     if (typeof callback === 'function') {
-                        SEQUENCE_PLAYING_LOCKED = false;
                         callback()
                     }
                 }
@@ -135,7 +132,7 @@ class Audio extends AudioContext {
         // TODO
     }
 
-    _initialize_events(index, start) {
+    _initialize_events(index) {
         // fire up clock
         this._start_clock()
         // assign first index which will propagate through
@@ -143,7 +140,7 @@ class Audio extends AudioContext {
         this._sequential_playback_index = index;
 
         // set markers at begining of segment
-        this._set_sequence(this._sequential_playback_index)
+        this._sequence.setSequencePlayheadAt(this._sequential_playback_index)
         this._plot.setHighlight(this._sequential_playback_index)
 
         var step = data.meta.settings.segmentation.step/1000;
@@ -151,7 +148,7 @@ class Audio extends AudioContext {
         // set up event for plot and sequence map
         this._event = this._clock.callbackAtTime((e) => {
             this._sequential_playback_index++;
-            this._set_sequence(this._sequential_playback_index)
+            this._sequence.setSequencePlayheadAt(this._sequential_playback_index)
             this._plot.setHighlight(this._sequential_playback_index)
         }, step + this.currentTime)
         .repeat(step)
@@ -174,14 +171,17 @@ class Audio extends AudioContext {
         return volume
     }
 
-    _instantiate_source(volume) {
+    _instantiate_source(volume, song_id) {
         var source = this.createBufferSource();
-        source.buffer = this._audio_buffer;
+        source.buffer = this._audio_buffer[song_id];
         source.connect(volume)
         return source
     }
 
     _start_clock() {
+        if (this._clock) {
+            this._clock.stop()
+        }
         this._clock = new WAAClock(this, {
             toleranceEarly: 0.1
         })
@@ -195,7 +195,7 @@ class Audio extends AudioContext {
     }
 
     _resetAll() {
-        this._reset_sequence.call()
+        this._sequence.resetSequencePlayhead()
         this._plot.resetHighlight()
     }
 
@@ -206,19 +206,20 @@ class Audio extends AudioContext {
 
 
     load() {
-        var audioList = [this._audio_path];
+        var audioList = this._audio.files;
         var buffer;
         var bufferLoader = new BufferLoader(
             this,
+            this._audio.path,
             audioList,
             finishedLoading
         );
         bufferLoader.load();
 
         function finishedLoading(bufferList) {
-            this._audio_buffer = bufferList[0];
+            this._audio_buffer = bufferList;
             AUDIO_LOADED = true;
-            $("#loading-sm").hide()
+            //$("#loading-sm").hide()
             console.log("Audio loaded.");
         }
 
@@ -226,12 +227,13 @@ class Audio extends AudioContext {
     }
 
 
-    hooverPlay(index, start, duration) {
-        if (this._stack.length < this._stack_limit) {
+    hooverPlay(index, start, duration, song_id) {
+        if (AUDIO_LOADED && this._stack.length < this._stack_limit) {
             this._stack.push({
                 index: index,
                 start: start,
-                duration: duration
+                duration: duration,
+                song_id: song_id
             })
         }
     }
@@ -245,9 +247,9 @@ class Audio extends AudioContext {
     _stack_playback() {
         if (this._stack.length > 0) {
             var o = this._stack.pop();
-            var source = this._instantiate_source(this._instantiate_volume_fade(o.duration))
-            source.start(0, o.start/1000, o.duration/1000)
-            this._set_sequence(o.index)
+            var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
+            source.start(0, o.start, o.duration)
+            this._sequence.setSequencePlayheadAt(o.index)
             this._plot.setHighlight(o.index)
         }
     }

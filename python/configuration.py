@@ -24,7 +24,7 @@ def _header(target_path, segmentation):
                 if line.startswith(';FRAMESTEP'):
                     line = 'frameStep=' + str(segmentation['step']/1000) + '\n'
                 if line.startswith(';MODE'):
-                    line = 'frameMode=fixed'
+                    line = 'frameMode=fixed\n'
             elif segmentation['mode'] == 'coagulated':
                 if line.startswith(';FRAMESIZE'):
                     line = 'frameSize=0\n'

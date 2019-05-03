@@ -2,12 +2,17 @@ import umap
 from itertools import count
 import numpy as np
 import random
+import time
 
-
-def run(data, n_components, n_neighbours, metric):
-    print(f'UMAP :: {n_components} components, {n_neighbours} neighbours, {metric}-metric... ', end='')
-    result = convert_range(umap.UMAP(n_components=n_components).fit_transform(data))
-    print('done!')
+def run(X, Y=None, n_components=3, n_neighbours=15, metric='euclidean'):
+    start_time = time.time()
+    if Y:
+        print(f'Supervised-UMAP :: {n_components} components, {n_neighbours} neighbours, {metric}-metric... ', end='')
+        result = convert_range(umap.UMAP(n_components=n_components).fit_transform(X, y=Y))
+    else:
+        print(f'UMAP :: {n_components} components, {n_neighbours} neighbours, {metric}-metric... ', end='')
+        result = convert_range(umap.UMAP(n_components=n_components).fit_transform(X))
+    print(f'done in {time.time()-start_time:.2f}s')
     return result
 
 

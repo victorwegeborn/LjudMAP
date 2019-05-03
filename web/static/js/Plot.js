@@ -90,7 +90,7 @@ class Plot {
                     data: this._data,
                     coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
                     getPosition: d => [0,0,0],
-                    getColor: d => this._getColor(d.category),
+                    getColor: d => COLORS.get(d.category, 1, d.song_id),
                     getNormal: d => d.normal,
                     radiusPixels: this._point_radius,
                     lightSettings: {},
@@ -127,9 +127,10 @@ class Plot {
                         _pos[2]*this._flatten[2]*this._scale];
             },
             getColor: d => {
-                if (this._colorSegmentByIndex)
+                if (space_down)
                     this._colorSegmentByIndex(d.id)
-                return this._getColor(d.category)
+                var a = this._highlight_index > 0 ? 20 : null;
+                return COLORS.get(d.category, 1, d.song_id, a)
             },
             getNormal: d => d.normal,
             radiusPixels: this._point_radius,
@@ -271,7 +272,8 @@ class Plot {
         }
 
         for (var i = 0; i < pointsInRadius.length; i++) {
-            o.hooverPlay(pointsInRadius[i].object.id, pointsInRadius[i].object.start, this._segment_size)
+            var p = pointsInRadius[i].object;
+            o.hooverPlay(p.id, p.start, p.length, p.song_id)
         }
     }
 
@@ -323,39 +325,4 @@ class Plot {
         this._highlight_index = -1;
         this._redraw()
     }
-
-
-
-    _getColor(c) {
-        var alpha = this._highlight_index > 0 ? 35 : 240;
-        switch (c) {
-            case 0 : return [ 51,  58,  63, alpha]; break; // black
-            case 1 : return [  0, 125, 255, alpha]; break; // blue
-            case 2 : return [  0, 167,  84, alpha]; break; // green
-            case 3 : return [255, 191,  66, alpha]; break; // yellow
-            case 4 : return [228,  47,  70, alpha]; break; // red
-            case 5 : return [134,   0, 123, alpha]; break; // purple
-            case 6 : return [255, 163,  56, alpha]; break; // orange
-            case 7 : return [  0, 129, 128, alpha]; break; // teal
-            case 8 : return [171,  38,  44, alpha]; break; // brown
-                default:
-                    console.log('Point without valid category');
-                    return [255,255,255,255];
-        }
-    }
-
 }
-
-
-/*
-function showToolTip(object, index, target) {
-    const el = $(target);
-    if (object) {
-        el.html('index: ' + index + '<br>time: ' + msToTime(object.start));
-        el.css('display', 'block')
-        el.css('height', '30')
-    } else {
-        el.css('display', 'none')
-    }
-}
-*/

@@ -395,7 +395,7 @@
 
         // append non input field data TODO: add support for customizing
         formData.set('sessions', JSON.stringify(data.meta.sessions))
-        formData.set('audioPath', audioPath)
+        formData.set('audios', JSON.stringify(data.meta.audios))
 
         // send current labeling
         var labels = []

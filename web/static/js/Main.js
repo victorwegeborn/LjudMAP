@@ -12,7 +12,8 @@ var shift_down = false;
 /* global objects */
 var PLOT = null;
 var AUDIO = null;
-
+var SEQUENCE = null;
+const COLORS = new Colors;
 const history = new History();
 
 
@@ -30,6 +31,9 @@ $(document).ready(function() {
     var labeled = false;
 
     //////////////////////////// INITIALIZING ////////////////////////////
+    SEQUENCE = new Sequence(
+        data.data, data.meta
+    );
 
     PLOT = new Plot({
         id: 'default',
@@ -37,22 +41,20 @@ $(document).ready(function() {
         meta: data.meta,
         canvas: 'map',
         tooltip: '#tooltip',
-        colorSegment: colorSegmentByIndex,
+        colorSegment: SEQUENCE.colorSegmentByIndex,
         history: history,
         dim: '3D' in data.data[0] ? '3D' : '2D'
     });
 
+
     /* initialize sequence */
-    initSequence()
+    //initSequence()
 
 
     AUDIO = new Audio({
-        audio_path: audioPath,
+        audio: data.meta.audios,
         plot: PLOT,
-        f: {
-            set_sequence: setSequencePlayheadAt,
-            reset_sequence: resetSequencePlayhead
-        }
+        sequence: SEQUENCE
     });
     AUDIO.load()
 
@@ -115,8 +117,12 @@ $(document).ready(function() {
             modalDialog.addClass('modal-lg')
             showModal(t)
         }
+        else if (t === 'recluster') {
+            modalDialog.removeClass('modal-lg')
+            showModal(t)
+        }
         else if (t === 'export') {
-
+            exportDataToCsv();
         }
         else if (t === 'undo') {
             history.undo( PLOT, colorSegmentByIndex )
@@ -129,7 +135,7 @@ $(document).ready(function() {
 
         }
         else {
-            console.log(t + 'is not hooked up!')
+            console.log(t + ' is not hooked up!')
         }
     })
 
@@ -262,7 +268,7 @@ $(document).ready(function() {
         if (space_down) {
             PLOT.categorize();
         }
-        else if (shift_down && !SEQUENCE_PLAYING_LOCKED) {
+        else if (shift_down && !SEQUENCE.isSequencePlaying()) {
             PLOT.updateAudioList(AUDIO);
         }
     })
@@ -281,7 +287,7 @@ $(document).ready(function() {
             // undo
             console.log('test')
             console.log(history)
-            history.undo( PLOT, colorSegmentByIndex )
+            history.undo( PLOT, SEQUENCE )
             console.log(history)
         }
     });
@@ -295,8 +301,8 @@ $(document).ready(function() {
         }
         else if (shift_down) {
             shift_down = false;
-            if (!SEQUENCE_PLAYING_LOCKED) {
-                resetSequenceHighlighting()
+            if (!SEQUENCE.isSequencePlaying()) {
+                //SEQUENCE.resetSequenceHighlighting()
                 AUDIO.resetHooverPlayStack()
             }
         } else {
@@ -328,9 +334,30 @@ $(document).ready(function() {
     });
 
 
+    function exportDataToCsv() {
+        $('#csv-form').on('submit', function(ev) {
+            var fmt = $("<input type='hidden' name='format' value='csv'/>")
+            var dat = $("<input type='hidden' name='data'/>")
+            var ado = $("<input type='hidden' name='audios'/>")
+            var nme = $("<input type='hidden' name='name' value='" + data.meta.sessions.current[0] +  "''/>")
+            dat.val(JSON.stringify(data.data))
+            ado.val(JSON.stringify(data.meta.audios))
+            $(this).append(fmt)
+            $(this).append(dat)
+            $(this).append(ado)
+            $(this).append(nme)
+        })
+        $('#csv-form').submit()
+        // ugly fix to remove from body
+        setTimeout(function() {
+            $("#csv-form").empty()
+        }, 2000)
+    }
+
+
     //////////////////////////// RETRAIN ////////////////////////////
 
-
+    /*
     function retrain (arg) {
 
         $('#content').hide()
@@ -379,4 +406,5 @@ $(document).ready(function() {
         });
 
     }
+    */
 })

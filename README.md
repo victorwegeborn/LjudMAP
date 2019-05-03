@@ -22,7 +22,7 @@ $ conda env create -f environment.yml
 
 activate environment
 ```
-$ source activate TDA
+$ source activate LjudMAP
 ```
 
 run from within /web
