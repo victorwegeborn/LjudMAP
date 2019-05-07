@@ -75,10 +75,10 @@ $(document).ready(function() {
     // Populate meta info
     $('#metaDefault small').each(function() {
         if ($(this).hasClass('fileName')) {
-            $(this).text(audioPath.split("/").slice(-1))
+            //$(this).text(audioPath.split("/").slice(-1))
         }
         else if ($(this).hasClass('duration')) {
-            $(this).text(msToTime(audioDuration))
+            //$(this).text(msToTime(audioDuration))
         }
         else if ($(this).hasClass('segmentSize')) {
             $(this).text(data.meta.settings.segmentation.size + ' ms')
@@ -217,49 +217,35 @@ $(document).ready(function() {
                 AUDIO.STOP()
             }
             else if (this.value=="play" && !AUDIO.isPlaying()) {
-                AUDIO.PLAY([{
-                    start: 0,
-                    duration: audioDuration
-                }])
+                AUDIO.PLAYALL()
             }
         }
     });
 
 
-    //////////////////////////// AUDIO SLIDERS ////////////////////////////
+    //////////////////////////// AUDIO Settings ////////////////////////////
 
-    $("#launchSlider").val(AUDIO.launchInterval);
-    $("#launchSliderText").text("Launch interval: " + AUDIO.launchInterval);
+    const grainDensity = $('#grain-density');
+    const grainEnvelope = $('#grain-envelope');
 
-    $("#fadeSlider").val(AUDIO.fade);
-    $("#fadeSliderText").text("Fade in/out: " + AUDIO.fade);
+    // set UI from audio defaults
+    grainDensity.val(AUDIO.segmentsPerSecond)
+    grainEnvelope.val(AUDIO.segmentEnvelope)
 
-
-    $("#launchSlider").on("mousemove", function() {
-        AUDIO.launchInterval = this.value;
-        $("#launchSliderText").text("Launch interval: " + AUDIO.launchInterval);
+    grainDensity.on('input', function() {
+        var n = parseInt(this.value)
+        if (n > 1) {
+            AUDIO.segmentsPerSecond = n;
+        }
     })
 
-    $("#fadeSlider").on("mousemove", function() {
-        AUDIO.fade = this.value;
-        $("#fadeSliderText").text("Fade in/out: " + AUDIO.fade);
+    grainEnvelope.on('input', function() {
+        var e = parseInt(this.value);
+        if (e >= 0 && e <= 1) {
+            AUDIO.segmentEnvelope = e;
+        }
     })
 
-
-    //////////////////////////// SCALE SLIDERS ////////////////////////////
-
-
-    var scaleSlider = $('#scaleSlider');
-
-    $(scaleSlider).attr({
-        'min': min_scale,
-        'max': max_scale,
-        'step': scale_step
-    });
-
-    $(scaleSlider).on('input', function() {
-        PLOT.updateScale($(this).val());
-    });
 
     ////////////////////////////////////////////////////////////////////////
 
@@ -353,58 +339,4 @@ $(document).ready(function() {
             $("#csv-form").empty()
         }, 2000)
     }
-
-
-    //////////////////////////// RETRAIN ////////////////////////////
-
-    /*
-    function retrain (arg) {
-
-        $('#content').hide()
-        $('#loading').show()
-
-        defaultValidPoints = [["id", "startTime(ms)", "label"]]
-        for (let i = 0; i < data.data.length; i++) {
-            if (data.data[i].category != 0) {
-                defaultValidPoints.push([data.data[i].start/data.meta.settings.segmentation.size, data.data[i].start, data.data[i].category])
-            }
-        }
-
-        if (defaultValidPoints.length == 0) {
-            alert("Can't retrain, there are no labels")
-            $('#loading').hide()
-            $('#content').show()
-        }
-
-        __data = {
-            "points": JSON.stringify(defaultValidPoints),
-            "sessionKey": sessionKey,
-            "audioPath": audioPath,
-            "segment_size": data.meta.settings.segmentation.size,
-            "step_size": data.meta.settings.segmentation.step,
-            "components": JSON.stringify(data.meta.settings.cluster.components),
-            "n_neighbours": data.meta.settings.cluster.neighbours,
-            "metric": data.meta.settings.cluster.metric,
-            //'n_songs': data.meta.n_songs
-        }
-
-
-        $.ajax({
-            type: "POST",
-            url: "/retrain",
-            data: __data,
-            dataType: "json",
-            success: function(data, textStatus) {
-                if (data.redirect) {
-                    // data.redirect contains the string URL to redirect to
-                    window.location.href = data.redirect;
-                }
-                else {
-                    console.log("Check ajax request, went to else-statement there");
-                }
-            }
-        });
-
-    }
-    */
 })

@@ -34,7 +34,7 @@ def generate_waveform(output_dir, audio_path, audio_name, waveform_data):
     waveform_path = f'{waveform_folder}{audio_name[:-4:]}.json'
 
     # TODO: set samples_per_pixel proportional to the total audio duration
-    samples_per_pixel = 1000
+    samples_per_pixel = 2000
     with open(os.devnull, 'w') as devnull:
         subprocess.call(['audiowaveform',
                          '-i', audio_path + audio_name,

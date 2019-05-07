@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+"""
+
+
+
+"""
 import os
 import io
 from flask import Flask, render_template, request, flash, redirect, jsonify, make_response
@@ -106,6 +110,9 @@ def parse_request(request):
         settings['segmentation']['step'] = float(settings['segmentation']['step'])
     if settings['segmentation']['mode'] == 'coagulated':
         settings['segmentation']['threshold'] = float(settings['segmentation']['threshold'])
+        settings['segmentation']['target'] = int(settings['segmentation']['target'])
+        settings['segmentation']['size'] = float(settings['segmentation']['size'])
+        settings['segmentation']['step'] = float(settings['segmentation']['step'])
 
     # parse cluster settings
     settings['cluster']['components'] = json.loads(settings['cluster']['components'])
@@ -199,7 +206,7 @@ def store_audio(request, session=None, audios=None):
         audios['duration'] += duration
         audios['files'].append([filename, duration])
         print(f'done in {time.time()-start_time:.2f} s. {msg}')
-    print(f'Storing done in {time.time()-store_time:.2f} s.')
+    print(f'Saving done in {time.time()-store_time:.2f} s.')
     return audios
 
 
@@ -287,7 +294,7 @@ def new_features() -> str:
         return jsonify(dict(redirect='/' + sessions['current'][0]))
     return ''
 
-'''
+
 # Performs coagulation. Only available when one song has been uploaded!!
 @app.route('/coagulate', methods=['POST'])
 def run_coagulate() -> str:
@@ -296,18 +303,17 @@ def run_coagulate() -> str:
         settings, features = parse_request(request)
 
         # copy session key and create new key
-        old_session_key = request.form['sessionKey']
-        filename = request.form['audioPath'].split("/")[-1]
-        new_session_key = str(time.time()).split(".")[0] + str(time.time()).split(".")[1]
+        sessions = handle_sessions(request.form['sessions'])
 
-        # make new dir for the new data
-        subprocess.call(['mkdir', UPLOAD_FOLDER + new_session_key])
-        subprocess.call(['cp', UPLOAD_FOLDER + old_session_key + "/" + filename, UPLOAD_FOLDER + new_session_key + "/" + filename])
+        # audio path and files stored.
+        audios = json.loads(request.form['audios'])
 
-        audio_processing.coagulate(new_session_key, old_session_key, settings, features)
-        return jsonify(dict(redirect='/' + new_session_key))
+        coagulation_data = json.loads(request.form['data'])
+
+        audio_processing.coagulate(audios, sessions, settings, features, coagulation_data)
+        return jsonify(dict(redirect='/' + sessions['current'][0]))
     return ''
-'''
+
 
 # Triggered when searching by key, if key exists go to load_browser()
 @app.route('/goByKey', methods=['POST'])
@@ -420,11 +426,7 @@ def export_to_csv() -> str:
             output.headers["Content-Disposition"] = "attachment; filename=session="+ filename + '_ddmmyy=' + _date + '_hhssmm=' + _time + ".csv"
             output.headers["Content-type"] = 'application/download'
             return output
-
-        else:
-            print('non-recognized format from UI')
-            return
-    return
+    return '<h3> error in export to csv </h3>'
 
 
 

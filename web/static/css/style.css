@@ -16,6 +16,7 @@
 
 html, body {
   height: 100%;
+  background-color: var(--dark-color);
 }
 
 #selectionBox {
@@ -40,6 +41,11 @@ html, body {
 .dropdown-menu {
     background: rgb(248, 249, 250)
 }
+
+.dropdown-menu-static {
+    background: rgb(248, 249, 250)
+}
+
 
 .drop-highlight:hover {
     background-color: rgb(225, 229, 233);

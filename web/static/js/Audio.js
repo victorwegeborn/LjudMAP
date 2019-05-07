@@ -46,8 +46,8 @@ class Audio extends AudioContext {
         this._source = null;
 
         /* audio settings */
-        this._fade = data.meta.settings.segmentation.size/2;
-        this._launch_interval = data.meta.settings.segmentation.size/2;
+        this._segments_per_second = 2 * 1000 / data.meta.settings.segmentation.size;
+        this._envelope = 0.1;
 
         /* hoover playback trackers */
         this._stack = []
@@ -60,6 +60,7 @@ class Audio extends AudioContext {
         this._stack_clock.start();
         this._stack_event = this._initialize_stack_event();
 
+        this._stack_playing_sources = []
 
 
         /* holds all reset functions */
@@ -85,15 +86,15 @@ class Audio extends AudioContext {
             var t = T.shift();
             const length = T.length | 0;
             const song_id = t.song_id;
-            const start = t.start / 1000;
-            const duration = t.duration / 1000;
+            const start = t.start;
+            const duration = t.duration;
             const index = t.index;
             this._source = this._instantiate_source(this._instantiate_volume(), song_id);
             this._playing = true;
 
 
             // setup UI events
-            this._initialize_events(index)
+            this._initialize_events(index, duration)
 
             // fire up source
             this._source.start(0, start, duration);
@@ -122,9 +123,47 @@ class Audio extends AudioContext {
         }
     }
 
+    PLAYALL() {
+        if (data.data.length <= 1) return;
+
+        var song_list = [];
+        var song_id = data.data[0].song_id
+        var start_p = null
+        for (var i = 0; i < data.data.length; i++) {
+            var p = data.data[i];
+
+            if (!start_p) start_p = p;
+
+            if (p.song_id != song_id || i == data.data.length - 1) {
+                var prev_p = i == data.data.length - 1 ? data.data[i] : data.data[i-1];
+                song_list.push({
+                    start: start_p.start,
+                    duration: prev_p.start - start_p.start + prev_p.length,
+                    song_id: song_id,
+                    index: start_p.id
+                });
+                song_id = p.song_id;
+                start_p = p;
+            }
+
+            // last element
+            if (i == data.data.length - 1) {
+            }
+        }
+
+        this.PLAY(song_list)
+    }
+
+
     STOP() {
         if (this._source) {
             this._source.stop()
+        }
+        if (this._stack_playing_sources.length > 0) {
+            for (var i = 0; i < this._stack_playing_sources.length; i++ ) {
+                this._stack_playing_sources[i].stop()
+            }
+            this._stack_playing_sources = []
         }
     }
 
@@ -150,8 +189,12 @@ class Audio extends AudioContext {
             this._sequential_playback_index++;
             this._sequence.setSequencePlayheadAt(this._sequential_playback_index)
             this._plot.setHighlight(this._sequential_playback_index)
-        }, step + this.currentTime)
-        .repeat(step)
+            // update repeat of this event by length of segment
+            if (this._sequential_playback_index < data.data.length) {
+                this._event.repeat(data.data[this._sequential_playback_index].length)
+            }
+        }, data.data[this._sequential_playback_index].length + this.currentTime)
+        .repeat(data.data[this._sequential_playback_index].length)
         .tolerance({late: 100})
     }
 
@@ -165,9 +208,10 @@ class Audio extends AudioContext {
         var volume = this.createGain();
         volume.connect(this.destination);
         /* TODO: FIX THESE PARAMETERS */
-        volume.gain.exponentialRampToValueAtTime(1.0, this.currentTime + this._fade/1000);
-        volume.gain.setValueAtTime(1.0, this.currentTime +  (t-this._fade)/1000);
-        volume.gain.exponentialRampToValueAtTime(0.01, this.currentTime + t/1000);
+        volume.gain.setValueAtTime(-1.40130e-45, this.currentTime);
+        volume.gain.exponentialRampToValueAtTime(1.0, this.currentTime + t/2 * this._envelope);
+        volume.gain.setValueAtTime(-1.40130e-45, this.currentTime);
+        volume.gain.exponentialRampToValueAtTime(-1.40130e-45, this.currentTime +  t - t/2 * this._envelope);
         return volume
     }
 
@@ -244,41 +288,42 @@ class Audio extends AudioContext {
     }
 
 
-    _stack_playback() {
+    _stack_playback(deadline) {
         if (this._stack.length > 0) {
             var o = this._stack.pop();
             var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
             source.start(0, o.start, o.duration)
             this._sequence.setSequencePlayheadAt(o.index)
             this._plot.setHighlight(o.index)
+            this._stack_playing_sources.push(source)
         }
     }
 
 
     _initialize_stack_event() {
         // return event object for repeated launching from stack
-        return this._stack_clock.callbackAtTime(() => {
-            this._stack_playback()
+        return this._stack_clock.callbackAtTime((ev) => {
+            this._stack_playback(ev.deadline)
         }, this.currentTime)
-        .repeat(this._launch_interval/1000)
+        .repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000) + this.currentTime)
         .tolerance({late: 100})
     }
 
-    set launchInterval(val) {
-        this._launch_interval = val;
-        this._stack_event.repeat(this._launch_interval/1000)
+
+    set segmentsPerSecond(n) {
+        this._segments_per_second = n;
+        this._stack_event.repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000))
     }
 
-    get launchInterval() {
-        return this._launch_interval;
+    get segmentsPerSecond() {
+        return this._segments_per_second;
     }
 
-    set fade(val) {
-        this._fade = val;
+    set segmentEnvelope(i) {
+        this._envelope = i;
     }
 
-    get fade() {
-        return this._fade;
+    get segmentEnvelope() {
+        return this._envelope;
     }
-
 }

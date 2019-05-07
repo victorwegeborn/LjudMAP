@@ -62,9 +62,9 @@
             <label class="custom-control-label small pt-1" for="targets">Use labels for Full-/Semi-Supervised Clustering</label>
         </div>
 
-        <p class="text-muted small text-center mt-4 mb-0">Exclude labeled points by clicking the corresponding label button above. <br>
-            This will exclude points from the re-clustering process and remove them from the space.
-             All points are included by default.
+        <p class="text-muted small text-center mt-4 mb-0">Excluding labels in full-/semi-supervised clustering mode will
+            mark all points in the corresponding label as unlabeled. In unsupervised clustering mode (default), the labeled points will be removed from
+            the space. All labels are included by default.
         </p>
 
 
@@ -138,18 +138,18 @@
         var use_supervised = $('#targets').prop('checked');
 
         // pack data and labels
-        label_data = [['id', 'startTimes(ms)', 'label', 'song_ids', 'positions']]
+        label_data = [['id', 'startTimes(s)', 'label', 'song_ids', 'positions(s)', 'lengths(s)']]
         $.each(data.data, function(i, p) {
             if (use_supervised) {
                 // include all points when using unsupervised
                 // cluster, but mark excluded points as -1
                 var l = tracker[p.category] ? p.category : -1;
-                label_data.push([p.id, p.start, l, p.song_id, p.position])
+                label_data.push([p.id, p.start, l, p.song_id, p.position, p.length])
             } else {
                 // skip points if not using unsupervised
                 // clustering
                 if (tracker[p.category]) {
-                    label_data.push([p.id, p.start, p.category, p.song_id, p.position])
+                    label_data.push([p.id, p.start, p.category, p.song_id, p.position, p.length])
                 }
             }
         })

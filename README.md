@@ -2,11 +2,11 @@
 
 Install
 -----
-This application requires two external softwares in order to run.
+This application requires external software in order to run.
 Get them here:
 1. [openSMILE](https://www.audeering.com/opensmile/)
 2. [BBC's audiowaveform](https://github.com/bbc/audiowaveform)
-3. [FFMPEG](http://www.ffmpeg.org/) - only needed for .mp3-files
+3. [FFMPEG](http://www.ffmpeg.org/)
 
 Extract and install openSMILE in the repository directory. Ensure relative path to executable:
 ```

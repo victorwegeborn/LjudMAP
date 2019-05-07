@@ -44,9 +44,14 @@
                 <button id="reset" type="button" value="" class="btn btn-dark btn-sm flex-fill"><text style="font-size: 11px;">Reset exclusion</text></button>
             </div>
         </div>
+        <div class="custom-control custom-checkbox mt-3 d-flex justify-content-center" id='target-div' style='display: none;'>
+            <input type="checkbox" class="custom-control-input custom-control-input-sm signals" id="coagulation-target">
+            <label class="custom-control-label small pt-1" for="coagulation-target">Coagulate on 2D data</label>
+        </div>
+
         <p class="text-muted small text-center mt-4 mb-0">Exclude labeled points by clicking the corresponding label button above. <br>
             This will exclude points from the coagulation process. <br>
-             All points are included by default.
+             All segments are included by default.
         </p>
     </div>
 
@@ -61,7 +66,20 @@
 
     var btn = $('#coagulation-submit');
     var frm = $('#coagulation-form');
+    var target = $('#coagulation-target');
     var tracker = [];
+
+
+    if ('2D' in data.data[0]) {
+        if ('3D' in data.data[0]) {
+            // keep unchecked
+        } else {
+            target.prop('checked', true);
+            target.prop('disabled', true);
+        }
+    } else {
+        target.prop('disabled', true);
+    }
 
     // setup events and track labels
     $('#exclude button').each(function(ev) {
@@ -107,9 +125,11 @@
         $.each(ev.target, function() {
             if (!this.checkValidity()) {
                 frm.addClass('was-validated')
-                return;
+                error = true;
             }
         })
+
+        if (error) return;
 
         // pack values and send for coagulate
         var formData = new FormData();
@@ -125,17 +145,22 @@
             }
         });
 
+        console.log(tracker)
+
         // pack data and labels
-        coag_data = []
+        coag_data = [['id', 'startTimes(s)', 'lengths(s)', 'label', 'song_ids', 'positions(s)', 'included (1 = y, 0 = n)']]
         $.each(data.data, function(i, val) {
-            coag_data.push([val.start, val.category]);
+            var c = tracker[val.category] ? 1 : 0;
+            console.log(c)
+            coag_data.push([val.id, val.start, val.length, val.category, val.song_id, val.position, c]);
         })
+
+        // pass data tp backend
+        formData.set('data', JSON.stringify(coag_data))
 
         // append tracker and labels to segmentation
         settings.segmentation.threshold = $('#threshold').val()
-        settings.segmentation.tracker = tracker;
-        settings.segmentation.data = coag_data;
-        settings.segmentation.target = '3' // MAKE USER CHANGEABLE
+        settings.segmentation.target = target.prop('checked') ? 2 : 3;
 
         // make cluster components compatable
         settings.cluster.components = '[' + settings.cluster.components.toString() + ']';
@@ -145,8 +170,8 @@
         formData.set('settings', JSON.stringify(settings))
 
         // append non input field data TODO: add support for customizing
-        formData.set('sessionKey', sessionKey)
-        formData.set('audioPath', audioPath)
+        formData.set('sessions', JSON.stringify(data.meta.sessions))
+        formData.set('audios', JSON.stringify(data.meta.audios))
 
         $.ajax({
             url: '/coagulate',

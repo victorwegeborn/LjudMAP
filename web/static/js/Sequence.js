@@ -25,7 +25,6 @@ function Sequence(data, meta) {
     const TEXTURE_HEIGHT = canvas_height + 2;
     const LINE_TEXTURE_WIDTH = Math.floor(meta.settings.segmentation.step * 0.03);
     const N_PIXELS = (meta.settings.segmentation.windows[meta.settings.segmentation.windows.length-1]) * meta.settings.segmentation.step
-    console.log(N_PIXELS)
     const MIN_xSCALE = canvas_width / N_PIXELS;
     const MAX_xSCALE = canvas_width / (30 * TEXTURE_WIDTH);
 
@@ -98,7 +97,7 @@ function Sequence(data, meta) {
     /* highlighting variables */
     var hightlight_segments = [];
 
-    var playhead_point = data[0];
+    var playhead_point = null;
 
     /*-------------------- Initialize --------------------*/
 
@@ -121,9 +120,9 @@ function Sequence(data, meta) {
         // construct sprite for colored segment
         constructSprite(containers.segments, {
             texture: textures.segment,
-            color: i == 0 ? colors.playhead : COLORS.get(point.category, 2, point.song_id),
+            color: COLORS.get(point.category, 2, point.song_id),
             length: point.length,
-            alpha: i == 0 ? alphas.playhead : alphas.segment,
+            alpha: alphas.segment,
             position: point.position
         });
 
@@ -188,36 +187,33 @@ function Sequence(data, meta) {
                 var length = n_samples / meta.waveform.data[j].samples_per_pixel * 2;
                 accu += length
 
+                zero_begin_idx = null;
                 for (var i = 0; i < length; i += 2) {
-                    var positive = meta.waveform.data[j].data[i] / scale;
-                    var negative = meta.waveform.data[j].data[i+1] / scale
-                    if (positive == 0) {
-                        line.moveTo(i+last_length, zero);
-                        line.lineTo(i+1+last_length, zero);
-                    } else {
+                    var negative = Math.floor(meta.waveform.data[j].data[i] / scale);
+                    var positive = Math.floor(meta.waveform.data[j].data[i+1] / scale);
+                    if (positive > 1) {
                         line.moveTo(i+last_length, Math.ceil(zero+positive));
                         line.lineTo(i+last_length, Math.ceil(zero-positive));
                     }
-                    if (negative == 0) {
-                        line.moveTo(i+1+last_length, zero);
-                        line.lineTo(i+last_length, zero);
-                    } else {
+                    if (negative < -1) {
                         line.moveTo(i+1+last_length, Math.ceil(zero+negative));
                         line.lineTo(i+1+last_length, Math.ceil(zero-negative));
                     }
                 }
                 last_length = length;
+                // draw one long line along zero from start to finish
+                line.moveTo(0, zero);
+                line.lineTo(last_length+1, zero)
             }
             delete meta.waveform
 
-            line.alpha = 0.9
+            line.alpha = 1
             // scale to fit
             line.scale.x = N_PIXELS / last_length;
             containers.waveform.addChild(line)
         }
     }
 
-    console.log(last_segments, meta.settings.segmentation.windows)
 
     containers.master.scale.x = MIN_xSCALE;
     containers.master.updateTransform();
@@ -264,9 +260,9 @@ function Sequence(data, meta) {
                 // play single point
                 var point = data[this.id];
                 AUDIO.PLAY([{
-                    start: point.start * TEXTURE_WIDTH,
+                    start: point.start,
                     song_id: point.song_id,
-                    duration: point.length * TEXTURE_WIDTH,
+                    duration: point.length,
                     index: point.id
                 }])
             }
@@ -319,7 +315,7 @@ function Sequence(data, meta) {
                 if (i==0) {
                     current_song_id = point.song_id
                     audio_play_segments.push({
-                        start: point.start * TEXTURE_WIDTH,
+                        start: point.start,
                         song_id: point.song_id,
                         index: point.id
                     })
@@ -327,10 +323,10 @@ function Sequence(data, meta) {
                     current_song_id = point.song_id
                     var prev_point = data[hightlight_segments[i-1].id];
                     var last = audio_play_segments[audio_play_segments.length-1];
-                    console.log(point.start, prev_point.start, point.length, prev_point.length)
-                    last.duration = (prev_point.start + prev_point.length) * TEXTURE_WIDTH - last.start;
+
+                    last.duration = (prev_point.start + prev_point.length) - last.start;
                     audio_play_segments.push({
-                        start: point.start * TEXTURE_WIDTH,
+                        start: point.start,
                         song_id: point.song_id,
                         index: point.id
                     })
@@ -338,14 +334,14 @@ function Sequence(data, meta) {
                     var prev_point = data[hightlight_segments[i-1].id];
                     var last = audio_play_segments[audio_play_segments.length-1];
                     if (current_song_id == point.song_id) {
-                        last.duration = (point.start + point.length) * TEXTURE_WIDTH - last.start;
+                        last.duration = (point.start + point.length) - last.start;
                     } else {
-                        last.duration = (prev_point.start + prev_point.length) * TEXTURE_WIDTH - last.start;
+                        last.duration = (prev_point.start + prev_point.length) - last.start;
                         audio_play_segments.push({
-                            start: point.start * TEXTURE_WIDTH,
+                            start: point.start,
                             song_id: point.song_id,
                             index: point.id,
-                            duration: point.length * TEXTURE_WIDTH
+                            duration: point.length
                         })
                     }
                 }
@@ -454,23 +450,32 @@ function Sequence(data, meta) {
     this.colorSegmentByIndex = function(i) {
         var segment = containers.segments.getChildAt(i);
         var point = data[i];
-        if (point.id == playhead_point.id) return;
+        if (playhead_point && point.id == playhead_point.id) return;
         segment.tint = COLORS.get(point.category, 2, point.song_id);
     }
 
     this.setSequencePlayheadAt = function(i) {
-        // remove color on current playhead segment
-        var current_segment = containers.segments.getChildAt(playhead_point.id);
-        current_segment.tint = COLORS.get(playhead_point.category, 2, playhead_point.song_id);
-        current_segment.alpha = alphas.segment
+        if (playhead_point) {
+            var current_segment = containers.segments.getChildAt(playhead_point.id);
+            current_segment.tint = COLORS.get(playhead_point.category, 2, playhead_point.song_id);
+            current_segment.alpha = alphas.segment
+        }
+
+        if (i == -1) {
+            playhead_point = null;
+            return;
+        }
+
         if (i < data.length) playhead_point = data[i];
         else playhead_point = data[data.length-1];
+
         var new_segment = containers.segments.getChildAt(playhead_point.id);
         new_segment.tint = colors.playhead;
         new_segment.alpha = alphas.playhead;
     }
 
     this.resetSequencePlayhead = function() {
-        this.setSequencePlayheadAt(0)
+        this.setSequencePlayheadAt(-1)
+        playhead_point = null;
     }
 }

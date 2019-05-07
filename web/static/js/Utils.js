@@ -68,6 +68,8 @@ BufferLoader.prototype.load = function() {
 /**
  * Converts milliseconds to time format 00:00:00.000
  *
+ * @Author Per Fallgren
+ *
  * @param {int} ms - time in milliseconds
  * @return {string} - string formated time
  */

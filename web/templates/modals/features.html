@@ -399,7 +399,7 @@
 
         // send current labeling
         var labels = []
-        if ($('#size').val() === data.meta.settings.segmentation.size && $('#step').val() === data.meta.settings.segmentation.step) {
+        if ($('#size').val() == data.meta.settings.segmentation.size && $('#step').val() == data.meta.settings.segmentation.step && data.meta.settings.segmentation.mode != 'coagulated') {
             $.each(data.data, function(ev) {
                 labels.push(this.category)
             })

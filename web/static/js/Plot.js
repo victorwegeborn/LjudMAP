@@ -88,6 +88,7 @@ class Plot {
                 new deck.PointCloudLayer({
                     id: this._id,
                     data: this._data,
+                    opacity: 1,
                     coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
                     getPosition: d => [0,0,0],
                     getColor: d => COLORS.get(d.category, 1, d.song_id),
@@ -135,6 +136,7 @@ class Plot {
             getNormal: d => d.normal,
             radiusPixels: this._point_radius,
             lightSettings: {},
+            opacity: 1,
             highlightedObjectIndex: this._highlight_index,
             highlightColor: this._highlight_color,
             updateTriggers: {
@@ -257,7 +259,7 @@ class Plot {
         var pointsInRadius = this.renderer.pickMultipleObjects({
             x: this._local_mouse.x, y: this._local_mouse.y,
             radius: 10,
-            depth: 5,
+            depth: 1,
         });
 
         /* randomize points */

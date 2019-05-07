@@ -51,11 +51,11 @@
  		                        File
  		                    </a>
  		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="fileNavbarDropdown">
-								<div data-target="open" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Open..</div>
+								<div data-target="open" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100">Open..</div>
 								<div data-target="recent" id="open-recent-dropwdown" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Open Recent..</div>
 								<div class="dropdown-divider my-0"></div>
-								<div data-target="import" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Import Audio..</div>
-								<div data-target="export" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Export to CSV..</div>
+								<div data-target="import" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Import Audio..</div>
+								<div data-target="export" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100">Export to CSV..</div>
  							</div>
  		                </li>
 
@@ -65,27 +65,15 @@
  		                        Edit
  		                    </a>
  		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="editNavbarDropdown">
-								<div data-target="undo" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Undo<text class="py-0 my-0 text-muted">cmd+z</text></div>
-								<div data-target="redo" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Redo<text class="py-0 my-0 text-muted">shift+cmd+z</text></div>
+								<div data-target="undo" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100">Undo<text class="py-0 my-0 text-muted">cmd+z</text></div>
+								<div data-target="redo" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Redo<text class="py-0 my-0 text-muted">shift+cmd+z</text></div>
 								<div class="dropdown-divider my-0"></div>
-								<div data-target="features" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Features..</div>
-								<div data-target="recluster" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100">Re-Cluster..</div>
+								<div data-target="features" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100">Features..</div>
+								<div data-target="recluster" class="dropdown-item d-flex small justify-content-between drop-highlight px-2 w-100">Re-Cluster..</div>
 							</div>
  		                </li>
 
-						<!-- cluster drop down -->
-						<!--
-						<li class="nav-item dropdown mt-auto small">
- 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="clusterNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
- 		                        Analysis
- 		                    </a>
- 		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="clusterNavbarDropdown">
 
-								<div class="dropdown-divider my-0"></div>
-								<div data-target="recluster" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight px-2 w-100 drop-highlight-disabled">Cluster labeled</div>
- 							</div>
- 		                </li>
-						-->
 
 						<!-- Tools Drop Down -->
  		                <li class="nav-item dropdown mt-auto small">
@@ -93,8 +81,8 @@
  		                        Tools
  		                    </a>
  		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="toolsNavbarDropdown">
-								<!--<div data-target="coagulate" class="dropdown-item d-flex small d-flex justify-content-between px-2 w-100">Coagulate..</div>-->
-								<div data-target="synthesize" class="dropdown-item d-flex small d-flex justify-content-between drop-highlight-disabled px-2 w-100">Concatinative Synthesis..</div>
+								<div data-target="coagulate" class="dropdown-item d-flex small justify-content-between px-2 w-100">Coagulate..</div>
+								<div data-target="synthesize" class="dropdown-item d-flex small justify-content-between drop-highlight-disabled px-2 w-100">Concatinative Synthesis..</div>
 								<!--
  								<div style="width: 10em;">
 									<p class="small mb-0">Re-train</p>
@@ -117,7 +105,24 @@
 		                    <a class="nav-link dropdown-toggle" style='color:white' href="#" id="audioNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		                        Audio
 		                    </a>
-		                    <div class="dropdown-menu bg-dark px-3 text-white" aria-labelledby="audioNavbarDropdown">
+		                    <div class="dropdown-menu rounded-0 py-0" aria-labelledby="audioNavbarDropdown">
+								<div data-target="coagulate" class="dropdown-item-static d-flex small d-flex px-2 w-100">
+									<div class="form-group mt-2 mb-0">
+		                                <label for="grain-density">Grain density</label>
+		                                <input class="form-control form-control-sm" type="number" value="" step='any' id='grain-density'>
+										<p class="text-muted small d-flex justify-content-center">Segments per seconds. (>1)</p>
+									</div>
+								</div>
+								<div data-target="coagulate" class="dropdown-item-static d-flex small d-flex justify-content-between px-2 w-100">
+									<div class="form-group mb-0">
+		                                <label for="grain-envelope">Grain envelope</label>
+		                                <input class="form-control form-control-sm" type="number" value="" step='any' id='grain-envelope'>
+										<p class="text-muted small d-flex justify-content-center">Set to value in range (0,1)<br>0: Square envelope.<br>1: Cosine envelope.</p>
+		                            </div>
+								</div>
+
+
+								<!--
 								<div id="audioSettings" style="width: 10em;">
 					                <p id="launchSliderText" class="small mb-0"></p>
 					                <div class="slidecontainer">
@@ -132,6 +137,7 @@
 									</div>
 
 					            </div>
+								-->
 							</div>
 		                </li>
 		            </ul>
@@ -206,11 +212,6 @@
 							</div>
 
 							<div class="metaInfo" id="metaDefault" style="max-width: 18rem; opacity: 0.5;">
-	    							<p class="card-text my-0 py-0"><small class="text my-0 py-0">Filename:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	fileName"></small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Duration:</small></p>
-									<p class="card-text my-0 py-0"><small class="text my-0 py-0	duration"></small></p>
-									<br>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Segment size:</small></p>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0	segmentSize"></small></p>
 									<p class="card-text my-0 py-0"><small class="text my-0 py-0">Step size:</small></p>
@@ -255,11 +256,6 @@
 
 	<script type="text/javascript">
 		// Define variables passed from app.py, they are used in js-file
-		var audioDuration = '{{audioDuration}}';
-		var segmentSize = '{{segmentSize}}';
-		var stepSize = '{{stepSize}}';
-		var audioPath = '{{audioPath}}';
-		var sessionKey = '{{session_key}}';
 		var data = {{data | tojson}};
 
 	</script>

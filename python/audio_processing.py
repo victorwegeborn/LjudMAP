@@ -39,10 +39,15 @@ def main(sessions, settings, features, audios):
     waveform_data = extract_features_and_waveform(output_dir, settings, features, audios)
 
     # get resulting data
-    result = csv_to_data(output_dir)
+    data = csv_to_data(output_dir)
 
     # cluster data
-    data = cluster_and_pack_data(output_dir, result, settings)
+    data = cluster_data(output_dir, data, settings)
+
+    # pack data for application
+    data = pack_data(data, settings)
+
+    # save data and meta data to disc
     store_data(output_dir, data, waveform_data, audios, settings, features, sessions)
 
 
@@ -60,16 +65,18 @@ def retrain(sessions, settings, features, audios, labels=None):
     # read in old csv file
     result = csv_to_data(output_dir)
 
-    # parse data from labeled points
+
+    # OBVIOUSLY OPTIMIZE THIS
     idxs     = [i[0] for i in labels['data'][1:]]
     starts   = [i[1] for i in labels['data'][1:]]
     targets  = [i[2] for i in labels['data'][1:]]
     song_ids = [i[3] for i in labels['data'][1:]]
     positions= [i[4] for i in labels['data'][1:]]
-    new_result = []
+    lengths  = [i[5] for i in labels['data'][1:]]
+    data = []
     for i in idxs:
-        new_result.append(result[i,:])
-    new_result = np.array(new_result)
+        data.append(result[i,:])
+    data = np.array(data)
 
     # get old waveform data (TODO: load from ui by request)
     waveform_data = {
@@ -79,12 +86,18 @@ def retrain(sessions, settings, features, audios, labels=None):
     }
     waveform.load_waveform(old_output_dir, output_dir, audios, waveform_data)
 
-    data = cluster_and_pack_data(output_dir, new_result, settings,
-                                 use_supervised=labels['supervised'],
-                                 labels=targets,
-                                 starts=starts,
-                                 positions=positions,
-                                 song_ids=song_ids)
+    if labels['supervised']:
+        data = cluster_data(output_dir, data, settings, target_data=targets)
+    else:
+        data = cluster_data(output_dir, data, settings)
+
+    # pack data with data passed from UI
+    data = pack_data(data, settings, labels=targets,
+                                     starts=starts,
+                                     positions=positions,
+                                     song_ids=song_ids,
+                                     lengths=lengths)
+
     store_data(output_dir, data, waveform_data, audios, settings, features, sessions)
 
 
@@ -103,74 +116,89 @@ def new_features(audios, sessions, settings, features, labels=None):
     # waveform_data = waveform.getComputedJson(new_waveform_path)
 
     # get resulting data
-    result = csv_to_data(output_dir)
+    data = csv_to_data(output_dir)
 
-    data = cluster_and_pack_data(output_dir, result, settings,
-                                    labels=labels)
+    # cluster data (TODO: let user use labels to cluster semi/full-supervised clustering)
+    data = cluster_data(output_dir, data, settings)
+
+    # pack data for application with passed labels
+    data = pack_data(data, settings, labels=labels)
+
     store_data(output_dir, data, waveform_data, audios, settings, features, sessions)
 
-def coagulate(session_key, old_session_key, settings, features):
-    # Get audiofilename
-    audio_dir = "static/uploads/" + session_key + "/"
-    audio_path, audio_name, audio_duration = handle_audio(audio_dir)
 
+
+def coagulate(audios, sessions, settings, features, coagulation_data):
     # Create dir for ouput and set filenames
-    output_dir = "static/data/" + session_key + "/"
+    output_dir = "static/data/" + sessions['current'][0] + "/"
+    old_output_dir = "static/data/" + sessions['previous'][0][0] + "/"
     subprocess.call(["mkdir", output_dir])
 
-    # load previous raw numpy data
+    # load previous raw cluster data
     target_component = settings['segmentation']['target']
-    X = np.load("static/data/" + old_session_key + f'/raw_{target_component}d.npy');
+    X = np.load("static/data/" + sessions['previous'][0][0] + f'/{target_component}.npy');
+
+    # Copy csv files
+    path_to_new_csv = output_dir + FEATURES
+    path_to_old_csv = old_output_dir + FEATURES
+    subprocess.call(["cp", path_to_old_csv, path_to_new_csv])
+
+    # read in old csv file
+    feature_data = csv_to_data(output_dir)
 
     # coagulate segments
-    coagulation_data = coagulation.run(X, settings)
+    X, mapping = coagulation.run(X, coagulation_data, feature_data, settings)
 
-    # configure openSMILE file names
-    output_path = output_dir + audio_name.split(".")[0] + ".csv"
-    sequential_config_path = output_dir + 'sequential_config.conf'
-    coagulate_config_path = output_dir + 'coagulated_config.conf'
+    # store coagulated data
+    overwrite_csv_with_data(output_dir, X)
 
-    # create one sequential and one coagulation config path
-    settings['segmentation']['mode'] = 'uniform'
-    configuration.write_config(sequential_config_path, settings, features)
-    settings['segmentation']['mode'] = 'coagulated'
-    configuration.write_config(coagulate_config_path, settings, features)
+    # get old waveform data (TODO: load from ui by request)
+    waveform_data = {
+        'min': 99999999,
+        'max':-99999999,
+        'data': []
+    }
+    waveform.load_waveform(old_output_dir, output_dir, audios, waveform_data)
 
-    # Run openSMILE to output features for each coagulated data point
-    for coag in coagulation_data:
-        if coag['type'] == 'sequential':
-            subprocess.call([smilextract, "-C", sequential_config_path, "-I", audio_path, "-csvoutput", output_path, "-start", str(coag['start']), "-end", str(coag['end'])])
-        else:
-            subprocess.call([smilextract, "-C", coagulate_config_path, "-I", audio_path, "-csvoutput", output_path, "-start", str(coag['start']), "-end", str(coag['end'])])
+    # cluster on coagulated data
+    data = cluster_data(output_dir, X, settings)
 
-    # Read file, and return formatted data
-    result = csv_to_data(output_path)
-    print(result.shape)
-    asd
+    # pack coagulation data with passed data (OBVIOSULY OPTIMIZE THIS)
+    starts   = [i[0] for i in mapping]
+    lengths  = [i[1] for i in mapping]
+    song_ids = [i[2] for i in mapping]
+    positions= [i[3] for i in mapping]
+    labels   = [i[4] for i in mapping]
+    data = pack_data(data, settings, starts=starts,
+                                     lengths=lengths,
+                                     positions=positions,
+                                     song_ids=song_ids,
+                                     labels=labels)
 
-    # copy old waveform data and import
-    old_waveform_path = "static/data/" + old_session_key + "/wavedata.json"
-    new_waveform_path = "static/data/" + session_key + "/wavedata.json"
-    subprocess.call(['cp', old_waveform_path, new_waveform_path])
-    waveform_data = waveform.getComputedJson(new_waveform_path)
 
-    data = cluster_and_pack_data(result, output_dir, settings, labels)
-    store_data(output_dir, data, waveform_data, audio_duration, audio_path, settings, features)
+    # store application data
+    store_data(output_dir, data, waveform_data, audios, settings, features, sessions)
 
 
 ''' --- HELPER METHODS BELOW --- '''
 
 def get_rows_in_csv(filename):
     with open(filename, 'r') as f:
-        row_count = sum(1 for row in f) - 2 # never count header line or last empty line
+        row_count = sum(1 for row in f) - 1 # never count header line or last empty line
     return row_count
 
 def csv_to_data(output_dir):
-    csv_file = pandas.read_csv(f'{output_dir}' + FEATURES, sep=';', header=1, float_precision='round_trip')
-    return minmax_scale(X=csv_file.values)
+    csv_file = pandas.read_csv(f'{output_dir}' + FEATURES, sep=';', header=0, float_precision='round_trip')
+    return minmax_scale(X=csv_file.to_numpy())
 
-
-
+def overwrite_csv_with_data(output_dir, data):
+    # read only header from previous csv file
+    csv_file = pandas.read_csv(f'{output_dir}' + FEATURES, sep=';').columns.to_list()
+    np.savetxt(f'{output_dir}' + FEATURES, data, delimiter=';', header=';'.join(csv_file), comments='')
+    # create dataframe with header and data
+    #df = pandas.DataFrame(data=data, columns=csv_header)
+    # store on disc
+    #df.to_csv(f'{output_dir}' + FEATURES, header=True, sep=';', index=False)
 
 
 """
@@ -224,9 +252,35 @@ def extract_features_and_waveform(output_dir, settings, features, audios, config
 
 
 """
+Cluster data using UMAP. Takes optional target data
+for full-/semi-supervised clustering. Stores results
+on disc for use in coagulation and concat.
+
+Ensure target_data has same length as csv_data!!!
+
+:param str output_dir:
+:param np.array csv_data: feature data
+:param dict settings:
+:param list target_data: labels for clustering. -1 = no labels. Defaults to None.
+"""
+def cluster_data(output_dir, csv_data, settings, target_data=None):
+    result = {}
+    for c in settings['cluster']['components']:
+        r = cluster.run(X=csv_data, Y=target_data,
+                             n_components=c,
+                             n_neighbours=settings['cluster']['neighbours'],
+                             metric=settings['cluster']['metric'])
+        # store results for coagulation
+        np.save(f'{output_dir}{c}', r)
+        # result object
+        result[c] = r
+    return result
+
+
+
+"""
 Cluster and packs result for UI. All parameters defaulting to None
 should be list of exact same length as number of rows in X!!
-
 
 Packed data : [
     {
@@ -243,7 +297,6 @@ Packed data : [
     .
     .
 ]
-
 
 :param str output_dir:
 :param numpy.ndarray X: normalized feature data, shape=[n segments, features]
@@ -262,29 +315,16 @@ Packed data : [
                             ensure same number of rows as X, defaults to None
 
 """
-def cluster_and_pack_data(output_dir, X, settings, labels=None,
+def pack_data(cluster_data, settings, labels=None,
                             starts=None,  positions=None,
-                            lengths=None, song_ids=None,
-                            use_supervised=False):
+                            lengths=None, song_ids=None):
     # start clustering for each component
     data = []
     first = True
     for c in settings['cluster']['components']:
-        if use_supervised:
-            result = cluster.run(X, Y=labels,
-                                 n_components=c,
-                                 n_neighbours=settings['cluster']['neighbours'],
-                                 metric=settings['cluster']['metric'])
-        else:
-            result = cluster.run(X,
-                                 n_components=c,
-                                 n_neighbours=settings['cluster']['neighbours'],
-                                 metric=settings['cluster']['metric'])
-        # store cluster data
-        #np.save(output_dir + f'raw_{c}d' ,result)
         song_id = 0
         relative_idx = 0
-        for idx, row in enumerate(result):
+        for idx, row in enumerate(cluster_data[c]):
             # update song id from windows
             if 'windows' in settings['segmentation']:
                 if idx > settings['segmentation']['windows'][song_id] - 1:
