@@ -189,7 +189,7 @@ def get_rows_in_csv(filename):
 
 def csv_to_data(output_dir):
     csv_file = pandas.read_csv(f'{output_dir}' + FEATURES, sep=';', header=0, float_precision='round_trip')
-    return minmax_scale(X=csv_file.to_numpy())
+    return minmax_scale(X=csv_file.values)
 
 def overwrite_csv_with_data(output_dir, data):
     # read only header from previous csv file

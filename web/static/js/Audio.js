@@ -145,10 +145,6 @@ class Audio extends AudioContext {
                 song_id = p.song_id;
                 start_p = p;
             }
-
-            // last element
-            if (i == data.data.length - 1) {
-            }
         }
 
         this.PLAY(song_list)
@@ -204,6 +200,7 @@ class Audio extends AudioContext {
         return volume
     }
 
+    /* TODO: GET THIS TO WORK */
     _instantiate_volume_fade(t) {
         var volume = this.createGain();
         volume.connect(this.destination);
@@ -291,7 +288,8 @@ class Audio extends AudioContext {
     _stack_playback(deadline) {
         if (this._stack.length > 0) {
             var o = this._stack.pop();
-            var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
+            var source = this._instantiate_source(this._instantiate_volume(), o.song_id)
+            //var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
             source.start(0, o.start, o.duration)
             this._sequence.setSequencePlayheadAt(o.index)
             this._plot.setHighlight(o.index)
