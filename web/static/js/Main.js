@@ -213,7 +213,8 @@ $(document).ready(function() {
     // Sequential play, pause (todo), and stop
     $("#buttonGroup6 button").on("click", function() {
         if (AUDIO_LOADED) {
-            if(this.value=="stop" && AUDIO.isPlaying()){
+            if(this.value=="stop"){
+                //console.log('stopping')
                 AUDIO.STOP()
             }
             else if (this.value=="play" && !AUDIO.isPlaying()) {

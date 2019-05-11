@@ -287,6 +287,7 @@ class Audio extends AudioContext {
 
     _stack_playback(deadline) {
         if (this._stack.length > 0) {
+            this._playing = true;
             var o = this._stack.pop();
             var source = this._instantiate_source(this._instantiate_volume(), o.song_id)
             //var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
@@ -294,6 +295,11 @@ class Audio extends AudioContext {
             this._sequence.setSequencePlayheadAt(o.index)
             this._plot.setHighlight(o.index)
             this._stack_playing_sources.push(source)
+            source.onended = (function() {
+                if (this._stack_playing_sources.length <= 1) {
+                    this._playing = false;
+                }
+            }).bind(this)
         }
     }
 
