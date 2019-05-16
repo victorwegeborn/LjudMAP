@@ -1,13 +1,15 @@
-[ 11.05.2019 - 23:00:36 ]
+[ 17.05.2019 - 00:07:52 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 11.05.2019 - 23:00:36 ]
-    (MSG) [2] in SMILExtract : config file is: static/data/1557608436033408/config.conf
-[ 11.05.2019 - 23:00:36 ]
+[ 17.05.2019 - 00:07:52 ]
+    (MSG) [2] in SMILExtract : config file is: static/data/155804446551442/config.conf
+[ 17.05.2019 - 00:07:52 ]
     (MSG) [2] in cComponentManager : successfully registered 96 component types.
-[ 11.05.2019 - 23:00:36 ]
+[ 17.05.2019 - 00:07:52 ]
+    (WARN) [1] in instance 'cat1' : ignoring single (non-array) field 'LOGlog'!
+[ 17.05.2019 - 00:07:52 ]
     (MSG) [2] in cComponentManager : successfully finished createInstances
-                                 (9 component instances were finalised, 1 data memories were finalised)
-[ 11.05.2019 - 23:00:36 ]
+                                 (13 component instances were finalised, 1 data memories were finalised)
+[ 17.05.2019 - 00:07:52 ]
     (MSG) [2] in cComponentManager : starting single thread processing loop
-[ 11.05.2019 - 23:00:39 ]
-    (MSG) [2] in cComponentManager : Processing finished! System ran for 207 ticks.
+[ 17.05.2019 - 00:07:55 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 248 ticks.

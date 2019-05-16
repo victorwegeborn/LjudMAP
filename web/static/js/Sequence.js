@@ -93,6 +93,7 @@ function Sequence(data, meta) {
     /* Locks */
     var SEQUENCE_PLAYING_LOCK = false;
     var IS_HIGHLIGHTING = false;
+    var HIGHLIGHT_PLAYING_LOCK = false;
 
     /* highlighting variables */
     var hightlight_segments = [];
@@ -248,7 +249,7 @@ function Sequence(data, meta) {
     }
 
     function highlight_mousedown(e) {
-        if (AUDIO_LOADED) {
+        if (AUDIO_LOADED && !HIGHLIGHT_PLAYING_LOCK) {
             if (shift_down) {
                 // playing multiple segments
                 // by hightlighting
@@ -294,7 +295,7 @@ function Sequence(data, meta) {
     function playSequenceHighlights() {
         if (hightlight_segments.length > 1) {
             IS_HIGHLIGHTING = false
-
+            HIGHLIGHT_PLAYING_LOCK = true;
 
             // sort segments by position
             hightlight_segments = hightlight_segments.sort(function(a, b) {
@@ -362,6 +363,7 @@ function Sequence(data, meta) {
             IS_HIGHLIGHTING = false;
             hightlight_segments = []
             SEQUENCE_PLAYING_LOCK = false;
+            HIGHLIGHT_PLAYING_LOCK = false;
         }
     }
 

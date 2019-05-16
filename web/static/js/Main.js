@@ -125,7 +125,7 @@ $(document).ready(function() {
             exportDataToCsv();
         }
         else if (t === 'undo') {
-            history.undo( PLOT, colorSegmentByIndex )
+            history.undo( PLOT, SEQUENCE )
         }
         else if (t === 'coagulate') {
             modalDialog.removeClass('modal-lg')
@@ -217,7 +217,7 @@ $(document).ready(function() {
                 //console.log('stopping')
                 AUDIO.STOP()
             }
-            else if (this.value=="play" && !AUDIO.isPlaying()) {
+            else if (this.value=="play") {
                 AUDIO.PLAYALL()
             }
         }

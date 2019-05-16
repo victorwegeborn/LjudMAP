@@ -82,7 +82,7 @@ class Audio extends AudioContext {
     */
     PLAY(T, callback) {
         // extract and remove first time
-        if (!this._playing) {
+        if (true) {
             var t = T.shift();
             const length = T.length | 0;
             const song_id = t.song_id;
@@ -90,7 +90,7 @@ class Audio extends AudioContext {
             const duration = t.duration;
             const index = t.index;
             this._source = this._instantiate_source(this._instantiate_volume(), song_id);
-            this._playing = true;
+            //this._playing = true;
 
 
             // setup UI events
@@ -101,11 +101,11 @@ class Audio extends AudioContext {
             this._source.onended = (function(e) {
                 if (length > 0) {
                     // play the next segment by calling Play recursivly
-                    this._playing = false;
+                    //this._playing = false;
                     this.PLAY(T, callback)
 
                 } else {
-                    this._playing = false;
+                    //this._playing = false;
                     this._resetAll()
 
                     if (this._event) {
@@ -205,10 +205,10 @@ class Audio extends AudioContext {
         var volume = this.createGain();
         volume.connect(this.destination);
         /* TODO: FIX THESE PARAMETERS */
-        volume.gain.setValueAtTime(-1.40130e-45, this.currentTime);
+        volume.gain.setValueAtTime(0.01, this.currentTime);
         volume.gain.exponentialRampToValueAtTime(1.0, this.currentTime + t/2 * this._envelope);
-        volume.gain.setValueAtTime(-1.40130e-45, this.currentTime);
-        volume.gain.exponentialRampToValueAtTime(-1.40130e-45, this.currentTime +  t - t/2 * this._envelope);
+        volume.gain.setValueAtTime(1.0, this.currentTime);
+        volume.gain.exponentialRampToValueAtTime(0.01, this.currentTime +  t - t/2 * this._envelope);
         return volume
     }
 
@@ -287,7 +287,7 @@ class Audio extends AudioContext {
 
     _stack_playback(deadline) {
         if (this._stack.length > 0) {
-            this._playing = true;
+            //this._playing = true;
             var o = this._stack.pop();
             var source = this._instantiate_source(this._instantiate_volume(), o.song_id)
             //var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
@@ -295,11 +295,11 @@ class Audio extends AudioContext {
             this._sequence.setSequencePlayheadAt(o.index)
             this._plot.setHighlight(o.index)
             this._stack_playing_sources.push(source)
-            source.onended = (function() {
+            /*source.onended = (function() {
                 if (this._stack_playing_sources.length <= 1) {
                     this._playing = false;
                 }
-            }).bind(this)
+            }).bind(this)*/
         }
     }
 

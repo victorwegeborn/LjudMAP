@@ -1,46 +1,15 @@
-[ 27.04.2019 - 14:54:38 ]
+[ 16.05.2019 - 23:55:32 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 27.04.2019 - 14:54:38 ]
-    (MSG) [2] in SMILExtract : config file is: configuration/testing/test.conf
-[ 27.04.2019 - 14:54:38 ]
+[ 16.05.2019 - 23:55:32 ]
+    (MSG) [2] in SMILExtract : config file is: configuration/testing/test2.conf
+[ 16.05.2019 - 23:55:32 ]
     (MSG) [2] in cComponentManager : successfully registered 96 component types.
-[ 27.04.2019 - 14:54:38 ]
-    (MSG) [3] in configManager : reading config file 'configuration/testing/test.conf'
-[ 27.04.2019 - 14:54:38 ]
-    (MSG) [3] in configManager : successfully read config file 'configuration/testing/test.conf'
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 41) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 52) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 208) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 61) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 69) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 114) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 129) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 181) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 165) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 73) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 95) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [5] in configManager : (line 149) array type field with only one element and no array index in [], assuming arrT=10 and N=1
-[ 27.04.2019 - 14:54:38 ]
-    (MSG) [3] in instance 'fftmag' : mindBp = -29.697998
-[ 27.04.2019 - 14:54:38 ]
-    (MSG) [3] in cComponentManager : successfully registered 14 of 14 component instances (non dataMemory type)
-[ 27.04.2019 - 14:54:38 ]
-    (MSG) [3] in cComponentManager : successfully registered 1 of 1 dataMemory instances
-[ 27.04.2019 - 14:54:38 ]
-    (WARN) [1] in instance 'frame' : default user defined option noPostEOIprocessing=1 forced to 0 due to frameStep==0.0 (full input mode)
-[ 27.04.2019 - 14:54:38 ]
-    (ERROR) [1] in instance 'melspec' : cannot determine frame size of input spectrum! (frameSizeSec and lastFrameSizeSec are both 0). This can happen when multiple stages combine different frame sizes and/or asynchronuous processing is applied (use overrideFrameSizeSec to manually specify the correct size.)
-[ 27.04.2019 - 14:54:38 ]
-    (ERROR) [1] in cMelspec : aborting.
+[ 16.05.2019 - 23:55:32 ]
+    (WARN) [1] in instance 'cat1' : ignoring single (non-array) field 'LOGlog'!
+[ 16.05.2019 - 23:55:32 ]
+    (MSG) [2] in cComponentManager : successfully finished createInstances
+                                 (16 component instances were finalised, 1 data memories were finalised)
+[ 16.05.2019 - 23:55:32 ]
+    (MSG) [2] in cComponentManager : starting single thread processing loop
+[ 16.05.2019 - 23:55:35 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 418 ticks.
