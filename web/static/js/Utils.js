@@ -192,7 +192,8 @@ function Colors() {
     const unique_colors = [];
 
     // HSL settings
-    const H_delta = Math.trunc(360 / n);
+    var H_delta = Math.trunc(360 / n);
+    H_delta = H_delta == 0 ? H_delta = 1 : H_delta;
 
     const L = 0.4;
 

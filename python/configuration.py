@@ -229,7 +229,6 @@ class Component:
     def get_instance(self):
         return f'instance[{self.__component_name}].type={self.__component_type}\n'
 
-
     def get_body(self):
         return 'ERROR -- BODY NOT FOUND\n'
 
@@ -453,7 +452,7 @@ class ZCR(Component):
 """ REGRESSION """
 
 class Delta(Component):
-    def __init__(self, writer, reader=None):
+    def __init__(self, writer, reader=None, requirements=None):
         super().__init__(component_name=writer,
                          component_type='cDeltaRegression',
                          writer=writer, reader=reader)
