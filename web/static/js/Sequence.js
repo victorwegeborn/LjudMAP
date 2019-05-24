@@ -33,8 +33,8 @@ function Sequence(data, meta) {
     const containers = {
         segments: new PIXI.Container(),
         lines: new PIXI.Container(),
-        highlight: new PIXI.Container(),
         waveform: new PIXI.Container(),
+        highlight: new PIXI.Container(),
         master: new PIXI.Container()
     }
 
