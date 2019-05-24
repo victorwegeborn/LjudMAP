@@ -11,6 +11,8 @@
     --teal-hover:  rgb(3, 68, 67);
     --brown: rgb(160,82,45);
     --brown-hover: rgb(117, 61, 35);
+    --text-alt: rgb(71, 79, 85);
+    --text-alt2: rgb(71, 79, 85);
 }
 
 
@@ -418,6 +420,16 @@ audio::-webkit-media-controls-timeline {
 .analysisModal.nav-tabs > li > a {
     color: white;
 }
+
+.index.nav-tabs .nav-link.active {
+    color: var(--text-alt2);
+
+}
+
+.index.nav-tabs > li > a {
+    color: var(--text-alt2);
+}
+
 
 
 .list-group-item-action:active {
