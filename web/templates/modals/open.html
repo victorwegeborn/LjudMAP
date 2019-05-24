@@ -16,10 +16,31 @@
     var frm = $('#openForm');
 
     frm.on('submit', function(ev) {
+        ev.preventDefault();
         $.each(ev.target, function() {
             if (!this.checkValidity()) {
                 frm.addClass('was-validated')
-                ev.preventDefault();
+            }
+        })
+
+
+        var formData = new FormData();
+        formData.set('id', $(ev.target)[0][0].value)
+
+        $.ajax({
+            type: 'POST',
+            url: '/goByKey',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data, textStatus) {
+                if (data.redirect) {
+                    // data.redirect contains the string URL to redirect to
+                    window.location.href = data.redirect;
+                }
+                else {
+                    console.log("Not valid key");
+                }
             }
         })
     });

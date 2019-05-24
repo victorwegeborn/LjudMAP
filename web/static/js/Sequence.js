@@ -23,7 +23,7 @@ function Sequence(data, meta) {
     /* CONSTANTS */
     const TEXTURE_WIDTH = 1000;
     const TEXTURE_HEIGHT = canvas_height + 2;
-    const LINE_TEXTURE_WIDTH = Math.floor(meta.settings.segmentation.step * 0.03);
+    const LINE_TEXTURE_WIDTH = Math.floor(meta.settings.segmentation.step * 0.03) || 1;
     const N_PIXELS = (meta.settings.segmentation.windows[meta.settings.segmentation.windows.length-1]) * meta.settings.segmentation.step
     const MIN_xSCALE = canvas_width / N_PIXELS;
     const MAX_xSCALE = canvas_width / (30 * TEXTURE_WIDTH);

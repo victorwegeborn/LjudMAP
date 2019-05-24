@@ -157,40 +157,28 @@ var send = function() {
             window.location.href = data.redirect;
         }
     });
-
-    /*
-    // send all inputs to server
-    formData.set('segmentation_mode', 'uniform')
-    formData.set('segment_size', $('#size').val())
-    formData.set('step_size', $('#step').val())
-    formData.set('components', $('#components').val())
-    formData.set('n_neighbours', $('#neighbours').val())
-    formData.set('metric', $('#metric').val())
-    formData.set('n_songs', i)
-
-    formData.set('coefficients', $('#coefficients').val())
-    formData.set('mfccs-disabled', false)
-    formData.set('delta', false)
-    formData.set('delta-delta', false)
-
-    // default for other features
-    formData.set('spectrals-disabled', true)
-    formData.set('signals-disabled', true)
-
-    request.open('POST', '/process_audio')
-    request.send(formData);
-
-    showLoadingGif();
-    request.onload = function(ev) {
-        if (request.status != 200) {
-            alert(`Error ${request.status}: ${request.statusText}`);
-        } else {
-            var response = JSON.parse(request.response)
-            window.location.href = response.redirect
-        }
-    };
-    */
 }
+
+
+
+/* Drop down menu handling */
+var modal = $('#modal');
+var modalContent = $('#modal .modal-content')
+var modalDialog = $('.modal-dialog')
+$('.dropdown-item').on('click', function(ev) {
+    var t = this.dataset.target
+    if (t === 'open') {
+        showModal(t)
+    }
+})
+
+function showModal(target) {
+    modalContent.load('/modal/' + target, function(html) {
+        modal.modal({show: true})
+    })
+
+}
+
 
 ////// Utils
 
