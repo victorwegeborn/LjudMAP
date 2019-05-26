@@ -189,9 +189,9 @@ function showLoadingGif(){
 
 var formatSize = function(size) {
     if (size >= 1000000) {
-        return size/1000000 + ' MB';
+        return (size/1000000).toFixed(2) + ' MB';
     }
     else {
-        return size/1000 + ' kB';
+        return (size/1000).toFixed(2) + ' kB';
     }
 }
