@@ -118,6 +118,9 @@ def new_features(audios, sessions, settings, features, labels=None):
     # get resulting data
     data = csv_to_data(output_dir)
 
+    if labels and len(labels) != data.shape[0]:
+        labels = None
+
     # cluster data (TODO: let user use labels to cluster semi/full-supervised clustering)
     data = cluster_data(output_dir, data, settings)
 

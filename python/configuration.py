@@ -371,7 +371,7 @@ class Mfcc(Component):
     def get_body(self):
         return ('copyInputName = 0\n'
                 'processArrayFields = 1\n'
-                'firstMfcc = 0\n'
+                'firstMfcc = 1\n'
                f'lastMfcc = {self.__coefficients}\n'
                 'cepLifter = 22.0\n\n')
 
