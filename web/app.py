@@ -392,29 +392,29 @@ def export_to_csv() -> str:
             export = []
             # pack csv data into string
             if '2D' in data[0] and '3D' in data[0]:
-                export.append(['x', 'y', 'X', 'Y', 'Z', 'start time (ms)', 'duration (ms)', 'relative start time (ms)', 'audio file name'])
+                export.append(['x', 'y', 'X', 'Y', 'Z', 'label', 'start time (ms)', 'duration (ms)', 'relative start time (ms)', 'audio file name'])
                 for point in data:
                     export.append([
                         point['2D']['umap'][0], point['2D']['umap'][1],
-                        point['3D']['umap'][0], point['3D']['umap'][1], point['3D']['umap'][2],
+                        point['3D']['umap'][0], point['3D']['umap'][1], point['3D']['umap'][2], str(point['category']),
                         point['start'] * 1000,  point['length'] * 1000, point['position'] * 1000,
                         audios['files'][point['song_id']][0]
                     ])
             elif '2D' in data[0]:
-                export.append(['x', 'y', 'start time (ms)', 'duration (ms)', 'relative start time (ms)', 'audio file name'])
+                export.append(['x', 'y', 'label', 'start time (ms)', 'duration (ms)', 'relative start time (ms)', 'audio file name'])
                 for point in data:
                     export.append([
-                        point['2D']['umap'][0], point['2D']['umap'][1], \
-                        point['start'] * 1000,  point['length'] * 1000, point['position'] * 1000, \
-                        audios['files'][point['song_id']][0] \
+                        point['2D']['umap'][0], point['2D']['umap'][1], str(point['category']),
+                        point['start'] * 1000,  point['length'] * 1000, point['position'] * 1000,
+                        audios['files'][point['song_id']][0]
                     ])
             elif '3D' in data[0]:
-                export.append(['X', 'Y', 'Z', 'start time (ms)', 'duration (ms)', 'relative start time (ms)', 'audio file name'])
+                export.append(['X', 'Y', 'Z', 'label', 'start time (ms)', 'duration (ms)', 'relative start time (ms)', 'audio file name'])
                 for point in data:
                     song_name = audios['files'][int(point['song_id'])][0]
                     export.append([
-                        str(point['3D']['umap'][0]), str(point['3D']['umap'][1]), str(point['3D']['umap'][2]), \
-                        str(point['start'] * 1000),  str(point['length'] * 1000), str(point['position'] * 1000), \
+                        str(point['3D']['umap'][0]), str(point['3D']['umap'][1]), str(point['3D']['umap'][2]), str(point['category']),
+                        str(point['start'] * 1000),  str(point['length'] * 1000), str(point['position'] * 1000),
                         str(audios['files'][int(point['song_id'])][0])
                     ])
 
