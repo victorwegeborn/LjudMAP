@@ -205,10 +205,10 @@ class Audio extends AudioContext {
         var volume = this.createGain();
         volume.connect(this.destination);
         /* TODO: FIX THESE PARAMETERS */
-        volume.gain.setValueAtTime(0.01, this.currentTime);
+        volume.gain.setValueAtTime(0.001, this.currentTime);
         volume.gain.exponentialRampToValueAtTime(1.0, this.currentTime + t/2 * this._envelope);
-        volume.gain.setValueAtTime(1.0, this.currentTime);
-        volume.gain.exponentialRampToValueAtTime(0.01, this.currentTime +  t - t/2 * this._envelope);
+        volume.gain.setValueAtTime(1.0, this.currentTime + t/2);
+        volume.gain.exponentialRampToValueAtTime(0.001, this.currentTime +  t - t/2 * this._envelope);
         return volume
     }
 

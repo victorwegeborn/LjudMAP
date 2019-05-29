@@ -96,7 +96,9 @@ function Sequence(data, meta) {
     var HIGHLIGHT_PLAYING_LOCK = false;
 
     /* highlighting variables */
-    var hightlight_segments = [];
+    var highlight_segments = [];
+    var HIGH_IDX = null;
+    var LOW_IDX = null;
 
     var playhead_point = null;
 
@@ -241,7 +243,7 @@ function Sequence(data, meta) {
         if (IS_HIGHLIGHTING && !this.included) {
             this.alpha = alphas.highlight;
             this.included = true;
-            hightlight_segments.push(this);
+            highlight_segments.push(this);
         }
         else {
             this.alpha = alphas.highlight_hover;
@@ -254,7 +256,7 @@ function Sequence(data, meta) {
                 // playing multiple segments
                 // by hightlighting
                 IS_HIGHLIGHTING = true;
-                hightlight_segments.push(this);
+                highlight_segments.push(this);
                 this.included = true;
                 this.alpha = alphas.highlight;
             } else {
@@ -275,7 +277,7 @@ function Sequence(data, meta) {
             // add last segment
             if (!this.included) {
                 this.included = true;
-                hightlight_segments.push(this)
+                highlight_segments.push(this)
             }
 
             SEQUENCE_PLAYING_LOCK = true
@@ -293,36 +295,45 @@ function Sequence(data, meta) {
 
 
     function playSequenceHighlights() {
-        if (hightlight_segments.length > 1) {
+        if (highlight_segments.length > 1) {
             IS_HIGHLIGHTING = false
             HIGHLIGHT_PLAYING_LOCK = true;
 
             // sort segments by position
-            hightlight_segments = hightlight_segments.sort(function(a, b) {
-                return a.position.x - b.position.x;
-            })
+            low_index = data.length + 1;
+            high_index = -1;
+            for (var i = 0; i < highlight_segments.length; i++) {
+                current_id = highlight_segments[i].id;
+                low_index = Math.min(low_index, current_id);
+                high_index = Math.max(high_index, current_id);
+            }
+
+            // copy indexes for reset
+            HIGH_IDX = high_index;
+            LOW_IDX = low_index;
 
             var audio_play_segments = [];
             var current_song_id = null;
-            //console.log(hightlight_segments)
-            for (var i = 0; i < hightlight_segments.length; i++) {
-                var e = hightlight_segments[i];
-                var point = data[e.id];
+            //console.log(highlight_segments)
+            for (var i = low_index; i <= high_index; i++) {
+                var point = data[i];
+                var e = containers.highlight.getChildAt(i);
                 // change tint and alpha on all segments
                 e.alpha = alphas.highlight_playback;
                 e.tint = colors.playhead;
+                e.included = true;
 
                 // first element
-                if (i==0) {
+                if (i==low_index) {
                     current_song_id = point.song_id
                     audio_play_segments.push({
                         start: point.start,
                         song_id: point.song_id,
                         index: point.id
                     })
-                } else if (point.song_id != current_song_id && i < hightlight_segments.length - 1) {
+                } else if (point.song_id != current_song_id && i < high_index) {
                     current_song_id = point.song_id
-                    var prev_point = data[hightlight_segments[i-1].id];
+                    var prev_point = data[i-1];
                     var last = audio_play_segments[audio_play_segments.length-1];
 
                     last.duration = (prev_point.start + prev_point.length) - last.start;
@@ -331,8 +342,8 @@ function Sequence(data, meta) {
                         song_id: point.song_id,
                         index: point.id
                     })
-                } else if (i == hightlight_segments.length - 1) {
-                    var prev_point = data[hightlight_segments[i-1].id];
+                } else if (i == high_index) {
+                    var prev_point = data[i-1];
                     var last = audio_play_segments[audio_play_segments.length-1];
                     if (current_song_id == point.song_id) {
                         last.duration = (point.start + point.length) - last.start;
@@ -354,14 +365,18 @@ function Sequence(data, meta) {
     }
 
     function resetSequenceHighlighting() {
-        if (hightlight_segments.length > 0) {
-            $.each(hightlight_segments, function() {
-                this.alpha = alphas.highlight_null;
-                this.tint = colors.highlight;
-                this.included = false;
-            })
+
+        if (LOW_IDX && HIGH_IDX) {
+            for (var i = LOW_IDX; i <= HIGH_IDX; i++) {
+                var seg = containers.highlight.getChildAt(i);
+                seg.alpha = alphas.highlight_null;
+                seg.tint = colors.highlight;
+                seg.included = false;
+            }
+            LOW_IDX = null;
+            HIGH_IDX = null;
             IS_HIGHLIGHTING = false;
-            hightlight_segments = []
+            highlight_segments = []
             SEQUENCE_PLAYING_LOCK = false;
             HIGHLIGHT_PLAYING_LOCK = false;
         }
