@@ -197,7 +197,6 @@ class Audio extends AudioContext {
     _get_start_difference(current_index) {
         var next_index = current_index + 1;
         if (current_index < data.data.length) {
-            console.log(data.data[next_index].position - data.data[current_index].position)
             return data.data[next_index].position - data.data[current_index].position;
         }
         return data.data[current_index].duration;
