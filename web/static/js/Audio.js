@@ -178,7 +178,10 @@ class Audio extends AudioContext {
         this._sequence.setSequencePlayheadAt(this._sequential_playback_index)
         this._plot.setHighlight(this._sequential_playback_index)
 
-        var step = data.meta.settings.segmentation.step/1000;
+
+
+        var first_duration = this._get_start_difference(this._sequential_playback_index)
+        console.log(first_duration)
 
         // set up event for plot and sequence map
         this._event = this._clock.callbackAtTime((e) => {
@@ -186,12 +189,18 @@ class Audio extends AudioContext {
             this._sequence.setSequencePlayheadAt(this._sequential_playback_index)
             this._plot.setHighlight(this._sequential_playback_index)
             // update repeat of this event by length of segment
-            if (this._sequential_playback_index < data.data.length) {
-                this._event.repeat(data.data[this._sequential_playback_index].length)
-            }
-        }, data.data[this._sequential_playback_index].length + this.currentTime)
-        .repeat(data.data[this._sequential_playback_index].length)
+            this._event.repeat(this._get_start_difference(this._sequential_playback_index))
+        }, this._get_start_difference(this._sequential_playback_index) + this.currentTime)
         .tolerance({late: 100})
+    }
+
+    _get_start_difference(current_index) {
+        var next_index = current_index + 1;
+        if (current_index < data.data.length) {
+            console.log(data.data[next_index].position - data.data[current_index].position)
+            return data.data[next_index].position - data.data[current_index].position;
+        }
+        return data.data[current_index].duration;
     }
 
     _instantiate_volume() {
@@ -229,11 +238,7 @@ class Audio extends AudioContext {
         this._clock.start()
     }
 
-    _get_next_segment_index(index, step_time) {
-        var t = this.currentTime - this._start_time
-        //console.log(Math.floor(t / step_time))
-        return Math.floor(t / step_time)
-    }
+
 
     _resetAll() {
         this._sequence.resetSequencePlayhead()
