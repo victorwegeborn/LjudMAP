@@ -14,7 +14,7 @@ class Audio extends AudioContext {
 
     constructor(o) {
         super({
-            sampleRate: 48000
+            sampleRate: 44100
         });
 
 
