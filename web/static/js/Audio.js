@@ -13,7 +13,11 @@ var AUDIO_LOADED = false;
 class Audio extends AudioContext {
 
     constructor(o) {
-        super();
+        super({
+            sampleRate: 48000
+        });
+
+
 
         /* audio path to load */
         this._audio = o.audio;
@@ -65,7 +69,6 @@ class Audio extends AudioContext {
 
         /* holds all reset functions */
         this._resets = {}
-
 
     }
 
