@@ -133,11 +133,13 @@ var send = function() {
         spectrals: {
             disabled: false,
             flux: false,
-            fluxcentroid: false,
+            //fluxcentroid: false,
             centroid: false,
             harmonicity: false,
             flatness: false,
-            slope: false
+            //slope: false,
+            rolloff: false,
+            kurtosis: false
         },
         signals: {
             disabled: false,

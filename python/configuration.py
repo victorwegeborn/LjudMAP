@@ -390,22 +390,26 @@ class Spectral(Component):
         self.centroid = 1 if spectrals['centroid'] else 0
         self.flatness = 1 if spectrals['flatness'] else 0
         self.flux = 1 if spectrals['flux'] else 0
-        self.fluxcentroid = 1 if spectrals['fluxcentroid'] else 0
+        #self.fluxcentroid = 1 if spectrals['fluxcentroid'] else 0
         self.harmonicity = 1 if spectrals['harmonicity'] else 0
-        self.slope = 1 if spectrals['slope'] else 0
+        #self.slope = 1 if spectrals['slope'] else 0
+        self.rolloff = 1 if spectrals['rolloff'] else 0
+        self.kurtosis = 1 if spectrals['kurtosis'] else 0
 
     def get_body(self):
         return ('processArrayFields=1\n'
                 'copyInputName=0\n'
                f'flux={self.flux}\n'
-               f'fluxCentroid={self.fluxcentroid}\n'
+               #f'fluxCentroid={self.fluxcentroid}\n'
                f'centroid={self.centroid}\n'
                f'harmonicity={self.harmonicity}\n'
                f'flatness={self.flatness}\n'
-               f'slope={self.slope}\n'
+               #f'slope={self.slope}\n'
                 'maxPos = 0\n'
                 'minPos = 0\n'
-                'normBandEnergies=1\n\n')
+               f'{"rollOff=0.85" if self.rolloff else ""}\n'
+                'kurtosis=1\n'
+                'normBandEnergies=0\n\n')
 
 
 
