@@ -408,7 +408,7 @@ class Spectral(Component):
                 'maxPos = 0\n'
                 'minPos = 0\n'
                f'{"rollOff=0.85" if self.rolloff else ""}\n'
-                'kurtosis=1\n'
+               f'kurtosis={self.kurtosis}\n'
                 'normBandEnergies=0\n\n')
 
 
@@ -462,7 +462,8 @@ class Delta(Component):
                          writer=writer, reader=reader)
 
         if writer == 'delta':
-            self.requirements = ['cVectorConcat', 'cMfcc,cEnergy:log']
+            #self.requirements = ['cVectorConcat', 'cMfcc,cEnergy:log']
+            self.requirements = ['cMfcc']
         if writer == 'deltadelta':
             self.requirements = ['cDeltaRegression:delta']
 
