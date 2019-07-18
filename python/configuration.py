@@ -409,6 +409,8 @@ class Spectral(Component):
                 'minPos = 0\n'
                f'{"rollOff=0.85" if self.rolloff else ""}\n'
                f'kurtosis={self.kurtosis}\n'
+                'squareInput=1\n'
+                'bands[0]=0-16000\n'
                 'normBandEnergies=0\n\n')
 
 

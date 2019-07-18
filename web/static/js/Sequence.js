@@ -187,21 +187,17 @@ function Sequence(data, meta) {
             for (var j = 0; j < meta.settings.segmentation.windows.length; j++) {
                 var n_points = meta.settings.segmentation.windows[j]
                 var n_samples = n_points * meta.settings.segmentation.step / 1000 * meta.waveform.data[j].sample_rate
-                var length = n_samples / meta.waveform.data[j].samples_per_pixel * 2;
+                var length = n_samples / meta.waveform.data[j].samples_per_pixel;
                 accu += length
 
                 zero_begin_idx = null;
-                for (var i = 0; i < length; i += 2) {
+                var pos = 0;
+                for (var i = 0; i < length*2; i += 2) {
                     var negative = Math.floor(meta.waveform.data[j].data[i] / scale);
                     var positive = Math.floor(meta.waveform.data[j].data[i+1] / scale);
-                    if (positive > 1) {
-                        line.moveTo(i+last_length, Math.ceil(zero+positive));
-                        line.lineTo(i+last_length, Math.ceil(zero-positive));
-                    }
-                    if (negative < -1) {
-                        line.moveTo(i+1+last_length, Math.ceil(zero+negative));
-                        line.lineTo(i+1+last_length, Math.ceil(zero-negative));
-                    }
+                    line.moveTo(pos+last_length, zero+positive);
+                    line.lineTo(pos+last_length, zero+negative);
+                    pos++;
                 }
                 last_length = length;
                 // draw one long line along zero from start to finish
