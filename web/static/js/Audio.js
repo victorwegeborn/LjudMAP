@@ -50,13 +50,12 @@ class Audio extends AudioContext {
         this._source = null;
 
         /* audio settings */
-        this._segments_per_second = 2 * 1000 / data.meta.settings.segmentation.size;
+        this._segments_per_second = 2;// * 1000 / data.meta.settings.segmentation.size;
         this._envelope = 0.1;
 
         /* hoover playback trackers */
         this._stack = []
         this._stack_limit = 400;
-        this._stack_source = null;
         this._stack_volume = null;
         this._stack_clock = new WAAClock(this, {
             toleranceEarly: 0.1
@@ -323,7 +322,8 @@ class Audio extends AudioContext {
 
     set segmentsPerSecond(n) {
         this._segments_per_second = n;
-        this._stack_event.repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000))
+        this._stack_event = null;
+        this._stack_event = this._initialize_stack_event()
     }
 
     get segmentsPerSecond() {

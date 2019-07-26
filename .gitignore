@@ -6,3 +6,5 @@ web/static/uploads
 web/smile.log
 opensmile-2.3.0
 python/configuration/testing
+python/coagtest.py
+python/img/

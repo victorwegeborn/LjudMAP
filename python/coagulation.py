@@ -85,7 +85,6 @@ def run(X, coagulation_data, feature_data, settings):
                 if not glob_start_point:
                     glob_start_point = coagulation_data[i]
                     glob_start_index = i
-                i += 1
 
             # Not within radius, but globbing has started
             elif glob_start_point:
@@ -94,14 +93,14 @@ def run(X, coagulation_data, feature_data, settings):
                 feature_rows.append([glob_start_index, i-1])
                 glob_start_point = None
                 glob_start_index = None
-                # DO NOT MOVE FORWARD
 
             else:
                 # Next segment is neither within distance,
                 # and should not be globbed with previous segment
                 result.append([start, length, song_id, position, label])
                 feature_rows.append([i, i])
-                i += 1
+            i += 1
+
 
         # This segment should not be in the coagulation
         else:
