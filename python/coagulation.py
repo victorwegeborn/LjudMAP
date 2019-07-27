@@ -57,27 +57,30 @@ def run(X, coagulation_data, feature_data, settings):
                 glob_start_point = None
                 glob_start_index = None
 
+
+        # This is the last segment
+        elif i == len(coagulation_data)-1:
+            # This segment should be included in the currently
+            # opened glob. Add this as end point to current glob
+            if glob_start_point:
+                result.append(get_glob(glob_start_point, coagulation_data[i]))
+                feature_rows.append([glob_start_index, i])
+                glob_start_point = None
+                glob_start_index = None
+
+            # There is no opened glob. Add as sole segment
+            else:
+                result.append([start, length, song_id, position, label])
+                feature_rows.append([i, i])
+
+            # Break out of computation.
+            # all segments have been checked.
+            break
+
+
         # point set as included from coagulation
         elif included > 0:
 
-            # This is the last segment
-            if i == len(coagulation_data)-1:
-                # This segment should be included in the currently
-                # opened glob. Add this as end point to current glob
-                if glob_start_point:
-                    result.append(get_glob(glob_start_point, coagulation_data[i]))
-                    feature_rows.append([glob_start_index, i])
-                    glob_start_point = None
-                    glob_start_index = None
-
-                # There is no opened glob. Add as sole segment
-                else:
-                    result.append([start, length, song_id, position, label])
-                    feature_rows.append([i, i])
-
-                # Break out of computation.
-                # all segments have been checked.
-                break
 
 
             # is next point within radius?
@@ -89,8 +92,8 @@ def run(X, coagulation_data, feature_data, settings):
             # Not within radius, but globbing has started
             elif glob_start_point:
                 # end glob with previous segment
-                result.append(get_glob(glob_start_point, coagulation_data[i-1]))
-                feature_rows.append([glob_start_index, i-1])
+                result.append(get_glob(glob_start_point, coagulation_data[i]))
+                feature_rows.append([glob_start_index, i])
                 glob_start_point = None
                 glob_start_index = None
 
@@ -137,7 +140,8 @@ def run(X, coagulation_data, feature_data, settings):
         if start == end:
             X_features[i,None,:] = feature_data[start,None,:]
         else:
-            X_features[i,None,:] = np.mean(feature_data[start:end,None,:])
+            X_features[i,None,:] = np.mean(feature_data[start:end,None,:], axis=0)
+
 
 
     print(f' done in {(time.time()-t):.2f} (where distance matrix was {dist_matrix_computation:.2f})')
