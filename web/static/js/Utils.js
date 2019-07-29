@@ -200,7 +200,7 @@ function Colors() {
     /* populate unique history colors */
     for (var i = 0; i < n; i++) {
 
-        var H = i * H_delta / 360;
+        var H = (i % 360)  * H_delta / 360;
         const S = i % 2 == 0 ? 0.5 : 0.3;
         var R, G, B;
 
