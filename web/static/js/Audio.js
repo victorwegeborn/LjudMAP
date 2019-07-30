@@ -50,8 +50,11 @@ class Audio extends AudioContext {
         this._source = null;
 
         /* audio settings */
-        this._segments_per_second = 2;// * 1000 / data.meta.settings.segmentation.size;
-        this._envelope = 0.1;
+        this._segment_ratio = data.meta.settings.segmentation.size / 1000;
+        this._fire_rate = this._segment_ratio * 0.5;
+        console.log(this._fire_rate)
+        this._segments_per_second = 1/this._fire_rate;
+        this._envelope = 0.05;
 
         /* hoover playback trackers */
         this._stack = []
@@ -217,8 +220,9 @@ class Audio extends AudioContext {
         /* TODO: FIX THESE PARAMETERS */
         volume.gain.setValueAtTime(0.001, this.currentTime);
         volume.gain.exponentialRampToValueAtTime(1.0, this.currentTime + t/2 * this._envelope);
-        volume.gain.setValueAtTime(1.0, this.currentTime + t/2);
-        volume.gain.exponentialRampToValueAtTime(0.001, this.currentTime +  t - t/2 * this._envelope);
+        volume.gain.setValueAtTime(1.0, this.currentTime + t/2 * this._envelope);
+        volume.gain.setValueAtTime(1.0, this.currentTime + t - t/2 * this._envelope);
+        volume.gain.exponentialRampToValueAtTime(0.001, this.currentTime +  t);
         return volume
     }
 
@@ -315,7 +319,7 @@ class Audio extends AudioContext {
         return this._stack_clock.callbackAtTime((ev) => {
             this._stack_playback(ev.deadline)
         }, this.currentTime)
-        .repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000))
+        .repeat(this._fire_rate)
         .tolerance({late: 100})
     }
 
@@ -323,7 +327,8 @@ class Audio extends AudioContext {
     set segmentsPerSecond(n) {
         if (n > 0) {
             this._segments_per_second = n;
-            this._stack_event.repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000))
+            this._fire_rate = (1/this._segments_per_second);
+            this._stack_event.repeat(this._fire_rate)
             console.log(this._stack_event)
         }
     }
