@@ -295,8 +295,8 @@ class Audio extends AudioContext {
         if (this._stack.length > 0) {
             //this._playing = true;
             var o = this._stack.pop();
-            var source = this._instantiate_source(this._instantiate_volume(), o.song_id)
-            //var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
+            //var source = this._instantiate_source(this._instantiate_volume(), o.song_id)
+            var source = this._instantiate_source(this._instantiate_volume_fade(o.duration), o.song_id)
             source.start(0, o.start, o.duration)
             this._sequence.setSequencePlayheadAt(o.index)
             this._plot.setHighlight(o.index)
@@ -315,15 +315,17 @@ class Audio extends AudioContext {
         return this._stack_clock.callbackAtTime((ev) => {
             this._stack_playback(ev.deadline)
         }, this.currentTime)
-        .repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000) + this.currentTime)
+        .repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000))
         .tolerance({late: 100})
     }
 
 
     set segmentsPerSecond(n) {
-        this._segments_per_second = n;
-        this._stack_event = null;
-        this._stack_event = this._initialize_stack_event()
+        if (n > 0) {
+            this._segments_per_second = n;
+            this._stack_event.repeat(data.meta.settings.segmentation.size / (this._segments_per_second * 1000))
+            console.log(this._stack_event)
+        }
     }
 
     get segmentsPerSecond() {
