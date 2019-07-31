@@ -1,5 +1,9 @@
 # LjudMAP
 
+An explorative tool for audio material with real-time concatinative sound synthesis capabilities. Adapted from the work by Per Fallgren (https://github.com/perfall/Edyson). 
+
+--------
+
 Install
 -----
 This application requires external software in order to run.
@@ -27,5 +31,5 @@ $ source activate LjudMAP
 
 run from within /web
 ```
-(TDA) $ python3.6 app.py
+(LjudMAP) $ python3.6 app.py
 ```
