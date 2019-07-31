@@ -1,6 +1,6 @@
 # LjudMAP
 
-An explorative tool for audio material with real-time concatinative sound synthesis capabilities. Adapted from the work by Per Fallgren (https://github.com/perfall/Edyson). 
+An explorative tool for audio material with real-time concatenative sound synthesis capabilities. Adapted from the work by Per Fallgren (https://github.com/perfall/Edyson). 
 
 --------
 
