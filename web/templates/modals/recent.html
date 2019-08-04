@@ -62,7 +62,6 @@
             dataType: 'json',
             success: function(data, textStatus) {
 
-                console.log(data)
 
                 // set time and date
                 $('#recent-time').html('Created on ' + data.time[1] + ' ' + data.time[2])
@@ -87,7 +86,9 @@
                 $.each(data.settings, function(key, val) {
                     right.append('<p class="small text-white my-0 ml-3">' + key + ':</p>')
                     $.each(val, function(key, val) {
-                        right.append('<p class="small text-white my-0 ml-4">' + key + ': ' + val + '</p>')
+                        if (key != 'windows') {
+                            right.append('<p class="small text-white my-0 ml-4">' + key + ': ' + val + '</p>')
+                        }
                     })
                 })
 

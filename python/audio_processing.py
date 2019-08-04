@@ -271,7 +271,7 @@ def cluster_data(output_dir, csv_data, settings, target_data=None):
     for c in settings['cluster']['components']:
         r = cluster.run(X=csv_data, Y=target_data,
                              n_components=c,
-                             n_neighbours=settings['cluster']['neighbours'],
+                             n_neighbors=settings['cluster']['neighbours'],
                              metric=settings['cluster']['metric'])
         # store results for coagulation
         np.save(f'{output_dir}{c}', r)

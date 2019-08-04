@@ -155,6 +155,9 @@
             coag_data.push([val.id, val.start, val.length, val.category, val.song_id, val.position, c]);
         })
 
+        $('#modal').modal('hide')
+        showLoadingScreen()
+
         // pass data tp backend
         formData.set('data', JSON.stringify(coag_data))
 
