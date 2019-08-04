@@ -1,9 +1,12 @@
 # LjudMAP
 
+An explorative tool for audio material with real-time concatenative sound synthesis capabilities. Adapted from the work by Per Fallgren (https://github.com/perfall/Edyson). 
+
+--------
+
 Install
 -----
-This application requires external software in order to run.
-Get them here:
+This application requires the following software to run:
 1. [openSMILE](https://www.audeering.com/opensmile/)
 2. [BBC's audiowaveform](https://github.com/bbc/audiowaveform)
 3. [FFMPEG](http://www.ffmpeg.org/)
@@ -25,7 +28,7 @@ activate environment
 $ source activate LjudMAP
 ```
 
-run from within /web
+run from within LjudMAP/web
 ```
-(TDA) $ python3.6 app.py
+(LjudMAP) $ python3.6 app.py
 ```
